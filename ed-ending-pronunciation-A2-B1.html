@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>-ED Pronunciation Practice A2-B1</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #beffc7;
+  color: #365866;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.app {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 24px;
+  text-align: center;
+  width: min(650px, 100%);
+  box-shadow: 0 16px 35px rgba(0,0,0,0.14);
+  border: 4px solid #f5c46a;
+}
+
+h1 {
+  margin-bottom: 8px;
+  color: #7293a0;
+  font-size: clamp(30px, 5vw, 44px);
+}
+
+.subtitle {
+  color: #5d7c89;
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+.word {
+  font-size: clamp(30px, 5vw, 42px);
+  font-weight: bold;
+  margin: 24px 0;
+  background: #f5d7bd;
+  color: #365866;
+  padding: 22px;
+  border-radius: 18px;
+  border: 3px solid #f5c46a;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+button {
+  margin: 6px;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.16);
+  transition: 0.15s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.16);
+}
+
+.t {
+  background: #7293a0;
+  color: #ffffff;
+}
+
+.d {
+  background: #e08d8d;
+  color: #ffffff;
+}
+
+.id {
+  background: #f5c46a;
+  color: #365866;
+}
+
+.hint1 {
+  background: #f48d70;
+  color: #ffffff;
+}
+
+.hint2 {
+  background: #7293a0;
+  color: #ffffff;
+}
+
+.next {
+  background: #f5c46a;
+  color: #365866;
+}
+
+#result {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#hintBox {
+  margin-top: 18px;
+  font-size: 17px;
+  line-height: 1.5;
+  color: #365866;
+  background: #f5d7bd;
+  border-radius: 16px;
+  padding: 16px;
+  border: 2px solid #f5c46a;
+  min-height: 55px;
+}
+
+.footer {
+  margin-top: 28px;
+  font-size: 14px;
+  color: #5d7c89;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h1>🔊 -ED Pronunciation 💜</h1>
+  <p class="subtitle">Choose the correct ending sound</p>
+
+  <div class="word" id="word"></div>
+
+  <div class="buttons">
+    <button class="t" onclick="checkAnswer('/t/')">/t/</button>
+    <button class="d" onclick="checkAnswer('/d/')">/d/</button>
+    <button class="id" onclick="checkAnswer('/ɪd/')">/ɪd/</button>
+  </div>
+
+  <div>
+    <button class="hint1" onclick="showHint1()">💡 Hint 1</button>
+    <button class="hint2" onclick="openOxford()">🔊 Hint 2</button>
+    <button class="next" onclick="nextWord()">Next ➡️</button>
+  </div>
+
+  <div id="result"></div>
+  <div id="hintBox"></div>
+
+  <div class="footer">
+    by Inglés con Cin 💜 <br>
+    @inglesconcin.ok
+  </div>
+</div>
+
+<script>
+const words = [
+  {text: "play → played", answer: "/d/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/play"},
+  {text: "call → called", answer: "/d/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/call"},
+  {text: "follow → followed", answer: "/d/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/follow"},
+  {text: "clean → cleaned", answer: "/d/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/clean"},
+  {text: "need → needed", answer: "/ɪd/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/need"},
+  {text: "kiss → kissed", answer: "/t/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/kiss"},
+  {text: "walk → walked", answer: "/t/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/walk"},
+  {text: "fix → fixed", answer: "/t/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/fix"},
+  {text: "wash → washed", answer: "/t/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/wash"},
+  {text: "love → loved", answer: "/d/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/love_2"},
+  {text: "want → wanted", answer: "/ɪd/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/want"},
+  {text: "use → used", answer: "/d/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/use"},
+  {text: "start → started", answer: "/ɪd/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/start"},
+  {text: "end → ended", answer: "/ɪd/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/end"},
+  {text: "help → helped", answer: "/t/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/help"},
+  {text: "invite → invited", answer: "/ɪd/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/invite"},
+  {text: "open → opened", answer: "/d/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/open"},
+  {text: "watch → watched", answer: "/t/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/watch"},
+  {text: "text → texted", answer: "/ɪd/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/text"},
+  {text: "laugh → laughed", answer: "/t/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/laugh"},
+  {text: "visit → visited", answer: "/ɪd/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/visit"},
+  {text: "rain → rained", answer: "/d/", oxfordUrl: "https://www.oxfordlearnersdictionaries.com/definition/english/rain"}
+];
+
+let current;
+
+function nextWord() {
+  current = words[Math.floor(Math.random() * words.length)];
+  document.getElementById("word").textContent = current.text;
+  document.getElementById("result").textContent = "";
+  document.getElementById("hintBox").textContent = "";
+}
+
+function checkAnswer(choice) {
+  if (choice === current.answer) {
+    document.getElementById("result").innerHTML = "✅ Correct!";
+  } else {
+    document.getElementById("result").innerHTML = "❌ Try again!";
+  }
+}
+
+function showHint1() {
+  let hint = "";
+
+  if (current.answer === "/ɪd/") {
+    hint = "👉 It ends in /t/ or /d/.";
+  } else if (current.answer === "/t/") {
+    hint = "👉 The last sound is voiceless.";
+  } else {
+    hint = "👉 The last sound is voiced or a vowel sound.";
+  }
+
+  document.getElementById("hintBox").textContent = hint;
+}
+
+function openOxford() {
+  window.open(current.oxfordUrl, "_blank");
+
+  document.getElementById("hintBox").innerHTML = `
+    👉 Go to <strong>Verb Forms</strong><br>
+    👉 Find <strong>Past Simple</strong><br>
+    👉 Listen to the pronunciation<br><br>
+    ❓ Do you hear an extra syllable (/ɪd/) or just /t/ or /d/?
+  `;
+}
+
+nextWord();
+</script>
+
+</body>
+</html>
