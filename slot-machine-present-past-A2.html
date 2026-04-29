@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grammar Slot Machine – Present vs Past</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #f5d7bd;
+      color: #365866;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .app {
+      width: min(1050px, 100%);
+      background: #fff7e8;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.16);
+      border: 4px solid #f3bd68;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 48px);
+      color: #5d7c89;
+      line-height: 1.05;
+    }
+    .subtitle {
+      font-size: 18px;
+      margin: 0 0 24px;
+      color: #6b5b4f;
+    }
+    .machine {
+      background: #aeb5d6;
+      border-radius: 24px;
+      padding: 22px;
+      border: 4px solid #6a7898;
+    }
+    .slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    .slot {
+      background: #fff1c9;
+      border-radius: 20px;
+      min-height: 170px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid #ffe08a;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .slot-label {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      right: 14px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #8b5a2b;
+      font-weight: bold;
+    }
+    .slot-value {
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 900;
+      color: #365866;
+      margin-top: 20px;
+      transition: transform .12s ease;
+    }
+    .spinning .slot-value {
+      transform: scale(1.08) rotate(-1deg);
+    }
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 22px;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 rgba(0,0,0,.18);
+      transition: transform .1s ease, box-shadow .1s ease;
+    }
+    button:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(0,0,0,.18);
+    }
+    .spin { background: #f48d70; color: white; }
+    .check { background: #7293a0; color: white; }
+    .reset { background: #f5c46a; color: #3f3f3f; }
+    .panel {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      border: 3px solid #f3bd68;
+      min-height: 155px;
+    }
+    .panel h2 {
+      margin: 0 0 12px;
+      color: #5d7c89;
+      font-size: 24px;
+    }
+    .result {
+      font-size: 20px;
+      line-height: 1.45;
+      color: #4b4039;
+    }
+    .sentence {
+      margin-top: 12px;
+      background: #fff1c9;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #365866;
+    }
+    .teacher-notes {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .note {
+      background: rgba(255,255,255,.7);
+      border-radius: 18px;
+      padding: 16px;
+      color: #4b4039;
+      line-height: 1.4;
+    }
+    .note strong { color: #365866; }
+    @media (max-width: 760px) {
+      .slots, .teacher-notes { grid-template-columns: 1fr; }
+      .slot { min-height: 135px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>🎰 Grammar Slot Machine</h1>
+    <p class="subtitle">Present Simple vs Past Simple – routines, yesterday, last night, frequency adverbs</p>
+
+    <section class="machine">
+      <div class="slots">
+        <div class="slot" id="timeSlot">
+          <div class="slot-label">Time</div>
+          <div class="slot-value" id="timeValue">yesterday</div>
+        </div>
+        <div class="slot" id="verbSlot">
+          <div class="slot-label">Verb</div>
+          <div class="slot-value" id="verbValue">relax</div>
+        </div>
+        <div class="slot" id="freqSlot">
+          <div class="slot-label">Frequency</div>
+          <div class="slot-value" id="freqValue">often</div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="spin" onclick="spinAll()">SPIN 🎲</button>
+        <button class="check" onclick="checkAnswer()">CHECK ✅</button>
+        <button class="reset" onclick="resetGame()">RESET ↺</button>
+      </div>
+
+      <div class="panel">
+        <h2>Student challenge</h2>
+        <div class="result" id="result">
+          1. Spin the machine.<br />
+          2. Decide: Is it correct or not?<br />
+          3. If it is not correct, fix it.
+        </div>
+      </div>
+    </section>
+
+    <section class="teacher-notes">
+      <div class="note">
+        <strong>Hint:</strong><br />
+        Look at the three words. Can they go together? Why / why not?
+      </div>
+      <div class="note">
+        <strong>Remember:</strong><br />
+        yesterday / last night / last week → Past Simple<br />
+        every day / usually / often / sometimes / always → Present Simple
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const times = [
+      { text: "yesterday", type: "past" },
+      { text: "last night", type: "past" },
+      { text: "last week", type: "past" },
+      { text: "every day", type: "present" },
+      { text: "in the morning", type: "present" },
+      { text: "after work", type: "present" }
+    ];
+
+    const verbs = [
+      { base: "have breakfast", past: "had breakfast" },
+      { base: "go to work", past: "went to work" },
+      { base: "have lunch", past: "had lunch" },
+      { base: "finish work", past: "finished work" },
+      { base: "relax", past: "relaxed" },
+      { base: "go to bed", past: "went to bed" },
+      { base: "watch TV", past: "watched TV" },
+      { base: "work", past: "worked" }
+    ];
+
+    const frequencies = [
+      { text: "always", type: "present" },
+      { text: "usually", type: "present" },
+      { text: "often", type: "present" },
+      { text: "sometimes", type: "present" },
+      { text: "—", type: "none" }
+    ];
+
+    let currentTime = times[0];
+    let currentVerb = verbs[4];
+    let currentFrequency = frequencies[2];
+
+    function randomItem(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function setSlotValues() {
+      document.getElementById("timeValue").textContent = currentTime.text;
+      document.getElementById("verbValue").textContent = currentVerb.base;
+      document.getElementById("freqValue").textContent = currentFrequency.text;
+    }
+
+    function spinAll() {
+      const slotEls = ["timeSlot", "verbSlot", "freqSlot"].map(id => document.getElementById(id));
+      slotEls.forEach(el => el.classList.add("spinning"));
+
+      let count = 0;
+      const interval = setInterval(() => {
+        currentTime = randomItem(times);
+        currentVerb = randomItem(verbs);
+        currentFrequency = randomItem(frequencies);
+        setSlotValues();
+        count++;
+        if (count > 18) {
+          clearInterval(interval);
+          slotEls.forEach(el => el.classList.remove("spinning"));
+          document.getElementById("result").innerHTML =
+            "Now decide: <strong>Is this correct or not?</strong><br />Then press CHECK.";
+        }
+      }, 90);
+    }
+
+    function isCombinationCorrect() {
+      if (currentTime.type === "past" && currentFrequency.type === "present") return false;
+      return true;
+    }
+
+    function buildCorrectSentence() {
+      if (currentTime.type === "past") {
+        return `${capitalize(currentTime.text)} I ${currentVerb.past}.`;
+      }
+      if (currentFrequency.type === "present") {
+        return `I ${currentFrequency.text} ${currentVerb.base} ${currentTime.text}.`;
+      }
+      return `I ${currentVerb.base} ${currentTime.text}.`;
+    }
+
+    function buildFixOptions() {
+      const pastFix = `${capitalize(currentTime.text)} I ${currentVerb.past}.`;
+      const presentFix = `I ${currentFrequency.text} ${currentVerb.base}.`;
+      return { pastFix, presentFix };
+    }
+
+    function checkAnswer() {
+      const result = document.getElementById("result");
+
+      if (isCombinationCorrect()) {
+        result.innerHTML = `✅ <strong>Correct combination!</strong><div class="sentence">${buildCorrectSentence()}</div>`;
+      } else {
+        const fixes = buildFixOptions();
+        result.innerHTML = `❌ <strong>Tricky combination!</strong><br />
+          Past time + frequency adverb do not work together here.<br />
+          Choose one correct sentence:
+          <div class="sentence">Option A: ${fixes.pastFix}</div>
+          <div class="sentence">Option B: ${fixes.presentFix}</div>`;
+      }
+    }
+
+    function resetGame() {
+      currentTime = times[0];
+      currentVerb = verbs[4];
+      currentFrequency = frequencies[2];
+      setSlotValues();
+      document.getElementById("result").innerHTML =
+        "1. Spin the machine.<br />2. Decide: Is it correct or not?<br />3. If it is not correct, fix it.";
+    }
+
+    function capitalize(text) {
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+  </script>
+</body>
+</html>
