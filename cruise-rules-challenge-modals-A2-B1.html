@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cruise Rules Challenge 🚢</title>
+
+<style>
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #ffffff;
+  text-align: center;
+  padding: 30px;
+}
+
+h1 {
+  color: #f48d70;
+}
+
+.question-box {
+  background-color: #f5c46a;
+  padding: 20px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+button {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  background-color: #7293a0;
+  color: white;
+  cursor: pointer;
+  width: 60%;
+}
+
+button:hover {
+  background-color: #e08d8d;
+}
+
+.feedback {
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.footer {
+  margin-top: 40px;
+  color: #888;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>🚢 Cruise Rules Challenge</h1>
+<p>This is a game. Let's be playful! 💜</p>
+
+<div class="question-box" id="questionBox"></div>
+
+<div id="answers"></div>
+
+<div class="feedback" id="feedback"></div>
+
+<button onclick="nextQuestion()">Next Question ➡️</button>
+
+<div class="footer">
+by Ingles con Cin 💜<br>
+@inglesconcin.ok
+</div>
+
+<script>
+
+const questions = [
+{
+q: "You ___ follow safety instructions at all times.",
+options: ["don't have to", "must", "might"],
+correct: 1,
+explanation: "‘Must’ shows strong obligation."
+},
+
+{
+q: "Guests ___ enter this restricted area.",
+options: ["mustn't", "have to", "are allowed to"],
+correct: 0,
+explanation: "‘Mustn't’ means prohibition."
+},
+
+{
+q: "Crew members ___ attend safety drills.",
+options: ["have to", "mustn't", "don't have to"],
+correct: 0,
+explanation: "‘Have to’ = external rule."
+},
+
+{
+q: "You ___ work on your day off.",
+options: ["must", "don't have to", "mustn't"],
+correct: 1,
+explanation: "‘Don't have to’ = optional."
+},
+
+{
+q: "Guests are ___ use the pool.",
+options: ["must", "allowed to", "mustn't"],
+correct: 1,
+explanation: "‘Allowed to’ = permission."
+},
+
+{
+q: "You ___ ignore emergency procedures.",
+options: ["must", "mustn't", "have to"],
+correct: 1,
+explanation: "It's forbidden → mustn't."
+}
+];
+
+let current = 0;
+
+function showQuestion() {
+document.getElementById("feedback").innerText = "";
+const q = questions[current];
+document.getElementById("questionBox").innerText = q.q;
+
+const answersDiv = document.getElementById("answers");
+answersDiv.innerHTML = "";
+
+q.options.forEach((option, index) => {
+const btn = document.createElement("button");
+btn.innerText = option;
+btn.onclick = () => checkAnswer(index);
+answersDiv.appendChild(btn);
+});
+}
+
+function checkAnswer(index) {
+const q = questions[current];
+if(index === q.correct) {
+document.getElementById("feedback").innerText = "✅ Correct! " + q.explanation;
+} else {
+document.getElementById("feedback").innerText = "❌ Try again! " + q.explanation;
+}
+}
+
+function nextQuestion() {
+current++;
+if(current >= questions.length) {
+document.getElementById("questionBox").innerText = "🎉 Well done! You completed the challenge!";
+document.getElementById("answers").innerHTML = "";
+document.getElementById("feedback").innerText = "";
+return;
+}
+showQuestion();
+}
+
+showQuestion();
+
+</script>
+
+</body>
+</html>
