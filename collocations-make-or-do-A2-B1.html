@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Collocations with make and do (A2-B1)</title>
+  <style>
+    body {
+      font-family: Poppins, Arial, sans-serif;
+      background: linear-gradient(135deg, #f48d70, #7293a0);
+      color: white;
+      text-align: center;
+      padding: 30px;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 34px;
+    }
+
+    .game-box {
+      background: rgba(255,255,255,0.18);
+      padding: 40px 30px;
+      border-radius: 20px;
+      max-width: 620px;
+      margin: 20px auto;
+    }
+
+    .sentence {
+      font-size: 26px;
+      margin: 20px 0 30px;
+      line-height: 1.4;
+    }
+
+    button {
+      padding: 15px 28px;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      min-width: 110px;
+    }
+
+    .make { background-color: #f5c46a; }
+    .do { background-color: #beffc7; }
+
+    .feedback {
+      margin-top: 22px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .motivation {
+      margin-top: 10px;
+      font-size: 17px;
+      font-style: italic;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>💜 Collocations with make and do (A2-B1)</h1>
+  <p>This is a game. Let's be playful!</p>
+
+  <div class="game-box">
+    <div class="sentence" id="sentence">Loading...</div>
+
+    <button class="make" id="makeBtn" onclick="checkAnswer('make')">MAKE</button>
+    <button class="do" id="doBtn" onclick="checkAnswer('do')">DO</button>
+
+    <div class="feedback" id="feedback"></div>
+    <div class="motivation" id="motivation"></div>
+  </div>
+
+  <div class="footer">by @inglesconcin.ok 💜</div>
+
+<script>
+const questions = [
+  // PRESENT SIMPLE
+  { text: "Every morning, I ___ yoga at home.", answer: "do", tense: "present", person: "normal" },
+  { text: "She usually ___ exercise after work.", answer: "does", tense: "present", person: "third" },
+  { text: "He ___ his best in difficult situations.", answer: "does", tense: "present", person: "third" },
+  { text: "They often ___ plans for the weekend.", answer: "make", tense: "present", person: "normal" },
+  { text: "My friend ___ a decision quickly.", answer: "makes", tense: "present", person: "third" },
+
+  // PAST SIMPLE
+  { text: "Yesterday, I ___ a decision about my trip.", answer: "made", tense: "past", person: "normal" },
+  { text: "Last night, I ___ my homework late.", answer: "did", tense: "past", person: "normal" },
+  { text: "Last week, she ___ a mistake at work.", answer: "made", tense: "past", person: "third" },
+  { text: "Yesterday afternoon, I ___ the shopping.", answer: "did", tense: "past", person: "normal" },
+  { text: "Last month, she ___ an effort to improve her English.", answer: "made", tense: "past", person: "third" }
+];
+
+const motivationalMessages = [
+  "✨ You're building fluency right now.",
+  "💜 Trust your intuition.",
+  "🌱 Progress, not perfection.",
+  "🔥 You're getting faster!",
+  "💫 Keep going, you're doing great.",
+  "🧠 Your brain is learning patterns.",
+  "✨ Mistakes help you grow.",
+  "🚀 English is becoming natural for you."
+];
+
+let current = 0;
+let score = 0;
+
+function loadQuestion() {
+  const q = questions[current];
+
+  document.getElementById("sentence").innerText = q.text;
+  document.getElementById("feedback").innerText = "";
+  document.getElementById("motivation").innerText = "";
+
+  if (q.tense === "past") {
+    document.getElementById("makeBtn").innerText = "MADE";
+    document.getElementById("doBtn").innerText = "DID";
+  } else if (q.tense === "present" && q.person === "third") {
+    document.getElementById("makeBtn").innerText = "MAKES";
+    document.getElementById("doBtn").innerText = "DOES";
+  } else {
+    document.getElementById("makeBtn").innerText = "MAKE";
+    document.getElementById("doBtn").innerText = "DO";
+  }
+}
+
+function checkAnswer(choice) {
+  const q = questions[current];
+  let chosenForm = "";
+
+  if (q.tense === "past") {
+    chosenForm = choice === "make" ? "made" : "did";
+  } else if (q.tense === "present" && q.person === "third") {
+    chosenForm = choice === "make" ? "makes" : "does";
+  } else {
+    chosenForm = choice === "make" ? "make" : "do";
+  }
+
+  const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+
+  if (chosenForm === q.answer) {
+    score++;
+    document.getElementById("feedback").innerText = "✅ Correct! " + q.answer.toUpperCase();
+  } else {
+    document.getElementById("feedback").innerText = "❌ Correct answer: " + q.answer.toUpperCase();
+  }
+
+  document.getElementById("motivation").innerText = randomMessage;
+
+  current++;
+
+  if (current < questions.length) {
+    setTimeout(loadQuestion, 3000);
+  } else {
+    setTimeout(showResult, 3000);
+  }
+}
+
+function showResult() {
+  document.querySelector(".game-box").innerHTML =
+    `<h2>Your score: ${score}/${questions.length}</h2>
+     <p>💜 Amazing work!</p>
+     <p style="font-style: italic;">💫 Trust the process. Your English is growing every day💫.</p>`;
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
