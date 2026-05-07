@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekend Plans & Invitations – A2 Review</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --coral: #f48d70;
+      --yellow: #f5c46a;
+      --blue: #7293a0;
+      --mint: #beffc7;
+      --white: #ffffff;
+      --pink: #e08d8d;
+      --dark: #17333a;
+      --soft-bg: #f6fff8;
+      --good: #35a86b;
+      --bad: #d95252;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fff8f5, #f2fff5, #eef8fb);
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 980px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 32px;
+      box-shadow: 0 20px 50px rgba(23, 51, 58, 0.15);
+      overflow: hidden;
+      border: 4px solid rgba(190, 255, 199, 0.9);
+    }
+
+    header {
+      background: linear-gradient(120deg, var(--coral), var(--pink));
+      color: white;
+      padding: 28px 32px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800;
+    }
+
+    header p {
+      margin: 10px 0 0;
+      font-size: 1rem;
+      font-weight: 500;
+      opacity: 0.95;
+    }
+
+    .screen {
+      padding: 32px;
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .intro-card, .question-card, .result-card {
+      background: var(--soft-bg);
+      border: 3px solid var(--mint);
+      border-radius: 28px;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .intro-card h2, .result-card h2 {
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+      margin: 0 0 14px;
+      color: var(--dark);
+    }
+
+    .intro-card p, .result-card p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin: 10px auto;
+      max-width: 700px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 18px;
+      padding: 16px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(23, 51, 58, 0.18);
+    }
+
+    .btn-primary {
+      background: var(--coral);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .pill {
+      background: white;
+      border: 2px solid var(--mint);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 14px;
+      background: #e8f4ef;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--yellow), var(--coral));
+      transition: width 0.4s ease;
+    }
+
+    .question-type {
+      color: var(--blue);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .question-text {
+      font-size: clamp(1.4rem, 3vw, 2.3rem);
+      line-height: 1.3;
+      font-weight: 800;
+      margin: 0 0 26px;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .answer-btn {
+      min-height: 92px;
+      border: 3px solid transparent;
+      border-radius: 24px;
+      padding: 18px;
+      background: white;
+      color: var(--dark);
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(23, 51, 58, 0.08);
+      transition: all 0.2s ease;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      transform: scale(1.02);
+      border-color: var(--yellow);
+    }
+
+    .answer-btn:disabled {
+      cursor: default;
+      opacity: 0.9;
+    }
+
+    .answer-btn.correct {
+      background: #e9fff1;
+      border-color: var(--good);
+      color: #17643f;
+    }
+
+    .answer-btn.incorrect {
+      background: #fff0ef;
+      border-color: var(--bad);
+      color: #913232;
+    }
+
+    .feedback {
+      margin-top: 22px;
+      padding: 18px;
+      border-radius: 22px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: none;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.good {
+      background: #e9fff1;
+      color: #17643f;
+      border: 2px solid var(--good);
+    }
+
+    .feedback.bad {
+      background: #fff0ef;
+      color: #913232;
+      border: 2px solid var(--bad);
+    }
+
+    .explanation {
+      font-size: 0.98rem;
+      font-weight: 500;
+      margin-top: 8px;
+    }
+
+    .next-row {
+      text-align: center;
+      margin-top: 18px;
+      min-height: 70px;
+    }
+
+    .brand-footer {
+      text-align: center;
+      padding: 16px 20px 24px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .score-big {
+      font-size: clamp(2.6rem, 7vw, 5rem);
+      font-weight: 800;
+      color: var(--coral);
+      margin: 10px 0;
+    }
+
+    .tiny-note {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 700px) {
+      .screen {
+        padding: 22px;
+      }
+
+      .answers {
+        grid-template-columns: 1fr;
+      }
+
+      .answer-btn {
+        min-height: 76px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-container">
+    <header>
+      <h1>Weekend Plans & Invitations</h1>
+      <p>A2 Review Game · Future with <strong>be going to</strong></p>
+    </header>
+
+    <section id="startScreen" class="screen active">
+      <div class="intro-card">
+        <h2>Let’s practise future plans 🎉</h2>
+        <p>This is a game. Let’s be playful!</p>
+        <p>You are going to practise: <strong>am / is / are going to</strong>, invitations, polite answers and weekend vocabulary.</p>
+        <button class="btn btn-primary" onclick="startGame()">Start game</button>
+        <p class="tiny-note">Tip: read the sentences out loud before choosing.</p>
+      </div>
+    </section>
+
+    <section id="quizScreen" class="screen">
+      <div class="top-bar">
+        <div class="pill" id="questionCounter">Question 1 / 20</div>
+        <div class="pill" id="scoreCounter">Score: 0</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress" id="progressBar"></div>
+      </div>
+      <div class="question-card">
+        <div class="question-type" id="questionType">Complete the sentence</div>
+        <h2 class="question-text" id="questionText"></h2>
+        <div class="answers" id="answers"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="next-row">
+          <button id="nextButton" class="btn btn-secondary" onclick="nextQuestion()" style="display:none;">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+      <div class="result-card">
+        <h2>Amazing work! 🌸</h2>
+        <p>You are using English to talk about real plans and real life.</p>
+        <div class="score-big" id="finalScore"></div>
+        <p id="finalMessage"></p>
+        <button class="btn btn-primary" onclick="restartGame()">Play again</button>
+      </div>
+    </section>
+
+    <div class="brand-footer">by @inglesconcin.ok 💜</div>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        type: "Complete the sentence",
+        question: "Tonight, I ______ going to stay in and watch a film.",
+        answers: ["is", "am", "are", "be"],
+        correct: 1,
+        explanation: "With I, we use: I am / I’m going to..."
+      },
+      {
+        type: "Choose the correct sentence",
+        question: "Which sentence is correct?",
+        answers: [
+          "She going to visit her sister tomorrow.",
+          "She is going visit her sister tomorrow.",
+          "She is going to visit her sister tomorrow.",
+          "She going visit her sister tomorrow."
+        ],
+        correct: 2,
+        explanation: "Pattern: subject + am/is/are + going to + verb."
+      },
+      {
+        type: "Vocabulary",
+        question: "What does “stay in” mean?",
+        answers: ["Go to work", "Stay at home", "Travel abroad", "Meet friends outside"],
+        correct: 1,
+        explanation: "Stay in = stay at home, usually to relax."
+      },
+      {
+        type: "Invitation",
+        question: "Would you like to ______ coffee tomorrow?",
+        answers: ["having", "has", "have", "had"],
+        correct: 2,
+        explanation: "After would you like to, use the base verb: have."
+      },
+      {
+        type: "Polite answer",
+        question: "Best response: “Would you like to go out on Saturday?”",
+        answers: ["I’d love to!", "I loving it.", "Yes, I like.", "I go Saturday."],
+        correct: 0,
+        explanation: "I’d love to! is a friendly way to accept an invitation."
+      },
+      {
+        type: "Negative form",
+        question: "They ______ going to work this weekend.",
+        answers: ["isn’t", "aren’t", "not", "don’t"],
+        correct: 1,
+        explanation: "They + are not = They aren’t going to..."
+      },
+      {
+        type: "Question form",
+        question: "Choose the correct question.",
+        answers: [
+          "Are you going to meet your friend?",
+          "You are going to meet your friend?",
+          "Do you going to meet your friend?",
+          "Are going you to meet your friend?"
+        ],
+        correct: 0,
+        explanation: "Question form: Am/Is/Are + subject + going to + verb in the infinitive form?"
+      },
+      {
+        type: "Word order",
+        question: "Choose the correct order.",
+        answers: [
+          "going / I / am / relax / to",
+          "I / going / relax / am / to",
+          "I / am / going / to / relax",
+          "am / I / to / going / relax"
+        ],
+        correct: 2,
+        explanation: "I am going to relax."
+      },
+      {
+        type: "Reason",
+        question: "Why are you staying in tonight?",
+        answers: ["Because I’m tired.", "Because tired.", "Because I going to tired.", "Because stay home."],
+        correct: 0,
+        explanation: "Because + subject + verb + adjective: Because I’m tired."
+      },
+      {
+        type: "Collocation",
+        question: "My friends are going to ______ dinner at a restaurant tonight.",
+        answers: ["do", "make", "have", "eating"],
+        correct: 2,
+        explanation: "In English we usually say: have dinner, have lunch, etc."
+      },
+      {
+        type: "Polite refusal",
+        question: "Choose a polite refusal.",
+        answers: ["No.", "I don’t.", "Sorry, maybe another time.", "Not possible."],
+        correct: 2,
+        explanation: "Maybe another time is soft and polite."
+      },
+      {
+        type: "Future plan",
+        question: "Choose the correct sentence.",
+        answers: [
+          "We’re going to meet at 8 p.m.",
+          "We going to meet at 8 p.m.",
+          "We are going meet at 8 p.m.",
+          "We’re going meet at 8 p.m."
+        ],
+        correct: 0,
+        explanation: "We’re = We are. Form: Subject + verb “to be” + going to + verb in the infinitive form."
+      },
+      {
+        type: "Mini listening",
+        question: "Julia is going to meet her cousin for lunch. Then she’s going to stay in and relax. So, what is Julia going to do after lunch?",
+        answers: ["Go shopping", "Relax at home", "Go to work", "Visit the beach"],
+        correct: 1,
+        explanation: "Stay in and relax = relax at home."
+      },
+      {
+        type: "Future planned action",
+        question: "Choose the correct future plan.",
+        answers: [
+          "I’m going to have lunch with friends tomorrow.",
+          "I have lunch with friends tomorrow.",
+          "I going have lunch with friends tomorrow.",
+          "I’m have lunch with friends tomorrow."
+        ],
+        correct: 0,
+        explanation: "For a plan: I’m going to + verb."
+      },
+      {
+        type: "Mini conversation",
+        question: "— Would you like to come to dinner tonight? — ______",
+        answers: ["Yes, I’d love to!", "Yes, I would like going.", "Yes, I love.", "Yes, I going."],
+        correct: 0,
+        explanation: "I’d love to! is natural and friendly."
+      },
+      {
+        type: "Complete the question",
+        question: "______ she going to write her second novel?",
+        answers: ["When is", "When are", "When does", "When do"],
+        correct: 0,
+        explanation: "The personal pronoun “she” goes with “is” (verb “to be”): When is she going to...?"
+      },
+      {
+        type: "Complete the question",
+        question: "Where ______ they going to travel for their honeymoon?",
+        answers: ["is", "am", "are", "do"],
+        correct: 2,
+        explanation: "The personal pronoun “they” goes with “are”: Where are they going to...?"
+      },
+      {
+        type: "Negative form",
+        question: "My dog ______ going to be happy. He’s going to see the vet.",
+        answers: ["isn’t", "aren’t", "don’t", "doesn’t"],
+        correct: 0,
+        explanation: "My dog = he/it, so we use isn’t."
+      },
+      {
+        type: "Invitation language",
+        question: "We’re going to drive to the beach this afternoon. Would you like to ______ us?",
+        answers: ["join", "meet", "stay", "sleep"],
+        correct: 0,
+        explanation: "Join us = come with us."
+      },
+      {
+        type: "Final challenge",
+        question: "Choose the best complete sentence.",
+        answers: [
+          "I’m going to prepare dinner in 20 minutes.",
+          "I going to prepare dinner in 20 minutes.",
+          "I’m prepare dinner in 20 minutes.",
+          "I am going prepare dinner in 20 minutes."
+        ],
+        correct: 0,
+        explanation: "Perfect! I’m going to + verb in the infinitive form."
+      }
+    ];
+
+    const goodMessages = [
+      "Beautiful! You’re building confidence 💜",
+      "Great job! That sounded clear 🌸",
+      "Yes! Step by step, it gets easier ✨",
+      "Excellent! Keep speaking slowly and clearly 🎉",
+      "Amazing! Your English is growing 🌱"
+    ];
+
+    const tryMessages = [
+      "Good try! Mistakes are part of learning 💜",
+      "Almost! Read the pattern again and keep going 🌸",
+      "No worries! Your brain is learning ✨",
+      "Nice effort! Let’s notice the correct structure 💪",
+      "Keep going! Confidence grows with practice 🌱"
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+    const startScreen = document.getElementById('startScreen');
+    const quizScreen = document.getElementById('quizScreen');
+    const resultScreen = document.getElementById('resultScreen');
+    const questionCounter = document.getElementById('questionCounter');
+    const scoreCounter = document.getElementById('scoreCounter');
+    const progressBar = document.getElementById('progressBar');
+    const questionType = document.getElementById('questionType');
+    const questionText = document.getElementById('questionText');
+    const answersDiv = document.getElementById('answers');
+    const feedback = document.getElementById('feedback');
+    const nextButton = document.getElementById('nextButton');
+    const finalScore = document.getElementById('finalScore');
+    const finalMessage = document.getElementById('finalMessage');
+
+    function startGame() {
+      startScreen.classList.remove('active');
+      quizScreen.classList.add('active');
+      showQuestion();
+    }
+
+    function showQuestion() {
+      answered = false;
+      const q = questions[currentQuestion];
+      questionCounter.textContent = `Question ${currentQuestion + 1} / ${questions.length}`;
+      scoreCounter.textContent = `Score: ${score}`;
+      progressBar.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+      questionType.textContent = q.type;
+      questionText.textContent = q.question;
+      answersDiv.innerHTML = '';
+      feedback.className = 'feedback';
+      feedback.innerHTML = '';
+      nextButton.style.display = 'none';
+
+      q.answers.forEach((answer, index) => {
+        const button = document.createElement('button');
+        button.className = 'answer-btn';
+        button.textContent = answer;
+        button.onclick = () => selectAnswer(index, button);
+        answersDiv.appendChild(button);
+      });
+    }
+
+    function selectAnswer(index, selectedButton) {
+      if (answered) return;
+      answered = true;
+      const q = questions[currentQuestion];
+      const allButtons = document.querySelectorAll('.answer-btn');
+
+      allButtons.forEach((button, i) => {
+        button.disabled = true;
+        if (i === q.correct) button.classList.add('correct');
+      });
+
+      if (index === q.correct) {
+        score++;
+        selectedButton.classList.add('correct');
+        const msg = goodMessages[Math.floor(Math.random() * goodMessages.length)];
+        feedback.className = 'feedback show good';
+        feedback.innerHTML = `${msg}<div class="explanation">${q.explanation}</div>`;
+      } else {
+        selectedButton.classList.add('incorrect');
+        const msg = tryMessages[Math.floor(Math.random() * tryMessages.length)];
+        feedback.className = 'feedback show bad';
+        feedback.innerHTML = `${msg}<div class="explanation">${q.explanation}</div>`;
+      }
+
+      scoreCounter.textContent = `Score: ${score}`;
+      progressBar.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+      setTimeout(() => {
+        nextButton.style.display = 'inline-block';
+      }, 1200);
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        showQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      quizScreen.classList.remove('active');
+      resultScreen.classList.add('active');
+      finalScore.textContent = `${score} / ${questions.length}`;
+
+      const percentage = Math.round((score / questions.length) * 100);
+      if (percentage >= 85) {
+        finalMessage.textContent = "Fantastic! You can talk about plans and invitations with more confidence now.";
+      } else if (percentage >= 60) {
+        finalMessage.textContent = "Very good! You are practising the structure and noticing the details.";
+      } else {
+        finalMessage.textContent = "Good practice! Repeat the game and focus on: am / is / are + going to + verb.";
+      }
+    }
+
+    function restartGame() {
+      currentQuestion = 0;
+      score = 0;
+      resultScreen.classList.remove('active');
+      quizScreen.classList.add('active');
+      showQuestion();
+    }
+  </script>
+</body>
+</html>
