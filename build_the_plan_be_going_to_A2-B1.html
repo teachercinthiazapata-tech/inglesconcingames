@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build the Plan | Be Going To</title>
+  <style>
+    :root {
+      --coral: #f48d70;
+      --yellow: #f5c46a;
+      --blue: #7293a0;
+      --mint: #beffc7;
+      --white: #ffffff;
+      --pink: #e08d8d;
+      --ink: #263238;
+      --soft: #fff7f3;
+      --soft-blue: #eef7fb;
+      --shadow: rgba(38, 50, 56, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #fff7f3 0%, #eef7fb 55%, #eaffef 100%);
+      color: var(--ink);
+      padding: 22px;
+    }
+
+    .app {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 18px 50px var(--shadow);
+      border: 3px solid rgba(244, 141, 112, 0.22);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--yellow);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+
+    h1 {
+      font-size: clamp(2.3rem, 5vw, 4.2rem);
+      line-height: 1;
+      color: var(--coral);
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      line-height: 1.45;
+      max-width: 780px;
+      margin: 0 auto;
+      color: #43545a;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 24px 0;
+    }
+
+    .stat, .button {
+      border-radius: 18px;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 900;
+      box-shadow: 0 8px 20px rgba(38, 50, 56, 0.08);
+    }
+
+    .stat {
+      background: var(--soft);
+      border: 2px solid rgba(114, 147, 160, 0.18);
+      color: var(--blue);
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat span:last-child {
+      font-size: 1.5rem;
+      color: var(--ink);
+    }
+
+    .button {
+      border: 0;
+      cursor: pointer;
+      font-size: 1rem;
+      color: white;
+      background: var(--coral);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(244, 141, 112, 0.32);
+    }
+
+    .button.secondary {
+      background: var(--blue);
+    }
+
+    .grammar-box {
+      background: linear-gradient(135deg, #ffffff, #fff1eb);
+      border: 2px solid rgba(244, 141, 112, 0.3);
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 20px;
+      text-align: center;
+      line-height: 1.6;
+      font-size: 1.05rem;
+    }
+
+    .grammar-box strong {
+      color: var(--coral);
+    }
+
+    .game-card {
+      background: #ffffff;
+      border-radius: 26px;
+      padding: 24px;
+      border: 2px solid rgba(114, 147, 160, 0.2);
+      box-shadow: 0 12px 28px rgba(38, 50, 56, 0.08);
+    }
+
+    .prompt-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .level-pill {
+      background: var(--mint);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 900;
+      color: #295443;
+    }
+
+    .instruction {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--blue);
+    }
+
+    .sentence-zone {
+      min-height: 92px;
+      border: 3px dashed rgba(114, 147, 160, 0.55);
+      background: var(--soft-blue);
+      border-radius: 22px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .sentence-zone.empty::before {
+      content: "Click the words in the correct order here...";
+      color: rgba(38, 50, 56, 0.42);
+      font-weight: 800;
+    }
+
+    .word-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin: 22px 0;
+      min-height: 84px;
+    }
+
+    .word {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, var(--yellow), #ffeab0);
+      color: var(--ink);
+      font-size: 1.08rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 7px 15px rgba(38, 50, 56, 0.12);
+      transition: transform 0.16s ease, opacity 0.16s ease;
+    }
+
+    .word:hover {
+      transform: translateY(-2px);
+    }
+
+    .word.used {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .sentence-zone .word {
+      background: linear-gradient(135deg, var(--coral), #ffa58c);
+      color: white;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .check-btn, .clear-btn, .next-btn, .hint-btn {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 22px;
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow: 0 8px 18px rgba(38, 50, 56, 0.12);
+    }
+
+    .check-btn { background: var(--coral); }
+    .clear-btn { background: var(--pink); }
+    .next-btn { background: var(--blue); }
+    .hint-btn { background: #71b58e; }
+
+    .feedback {
+      min-height: 70px;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--soft);
+      text-align: center;
+      font-weight: 900;
+      line-height: 1.45;
+    }
+
+    .feedback.good {
+      background: #eaffef;
+      color: #247a47;
+      border: 2px solid #99dfaf;
+    }
+
+    .feedback.try {
+      background: #fff4f0;
+      color: #ad513d;
+      border: 2px solid #f7b4a4;
+    }
+
+    .speaking-card {
+      margin-top: 22px;
+      border-radius: 22px;
+      padding: 20px;
+      background: linear-gradient(135deg, #ffffff, #f2fff5);
+      border: 2px solid rgba(190, 255, 199, 0.9);
+      line-height: 1.55;
+    }
+
+    .speaking-card h2 {
+      color: var(--coral);
+      margin-bottom: 10px;
+      font-size: 1.35rem;
+    }
+
+    .speaking-card ul {
+      padding-left: 24px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(38, 50, 56, 0.58);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      z-index: 20;
+    }
+
+    .modal-box {
+      width: min(520px, 100%);
+      background: white;
+      border-radius: 28px;
+      padding: 32px;
+      text-align: center;
+      border: 4px solid var(--yellow);
+      box-shadow: 0 22px 70px rgba(0,0,0,0.22);
+    }
+
+    .modal-box h2 {
+      color: var(--coral);
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .modal-box p {
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    footer {
+      text-align: right;
+      color: var(--blue);
+      font-weight: 900;
+      margin-top: 18px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 780px) {
+      .app { padding: 18px; }
+      .topbar { grid-template-columns: repeat(2, 1fr); }
+      .stat, .button { min-height: 62px; }
+      .sentence-zone { min-height: 120px; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .topbar { grid-template-columns: 1fr; }
+      .word { width: 100%; }
+      .sentence-zone .word { width: auto; }
+      footer { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="badge">A2 Grammar Game</div>
+      <h1>Build the Plan ✨</h1>
+      <p class="subtitle">Click the words in the correct order to make sentences with <strong>be going to</strong> for future plans.</p>
+    </header>
+
+    <section class="topbar" aria-label="Game status">
+      <div class="stat"><span>Sentence</span><span><span id="currentNumber">1</span>/8</span></div>
+      <div class="stat"><span>Score</span><span id="score">0</span></div>
+      <div class="stat"><span>Tries</span><span id="tries">0</span></div>
+      <button class="button secondary" id="restartBtn" type="button">↻ Restart</button>
+    </section>
+
+    <section class="grammar-box">
+      <p><strong>Remember:</strong> Subject + am / is / are + going to + verb in the infinitive form.</p>
+      <p>Example: <strong>I am going to stay in tonight.</strong></p>
+    </section>
+
+    <section class="game-card">
+      <div class="prompt-row">
+        <div class="instruction">Put the words in order.</div>
+        <div class="level-pill" id="sentenceType">Affirmative</div>
+      </div>
+
+      <div id="sentenceZone" class="sentence-zone empty" aria-label="Your sentence"></div>
+      <div id="wordBank" class="word-bank" aria-label="Word bank"></div>
+
+      <div class="actions">
+        <button class="check-btn" id="checkBtn" type="button">Check answer</button>
+        <button class="clear-btn" id="clearBtn" type="button">Clear</button>
+        <button class="hint-btn" id="hintBtn" type="button">Hint</button>
+        <button class="next-btn" id="nextBtn" type="button">Next sentence</button>
+      </div>
+
+      <div id="feedback" class="feedback">Choose a word to start. Read your sentence aloud when you finish 💜</div>
+    </section>
+
+    
+
+    <footer>by @inglesconcin.ok</footer>
+  </main>
+
+  <div class="modal" id="winModal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="modal-box">
+      <h2 id="winTitle">Beautiful work! 🌟</h2>
+      <p>You completed all the sentences. Now say three personal plans using <strong>I’m going to...</strong></p>
+      <button class="check-btn" id="playAgainBtn" type="button">Play again</button>
+    </div>
+  </div>
+
+  <script>
+    const sentences = [
+      {
+        type: "Affirmative",
+        words: ["I", "am", "going to", "stay in", "tonight."],
+        answer: "I am going to stay in tonight.",
+        hint: "Start with the subject: I. Then the verb \"to be\" + going to."
+      },
+      {
+        type: "Affirmative",
+        words: ["She", "is", "going to", "meet", "a friend."],
+        answer: "She is going to meet a friend.",
+        hint: "The subject pronoun \"she\" goes with \"is\"."
+      },
+      {
+        type: "Affirmative",
+        words: ["We", "are", "going to", "have dinner", "downtown."],
+        answer: "We are going to have dinner downtown.",
+        hint: "The subject pronoun \"we\" goes with \"are\"."
+      },
+      {
+        type: "Question",
+        words: ["Are", "you", "going to", "go out", "this weekend?"],
+        answer: "Are you going to go out this weekend?",
+        hint: "For questions, start with the verb \"to be\": Am / Is / Are."
+      },
+      {
+        type: "Negative",
+        words: ["I", "am not", "going to", "have lunch", "at home."],
+        answer: "I am not going to have lunch at home.",
+        hint: "Negative: subject + am/is/are + not + going to."
+      },
+      {
+        type: "Affirmative",
+        words: ["They", "are", "going to", "have coffee", "after work."],
+        answer: "They are going to have coffee after work.",
+        hint: "The subject pronoun \"they\" goes with \"are\"."
+      },
+      {
+        type: "Question",
+        words: ["Is", "she", "going to", "join", "us?"],
+        answer: "Is she going to join us?",
+        hint: "Question: Is + she + going to + verb?"
+      },
+      {
+        type: "Negative",
+        words: ["We", "are not", "going to", "stay in", "tonight."],
+        answer: "We are not going to stay in tonight.",
+        hint: "The subject pronoun \"we\" goes with \"are\" + not to form a negative sentence."
+      }
+    ];
+
+    const wordBank = document.getElementById("wordBank");
+    const sentenceZone = document.getElementById("sentenceZone");
+    const feedback = document.getElementById("feedback");
+    const scoreEl = document.getElementById("score");
+    const triesEl = document.getElementById("tries");
+    const currentNumberEl = document.getElementById("currentNumber");
+    const sentenceTypeEl = document.getElementById("sentenceType");
+    const checkBtn = document.getElementById("checkBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const hintBtn = document.getElementById("hintBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const winModal = document.getElementById("winModal");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+
+    let currentIndex = 0;
+    let score = 0;
+    let tries = 0;
+    let selectedWords = [];
+    let answeredCorrectly = false;
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function renderSentence() {
+      const current = sentences[currentIndex];
+      selectedWords = [];
+      answeredCorrectly = false;
+      wordBank.innerHTML = "";
+      sentenceZone.innerHTML = "";
+      sentenceZone.classList.add("empty");
+      feedback.className = "feedback";
+      feedback.textContent = "Choose a word to start. Read your sentence aloud when you finish 💜";
+      currentNumberEl.textContent = currentIndex + 1;
+      sentenceTypeEl.textContent = current.type;
+
+      shuffle(current.words).forEach((word, index) => {
+        const button = document.createElement("button");
+        button.className = "word";
+        button.type = "button";
+        button.textContent = word;
+        button.dataset.word = word;
+        button.dataset.index = index;
+        button.addEventListener("click", () => selectWord(button));
+        wordBank.appendChild(button);
+      });
+    }
+
+    function selectWord(button) {
+      if (button.classList.contains("used") || answeredCorrectly) return;
+      button.classList.add("used");
+      selectedWords.push(button.dataset.word);
+      sentenceZone.classList.remove("empty");
+
+      const selectedButton = document.createElement("button");
+      selectedButton.className = "word";
+      selectedButton.type = "button";
+      selectedButton.textContent = button.dataset.word;
+      selectedButton.dataset.originalIndex = button.dataset.index;
+      selectedButton.addEventListener("click", () => removeSelectedWord(selectedButton));
+      sentenceZone.appendChild(selectedButton);
+    }
+
+    function removeSelectedWord(selectedButton) {
+      if (answeredCorrectly) return;
+      const word = selectedButton.textContent;
+      const position = Array.from(sentenceZone.children).indexOf(selectedButton);
+      selectedWords.splice(position, 1);
+      selectedButton.remove();
+
+      const original = Array.from(wordBank.children).find(btn =>
+        btn.dataset.word === word && btn.classList.contains("used")
+      );
+      if (original) original.classList.remove("used");
+
+      if (selectedWords.length === 0) sentenceZone.classList.add("empty");
+    }
+
+    function normalise(text) {
+      return text.replace(/\s+/g, " ").trim();
+    }
+
+    function checkAnswer() {
+      if (answeredCorrectly) return;
+      tries++;
+      triesEl.textContent = tries;
+
+      const userAnswer = normalise(selectedWords.join(" "));
+      const correctAnswer = sentences[currentIndex].answer;
+
+      if (userAnswer === correctAnswer) {
+        answeredCorrectly = true;
+        score++;
+        scoreEl.textContent = score;
+        feedback.className = "feedback good";
+        feedback.innerHTML = `Excellent! ✅<br><strong>${correctAnswer}</strong><br>Now read it aloud.`;
+      } else {
+        feedback.className = "feedback try";
+        feedback.innerHTML = `Almost! 🌱 Try again.<br>Your sentence: <strong>${userAnswer || "—"}</strong>`;
+      }
+    }
+
+    function clearAnswer() {
+      if (answeredCorrectly) return;
+      selectedWords = [];
+      sentenceZone.innerHTML = "";
+      sentenceZone.classList.add("empty");
+      Array.from(wordBank.children).forEach(button => button.classList.remove("used"));
+      feedback.className = "feedback";
+      feedback.textContent = "No problem. Try again calmly 💜";
+    }
+
+    function showHint() {
+      feedback.className = "feedback";
+      feedback.textContent = `Hint: ${sentences[currentIndex].hint}`;
+    }
+
+    function nextSentence() {
+      if (currentIndex === sentences.length - 1) {
+        winModal.style.display = "flex";
+        return;
+      }
+      currentIndex++;
+      renderSentence();
+    }
+
+    function restartGame() {
+      currentIndex = 0;
+      score = 0;
+      tries = 0;
+      scoreEl.textContent = "0";
+      triesEl.textContent = "0";
+      winModal.style.display = "none";
+      renderSentence();
+    }
+
+    function runDeveloperTests() {
+      console.assert(Array.isArray(sentences), "Test 1 failed: sentences must be an array.");
+      console.assert(sentences.length === 8, "Test 2 failed: there must be 8 sentences.");
+      sentences.forEach((sentence, index) => {
+        console.assert(typeof sentence.hint === "string" && sentence.hint.length > 0, `Test 3 failed: sentence ${index + 1} needs a hint.`);
+        console.assert(sentence.words.join(" ") === sentence.answer, `Test 4 failed: words must match answer in sentence ${index + 1}.`);
+      });
+      console.assert(sentences[2].hint === "The subject pronoun \"we\" goes with \"are\".", "Test 5 failed: third hint is incorrect.");
+      console.assert(sentences[7].hint === "The subject pronoun \"we\" goes with \"are\" + not to form a negative sentence.", "Test 6 failed: final negative hint is incorrect.");
+    }
+
+    checkBtn.addEventListener("click", checkAnswer);
+    clearBtn.addEventListener("click", clearAnswer);
+    hintBtn.addEventListener("click", showHint);
+    nextBtn.addEventListener("click", nextSentence);
+    restartBtn.addEventListener("click", restartGame);
+    playAgainBtn.addEventListener("click", restartGame);
+
+    runDeveloperTests();
+    renderSentence();
+  </script>
+</body>
+</html>
