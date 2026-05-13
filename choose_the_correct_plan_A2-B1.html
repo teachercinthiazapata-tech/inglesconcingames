@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Choose the Correct Plan</title>
+  <style>
+    :root {
+      --coral: #f48d70;
+      --yellow: #f5c46a;
+      --blue: #7293a0;
+      --mint: #beffc7;
+      --pink: #e08d8d;
+      --white: #ffffff;
+      --ink: #2f3a3d;
+      --soft: #fff7f3;
+      --shadow: rgba(47, 58, 61, 0.14);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #fff8f4 0%, #eef8fb 55%, #f4fff5 100%);
+      min-height: 100vh;
+      padding: 22px;
+      color: var(--ink);
+    }
+
+    .app {
+      width: min(980px, 100%);
+      margin: 0 auto;
+      background: rgba(255,255,255,0.92);
+      border-radius: 28px;
+      padding: 30px;
+      box-shadow: 0 20px 55px var(--shadow);
+      border: 3px solid rgba(244,141,112,0.18);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--yellow);
+      color: var(--ink);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-weight: 900;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: clamp(2.3rem, 5vw, 4rem);
+      color: var(--coral);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      max-width: 720px;
+      margin: 0 auto;
+      line-height: 1.5;
+      font-size: 1.1rem;
+      color: #536469;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stat,
+    .restart-btn {
+      min-height: 72px;
+      border-radius: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(47,58,61,0.08);
+    }
+
+    .stat {
+      background: var(--soft);
+      border: 2px solid rgba(114,147,160,0.18);
+      flex-direction: column;
+      gap: 4px;
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    .stat span:last-child {
+      font-size: 1.45rem;
+      color: var(--ink);
+    }
+
+    .restart-btn {
+      border: 0;
+      background: var(--blue);
+      color: white;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.18s ease;
+    }
+
+    .restart-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .quiz-card {
+      background: white;
+      border-radius: 24px;
+      padding: 28px;
+      border: 2px solid rgba(114,147,160,0.18);
+      box-shadow: 0 12px 28px rgba(47,58,61,0.08);
+    }
+
+    .question-tag {
+      display: inline-block;
+      background: var(--mint);
+      color: #305545;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      margin-bottom: 18px;
+    }
+
+    .question {
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      line-height: 1.4;
+      margin-bottom: 24px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .answers {
+      display: grid;
+      gap: 14px;
+    }
+
+    .answer-btn {
+      border: 2px solid rgba(114,147,160,0.18);
+      border-radius: 18px;
+      background: linear-gradient(135deg, #ffffff, #f7fbfd);
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 1.05rem;
+      font-weight: 800;
+      transition: all 0.18s ease;
+      color: var(--ink);
+    }
+
+    .answer-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(244,141,112,0.5);
+    }
+
+    .answer-btn.correct {
+      background: linear-gradient(135deg, #effff3, #dcffe6);
+      border-color: #7cd79b;
+      color: #1d6f3d;
+    }
+
+    .answer-btn.wrong {
+      background: linear-gradient(135deg, #fff1ec, #ffe1d6);
+      border-color: #f0a08a;
+      color: #a54d3a;
+    }
+
+    .feedback {
+      min-height: 78px;
+      margin-top: 22px;
+      border-radius: 18px;
+      background: var(--soft);
+      padding: 18px;
+      text-align: center;
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    .feedback.good {
+      background: #eaffef;
+      border: 2px solid #98dfb1;
+      color: #247546;
+    }
+
+    .feedback.try {
+      background: #fff2ec;
+      border: 2px solid #f3b39e;
+      color: #aa553f;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+
+    .next-btn,
+    .hint-btn {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 22px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(47,58,61,0.12);
+    }
+
+    .next-btn {
+      background: var(--coral);
+    }
+
+    .hint-btn {
+      background: #6db38b;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(47,58,61,0.58);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      z-index: 10;
+    }
+
+    .modal-box {
+      width: min(520px, 100%);
+      background: white;
+      border-radius: 28px;
+      padding: 34px;
+      text-align: center;
+      border: 4px solid var(--yellow);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.22);
+    }
+
+    .modal-box h2 {
+      color: var(--coral);
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .modal-box p {
+      line-height: 1.5;
+      margin-bottom: 22px;
+      font-weight: 700;
+    }
+
+    .play-again {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 22px;
+      background: var(--blue);
+      color: white;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: right;
+      margin-top: 18px;
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 12px;
+      }
+
+      .app {
+        padding: 18px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      footer {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="badge">A2 - B1 Quiz Game</div>
+      <h1>Choose the Correct Plan ✨</h1>
+      <p class="subtitle">
+        Choose the correct option to practise <strong>be going to</strong>, future plans and social expressions.
+      </p>
+    </header>
+
+    <section class="topbar">
+      <div class="stat">
+        <span>Question</span>
+        <span><span id="currentQuestion">1</span>/8</span>
+      </div>
+
+      <div class="stat">
+        <span>Score</span>
+        <span id="score">0</span>
+      </div>
+
+      <div class="stat">
+        <span>Correct</span>
+        <span id="correctAnswers">0</span>
+      </div>
+
+      <button class="restart-btn" id="restartBtn" type="button">↻ Restart</button>
+    </section>
+
+    <section class="quiz-card">
+      <div class="question-tag" id="questionType">Grammar</div>
+      <div class="question" id="questionText"></div>
+
+      <div class="answers" id="answersContainer"></div>
+
+      <div class="feedback" id="feedback">
+        Read the question carefully and choose the best answer 💜
+      </div>
+
+      <div class="controls">
+        <button class="hint-btn" id="hintBtn" type="button">Hint</button>
+        <button class="next-btn" id="nextBtn" type="button">Next question</button>
+      </div>
+    </section>
+
+    <footer>by @inglesconcin.ok</footer>
+  </main>
+
+  <div class="modal" id="winModal">
+    <div class="modal-box">
+      <h2>Beautiful work! 🌟</h2>
+      <p>
+        You finished the quiz. Now say 3 future plans using <strong>be going to</strong>.
+      </p>
+      <button class="play-again" id="playAgainBtn" type="button">Play again</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        type: 'Affirmative',
+        question: 'My uncle ___ going to ___ dinner downtown.',
+        answers: ['are / having', 'is / have', 'is / has'],
+        correct: 'is / have',
+        hint: 'My uncle = he, so you should use "is". After "going to", you should use the verb in the infinitive form: have.'
+      },
+      {
+        type: 'Negative',
+        question: 'My friends ___ going to ___ in tonight.',
+        answers: ['don’t / stay', 'isn’t / staying', 'aren’t / stay'],
+        correct: 'aren’t / stay',
+        hint: 'My friends = they, so you should use "are not" / "aren’t". After "going to", you should use the verb in the infinitive form: stay.'
+      },
+      {
+        type: 'Question',
+        question: '___ your sister going to ___ a friend after work?',
+        answers: ['Does / meeting', 'Are / meet', 'Is / meet'],
+        correct: 'Is / meet',
+        hint: 'Your sister = she, so the question starts with "Is". After going to, you should use the verb in the infinitive form: meet.'
+      },
+      {
+        type: 'Affirmative',
+        question: 'My parents ___ going to ___ coffee with friends.',
+        answers: ['is / have', 'are / having', 'are / have'],
+        correct: 'are / have',
+        hint: 'My parents = they, so you should use "are". After going to, use "have".'
+      },
+      {
+        type: 'Negative',
+        question: 'My cousin ___ going to ___ out this weekend.',
+        answers: ['aren’t / go', 'isn’t / going', 'isn’t / go'],
+        correct: 'isn’t / go',
+        hint: 'My cousin = he or she, so you should use "is not" / "isn’t". After going to, you should use the verb in the infinitive form: go.'
+      },
+      {
+        type: 'Question',
+        question: '___ your classmates going to ___ you downtown?',
+        answers: ['Are / meeting', 'Is / meet', 'Are / meet'],
+        correct: 'Are / meet',
+        hint: 'Your classmates = they, so the question starts with "Are". After going to,  you should use the verb in the infinitive form: meet.'
+      },
+      {
+        type: 'Short answer',
+        question: 'Are your friends going to join us tonight?',
+        answers: ['Yes, they do.', 'Yes, they going.', 'Yes, they are.'],
+        correct: 'Yes, they are.',
+        hint: 'For short answers with "be going to", repeat the verb to be: are.'
+      },
+      {
+        type: 'Social English',
+        question: 'Would you like to go out on Saturday?',
+        answers: ['I’d love, but I going stay in.', 'I love, but I stay in.', 'I’d love to, but I’m going to stay in.'],
+        correct: 'I’d love to, but I’m going to stay in.',
+        hint: 'For a polite answer, use I’d love to, but... Then use I’m going to + verb in the infinitive form.'
+      },
+      {
+        type: 'Negative',
+        question: 'My brother and I ___ going to ___ lunch at home tomorrow.',
+        answers: ['aren’t / having', 'isn’t / have', 'aren’t / have'],
+        correct: 'aren’t / have',
+        hint: 'My brother and I = we, so you should use "are not" / "aren’t". After going to, you should use the verb in the infinitive form: have.'
+      },
+      {
+        type: 'Question',
+        question: '___ your aunt going to ___ us for dinner?',
+        answers: ['Does / joins', 'Are / join', 'Is / join'],
+        correct: 'Is / join',
+        hint: 'Your aunt = she, so the question starts with "Is". After "going to", ou should use the verb in the infinitive form: join.'
+      }
+    ];
+
+    const questionText = document.getElementById('questionText');
+    const answersContainer = document.getElementById('answersContainer');
+    const feedback = document.getElementById('feedback');
+    const scoreEl = document.getElementById('score');
+    const currentQuestionEl = document.getElementById('currentQuestion');
+    const correctAnswersEl = document.getElementById('correctAnswers');
+    const questionTypeEl = document.getElementById('questionType');
+    const nextBtn = document.getElementById('nextBtn');
+    const hintBtn = document.getElementById('hintBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const winModal = document.getElementById('winModal');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+
+    let currentIndex = 0;
+    let score = 0;
+    let correctAnswers = 0;
+    let answered = false;
+
+    function renderQuestion() {
+      answered = false;
+      const current = questions[currentIndex];
+
+      questionText.textContent = current.question;
+      currentQuestionEl.textContent = currentIndex + 1;
+      questionTypeEl.textContent = current.type;
+      answersContainer.innerHTML = '';
+
+      feedback.className = 'feedback';
+      feedback.textContent = 'Read the question carefully and choose the best answer 💜';
+
+      current.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.className = 'answer-btn';
+        button.type = 'button';
+        button.textContent = answer;
+        button.addEventListener('click', () => checkAnswer(button, answer));
+        answersContainer.appendChild(button);
+      });
+    }
+
+    function checkAnswer(button, answer) {
+      if (answered) return;
+      answered = true;
+
+      const current = questions[currentIndex];
+      score++;
+      scoreEl.textContent = score;
+
+      const allButtons = document.querySelectorAll('.answer-btn');
+
+      allButtons.forEach(btn => {
+        if (btn.textContent === current.correct) {
+          btn.classList.add('correct');
+        }
+
+        if (btn === button && answer !== current.correct) {
+          btn.classList.add('wrong');
+        }
+
+        btn.disabled = true;
+      });
+
+      if (answer === current.correct) {
+        correctAnswers++;
+        correctAnswersEl.textContent = correctAnswers;
+
+        feedback.className = 'feedback good';
+        feedback.innerHTML = `Excellent! ✅<br><strong>${current.correct}</strong> is correct.`;
+      } else {
+        feedback.className = 'feedback try';
+        feedback.innerHTML = `Almost! 🌱<br>The correct answer is: <strong>${current.correct}</strong>`;
+      }
+    }
+
+    function showHint() {
+      feedback.className = 'feedback';
+      feedback.textContent = `Hint: ${questions[currentIndex].hint}`;
+    }
+
+    function nextQuestion() {
+      if (currentIndex === questions.length - 1) {
+        winModal.style.display = 'flex';
+        return;
+      }
+
+      currentIndex++;
+      renderQuestion();
+    }
+
+    function restartGame() {
+      currentIndex = 0;
+      score = 0;
+      correctAnswers = 0;
+
+      scoreEl.textContent = '0';
+      correctAnswersEl.textContent = '0';
+      winModal.style.display = 'none';
+
+      renderQuestion();
+    }
+
+    function runDeveloperTests() {
+      console.assert(Array.isArray(questions), 'Questions must be an array.');
+      console.assert(questions.length === 8, 'There must be 8 questions.');
+
+      questions.forEach((question, index) => {
+        console.assert(question.answers.includes(question.correct), `Question ${index + 1}: correct answer missing.`);
+        console.assert(typeof question.hint === 'string' && question.hint.length > 0, `Question ${index + 1}: hint missing.`);
+      });
+    }
+
+    nextBtn.addEventListener('click', nextQuestion);
+    hintBtn.addEventListener('click', showHint);
+    restartBtn.addEventListener('click', restartGame);
+    playAgainBtn.addEventListener('click', restartGame);
+
+    runDeveloperTests();
+    renderQuestion();
+  </script>
+</body>
+</html>
