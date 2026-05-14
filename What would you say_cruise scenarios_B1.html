@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>What Would You Say? – Inglés con Cin</title>
+
+  <style>
+
+    body{
+      font-family:'Poppins', sans-serif;
+      background:linear-gradient(to bottom right, #fff7f2, #ffffff);
+      margin:0;
+      padding:30px;
+      display:flex;
+      justify-content:center;
+      color:#333;
+    }
+
+    .container{
+      width:100%;
+      max-width:900px;
+    }
+
+    h1{
+      text-align:center;
+      color:#7293a0;
+      margin-bottom:10px;
+    }
+
+    .subtitle{
+      text-align:center;
+      margin-bottom:35px;
+      font-size:18px;
+    }
+
+    .card{
+      background:white;
+      border-radius:24px;
+      padding:35px;
+      box-shadow:0 8px 22px rgba(0,0,0,0.08);
+      border:3px solid #f5c46a;
+      display:none;
+    }
+
+    .card.active{
+      display:block;
+    }
+
+    .label{
+      font-weight:bold;
+      color:#e08d8d;
+      margin-top:18px;
+      margin-bottom:5px;
+    }
+
+    .content{
+      font-size:18px;
+      line-height:1.7;
+    }
+
+    button{
+      background:#7293a0;
+      color:white;
+      border:none;
+      padding:12px 20px;
+      border-radius:14px;
+      font-size:16px;
+      cursor:pointer;
+      transition:0.3s;
+      margin-top:20px;
+      margin-right:10px;
+    }
+
+    button:hover{
+      background:#5f7c87;
+      transform:scale(1.03);
+    }
+
+    .example-box{
+      display:none;
+      margin-top:20px;
+      background:#f7f7f7;
+      border-left:5px solid #beffc7;
+      padding:18px;
+      border-radius:14px;
+    }
+
+    .level{
+      font-weight:bold;
+      color:#7293a0;
+      margin-top:10px;
+    }
+
+    .navigation{
+      margin-top:30px;
+      text-align:center;
+    }
+
+    .footer{
+      text-align:right;
+      margin-top:25px;
+      color:#888;
+      font-size:14px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🎭 What Would You Say?</h1>
+
+  <div class="subtitle">
+    React naturally to real cruise ship situations 🚢✨
+  </div>
+
+  <!-- SCENARIO 1 -->
+
+  <div class="card active" id="scenario1">
+
+    <h2>Scenario 1 – Overbooked yoga class</h2>
+
+    <div class="label">Context</div>
+
+    <div class="content">
+      A guest wants to join the yoga class,
+      but the class is fully booked.
+    </div>
+
+    <div class="label">You should use</div>
+
+    <div class="content">
+      • waiting list<br>
+      • available spot<br>
+      • unfortunately
+    </div>
+
+    <button onclick="toggleExample('example1')">
+      Example answer
+    </button>
+
+    <div class="example-box" id="example1">
+
+      <div class="level">🟣 A2+ Example</div>
+
+      <p>
+        Unfortunately, the yoga class is fully booked,
+        but I can add you to the waiting list.
+      </p>
+
+      <div class="level">🔵 B1 Example</div>
+
+      <p>
+        Unfortunately, the yoga class is fully booked
+        at the moment, but I can add you to the waiting list
+        and check if there’s an available spot later.
+      </p>
+
+    </div>
+
+    <div class="navigation">
+      <button onclick="nextScenario(1)">
+        Next scenario ➜
+      </button>
+    </div>
+
+  </div>
+
+  <!-- SCENARIO 2 -->
+
+  <div class="card" id="scenario2">
+
+    <h2>Scenario 2 – Lost guest</h2>
+
+    <div class="label">Context</div>
+
+    <div class="content">
+      A guest can’t find Deck 5 and looks confused.
+    </div>
+
+    <div class="label">You should use</div>
+
+    <div class="content">
+      • main deck<br>
+      • go with
+    </div>
+
+    <button onclick="toggleExample('example2')">
+      Example answer
+    </button>
+
+    <div class="example-box" id="example2">
+
+      <div class="level">🟣 A2+ Example</div>
+
+      <p>
+        Deck 5 is near the main deck.
+        I can go with you.
+      </p>
+
+      <div class="level">🔵 B1 Example</div>
+
+      <p>
+        Deck 5 is close to the main deck area.
+        I can go with you and show you the way.
+      </p>
+
+    </div>
+
+    <div class="navigation">
+
+      <button onclick="previousScenario(2)">
+        ⬅ Previous
+      </button>
+
+      <button onclick="nextScenario(2)">
+        Next scenario ➜
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- SCENARIO 3 -->
+
+  <div class="card" id="scenario3">
+
+    <h2>Scenario 3 – Difficult guest</h2>
+
+    <div class="label">Context</div>
+
+    <div class="content">
+      A guest says:
+      “This service is terrible.”
+    </div>
+
+    <div class="label">You should use</div>
+
+    <div class="content">
+      • sorry<br>
+      • experience<br>
+      • solve
+    </div>
+
+    <button onclick="toggleExample('example3')">
+      Example answer
+    </button>
+
+    <div class="example-box" id="example3">
+
+      <div class="level">🟣 A2+ Example</div>
+
+      <p>
+        I’m sorry about your experience.
+        Let me help you.
+      </p>
+
+      <div class="level">🔵 B1 Example</div>
+
+      <p>
+        I’m really sorry about your experience.
+        Let me see what I can do
+        to help solve the situation.
+      </p>
+
+    </div>
+
+    <div class="navigation">
+
+      <button onclick="previousScenario(3)">
+        ⬅ Previous
+      </button>
+
+      <button onclick="nextScenario(3)">
+        Next scenario ➜
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- SCENARIO 4 -->
+
+  <div class="card" id="scenario4">
+
+    <h2>Scenario 4 – Stressed coworker</h2>
+
+    <div class="label">Context</div>
+
+    <div class="content">
+      A coworker feels stressed and overwhelmed
+      because many guests need help at the same time.
+    </div>
+
+    <div class="label">You should use</div>
+
+    <div class="content">
+      • deep breath<br>
+      • handle<br>
+      • one step at a time
+    </div>
+
+    <button onclick="toggleExample('example4')">
+      Example answer
+    </button>
+
+    <div class="example-box" id="example4">
+
+      <div class="level">🟣 A2+ Example</div>
+
+      <p>
+        Take a deep breath.
+        We can handle this one step at a time.
+      </p>
+
+      <div class="level">🔵 B1 Example</div>
+
+      <p>
+        Let’s take a deep breath and handle everything
+        one step at a time.
+        We can do this calmly.
+      </p>
+
+    </div>
+
+    <div class="navigation">
+
+      <button onclick="previousScenario(4)">
+        ⬅ Previous
+      </button>
+
+      <button onclick="nextScenario(4)">
+        Next scenario ➜
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- SCENARIO 5 -->
+
+  <div class="card" id="scenario5">
+
+    <h2>Scenario 5 – Guest complaint about noise</h2>
+
+    <div class="label">Context</div>
+
+    <div class="content">
+      A guest says they couldn’t sleep
+      because there was too much noise near their cabin.
+    </div>
+
+    <div class="label">You should use</div>
+
+    <div class="content">
+      • I understand<br>
+      • check the situation<br>
+      • as soon as possible
+    </div>
+
+    <button onclick="toggleExample('example5')">
+      Example answer
+    </button>
+
+    <div class="example-box" id="example5">
+
+      <div class="level">🟣 A2+ Example</div>
+
+      <p>
+        I understand.
+        I’ll check the situation
+        as soon as possible.
+      </p>
+
+      <div class="level">🔵 B1 Example</div>
+
+      <p>
+        I understand how uncomfortable that must be.
+        I’ll check the situation and report it
+        as soon as possible.
+      </p>
+
+    </div>
+
+    <div class="navigation">
+
+      <button onclick="previousScenario(5)">
+        ⬅ Previous
+      </button>
+
+      <button onclick="nextScenario(5)">
+        Next scenario ➜
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- SCENARIO 6 -->
+
+  <div class="card" id="scenario6">
+
+    <h2>Scenario 6 – Guest wants immediate attention</h2>
+
+    <div class="label">Context</div>
+
+    <div class="content">
+      You are helping one guest,
+      and another guest interrupts
+      because they want help immediately.
+    </div>
+
+    <div class="label">You should use</div>
+
+    <div class="content">
+      • assisting another guest<br>
+      • in order<br>
+      • as soon as I can
+    </div>
+
+    <button onclick="toggleExample('example6')">
+      Example answer
+    </button>
+
+    <div class="example-box" id="example6">
+
+      <div class="level">🟣 A2+ Example</div>
+
+      <p>
+        I’m assisting another guest now.
+        I’ll help you as soon as I can.
+      </p>
+
+      <div class="level">🔵 B1 Example</div>
+
+      <p>
+        I’m currently assisting another guest,
+        and we need to handle requests in order.
+        I’ll assist you as soon as I can.
+      </p>
+
+    </div>
+
+    <div class="navigation">
+
+      <button onclick="previousScenario(6)">
+        ⬅ Previous
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="footer">
+    by @inglesconcin.ok 💜
+  </div>
+
+</div>
+
+<script>
+
+function toggleExample(id){
+
+  const box = document.getElementById(id);
+
+  if(box.style.display === "block"){
+    box.style.display = "none";
+  } else {
+    box.style.display = "block";
+  }
+}
+
+function nextScenario(current){
+
+  document.getElementById("scenario" + current).classList.remove("active");
+
+  document.getElementById("scenario" + (current + 1)).classList.add("active");
+}
+
+function previousScenario(current){
+
+  document.getElementById("scenario" + current).classList.remove("active");
+
+  document.getElementById("scenario" + (current - 1)).classList.add("active");
+}
+
+</script>
+
+</body>
+</html>
