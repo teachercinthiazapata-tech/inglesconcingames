@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cruise crew wheel – Inglés con Cin</title>
+
+  <style>
+    body{
+      font-family:'Poppins', sans-serif;
+      background:linear-gradient(to bottom right, #fdf6f0, #ffffff);
+      margin:0;
+      padding:30px;
+      display:flex;
+      justify-content:center;
+      color:#333;
+    }
+
+    .container{
+      width:100%;
+      max-width:900px;
+    }
+
+    h1{
+      text-align:center;
+      color:#7293a0;
+      margin-bottom:10px;
+    }
+
+    .subtitle{
+      text-align:center;
+      margin-bottom:35px;
+      font-size:18px;
+    }
+
+    .card{
+      background:white;
+      border-radius:24px;
+      padding:35px;
+      box-shadow:0 8px 22px rgba(0,0,0,0.08);
+      border:3px solid #f5c46a;
+      display:none;
+    }
+
+    .card.active{
+      display:block;
+    }
+
+    .label{
+      font-weight:bold;
+      color:#e08d8d;
+      margin-top:18px;
+      margin-bottom:5px;
+    }
+
+    .content{
+      font-size:18px;
+      line-height:1.7;
+    }
+
+    button{
+      background:#7293a0;
+      color:white;
+      border:none;
+      padding:12px 20px;
+      border-radius:14px;
+      font-size:16px;
+      cursor:pointer;
+      transition:0.3s;
+      margin-top:20px;
+      margin-right:10px;
+    }
+
+    button:hover{
+      background:#5f7c87;
+      transform:scale(1.03);
+    }
+
+    .example-box{
+      display:none;
+      margin-top:20px;
+      background:#f7f7f7;
+      border-left:5px solid #beffc7;
+      padding:18px;
+      border-radius:14px;
+    }
+
+    .level{
+      font-weight:bold;
+      color:#7293a0;
+      margin-top:10px;
+    }
+
+    .navigation{
+      margin-top:30px;
+      text-align:center;
+    }
+
+    .footer{
+      text-align:right;
+      margin-top:25px;
+      color:#888;
+      font-size:14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🚢 Cruise crew wheel</h1>
+
+  <div class="subtitle">
+    Practice real cruise ship situations with confidence ✨
+  </div>
+
+  <!-- ROUND 1 -->
+  <div class="card active" id="round1">
+
+    <h2>🎡 Round 1</h2>
+
+    <div class="label">Guest Type</div>
+    <div class="content">😤 Impatient guest</div>
+
+    <div class="label">Situation</div>
+    <div class="content">
+      Their room isn’t ready yet.
+    </div>
+
+    <div class="label">You MUST use</div>
+    <div class="content">
+      • as soon as possible<br>
+      • I understand your situation
+    </div>
+
+    <button onclick="toggleExample('example1')">
+      Example answer
+    </button>
+
+    <div class="example-box" id="example1">
+
+      <div class="level">🟣 A2+ Example</div>
+      <p>
+        I understand your situation.
+        Your room isn’t ready yet,
+        but we’ll prepare it as soon as possible.
+      </p>
+
+      <div class="level">🔵 B1 Example</div>
+      <p>
+        I completely understand your situation.
+        Housekeeping is still preparing the room,
+        but we’ll do our best to have everything ready
+        as soon as possible.
+      </p>
+
+    </div>
+
+    <div class="navigation">
+      <button onclick="nextRound(1)">
+        Next round ➜
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ROUND 2 -->
+  <div class="card" id="round2">
+
+    <h2>🎡 Round 2</h2>
+
+    <div class="label">Guest Type</div>
+    <div class="content">🤔 Confused guest</div>
+
+    <div class="label">Situation</div>
+    <div class="content">
+      They don’t know where the yoga class is.
+    </div>
+
+    <div class="label">You MUST use</div>
+    <div class="content">
+      • main deck<br>
+      • I can show you
+    </div>
+
+    <button onclick="toggleExample('example2')">
+      Example answer
+    </button>
+
+    <div class="example-box" id="example2">
+
+      <div class="level">🟣 A2+ Example</div>
+      <p>
+        The yoga class is on the main deck.
+        I can show you.
+      </p>
+
+      <div class="level">🔵 B1 Example</div>
+      <p>
+        The yoga class is located on the main deck.
+        If you’d like,
+        I can show you where it is.
+      </p>
+
+    </div>
+
+    <div class="navigation">
+      <button onclick="previousRound(2)">
+        ⬅ Previous
+      </button>
+
+      <button onclick="nextRound(2)">
+        Next round ➜
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ROUND 3 -->
+  <div class="card" id="round3">
+
+    <h2>🎡 Round 3</h2>
+
+    <div class="label">Guest Type</div>
+    <div class="content">😠 Angry guest</div>
+
+    <div class="label">Situation</div>
+    <div class="content">
+      You are currently helping another guest at the reception desk.
+      Suddenly, a different guest walks over and starts complaining
+      because they’ve been waiting for a long time and want immediate attention.
+    </div>
+
+    <div class="label">You MUST use</div>
+    <div class="content">
+      • handle requests<br>
+      • in order
+    </div>
+
+    <button onclick="toggleExample('example3')">
+      Example answer
+    </button>
+
+    <div class="example-box" id="example3">
+
+      <div class="level">🟣 A2+ Example</div>
+      <p>
+        I’m sorry.
+        We have to handle requests in order.
+        I’ll help you soon.
+      </p>
+
+      <div class="level">🔵 B1 Example</div>
+      <p>
+        I’m really sorry for the delay.
+        I’m currently assisting another guest,
+        and we have to handle guest requests in order.
+        I’ll assist you as soon as I can.
+      </p>
+
+    </div>
+
+    <div class="navigation">
+      <button onclick="previousRound(3)">
+        ⬅ Previous
+      </button>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    by @inglesconcin.ok 💜
+  </div>
+
+</div>
+
+<script>
+function toggleExample(id){
+  const box = document.getElementById(id);
+
+  if(box.style.display === "block"){
+    box.style.display = "none";
+  } else {
+    box.style.display = "block";
+  }
+}
+
+function nextRound(current){
+  document.getElementById("round" + current).classList.remove("active");
+  document.getElementById("round" + (current + 1)).classList.add("active");
+}
+
+function previousRound(current){
+  document.getElementById("round" + current).classList.remove("active");
+  document.getElementById("round" + (current - 1)).classList.add("active");
+}
+</script>
+
+</body>
+</html>
