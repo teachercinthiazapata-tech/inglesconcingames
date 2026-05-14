@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oh no... What should I do?</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #fff7f3;
+      color: #333;
+      text-align: center;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #f48d70;
+      font-size: 2.2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 25px;
+      max-width: 850px;
+      margin: 20px auto;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .instructions {
+      text-align: left;
+      line-height: 1.7;
+    }
+
+    .structure {
+      background: #beffc7;
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .wheel-container {
+      margin: 35px auto;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #f48d70 0deg 36deg,
+        #f5c46a 36deg 72deg,
+        #7293a0 72deg 108deg,
+        #beffc7 108deg 144deg,
+        #e08d8d 144deg 180deg,
+        #f48d70 180deg 216deg,
+        #f5c46a 216deg 252deg,
+        #7293a0 252deg 288deg,
+        #beffc7 288deg 324deg,
+        #e08d8d 324deg 360deg
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 3s ease-out;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    .wheel-center {
+      background: white;
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #f48d70;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    button {
+      background: #f48d70;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 999px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #e08d8d;
+    }
+
+    .result {
+      font-size: 1.35rem;
+      font-weight: bold;
+      margin-top: 25px;
+      background: #ffffff;
+      border: 3px solid #f5c46a;
+      border-radius: 22px;
+      padding: 25px;
+      max-width: 780px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 0.85rem;
+      color: #7293a0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎡 Oh no... What should I do?</h1>
+
+  <div class="card instructions">
+    <h2>Instructions</h2>
+    <p>Somebody tells you about a problem or awkward situation.</p>
+    <p>You should:</p>
+    <ol>
+      <li>React naturally.</li>
+      <li>Give advice using <strong>should / shouldn’t</strong>.</li>
+      <li>Make a personal connection if possible.</li>
+    </ol>
+
+    <div class="structure">
+      <h2>🗣️ Speaking Structure</h2>
+
+      <h3>1️⃣ Reaction</h3>
+      <p>Oh no! / That’s embarrassing! / That sounds stressful. / I’d panic. / That’s so awkward.</p>
+
+      <h3>2️⃣ Advice</h3>
+      <p>You should apologise. / You shouldn’t ignore it. / You should explain the situation. / You shouldn’t overthink it.</p>
+
+      <h3>3️⃣ Personal Connection</h3>
+      <p>Something similar happened to me once. / I think I would feel really nervous. / Honestly, I’d probably laugh. / I’ve never experienced that, but...</p>
+    </div>
+  </div>
+
+  <div class="wheel-container" id="wheel">
+    <div class="wheel-center">SPIN</div>
+  </div>
+
+  <button onclick="spinWheel()">Spin the wheel</button>
+
+  <div class="result" id="result">
+    Click the button to get a situation.
+  </div>
+
+  <div class="footer">
+    by @inglesconcin.ok 💜
+  </div>
+
+  <script>
+    const situations = [
+      "I sent a message criticising someone… and I accidentally sent it to THAT person.",
+      "I was in a rush this morning and I forgot my passport at home.",
+      "My friends started squabbling during dinner and everybody got uncomfortable.",
+      "Somebody started crying out of the blue during a work meeting.",
+      "I said something really embarrassing at a party yesterday.",
+      "Out of the blue, my ex texted me after three years.",
+      "I accidentally liked a photo from 2018 while stalking someone on Instagram.",
+      "I was so tired that I got completely knocked out and missed an important call.",
+      "All of a sudden, my boss asked me to give a presentation in English.",
+      "I tried to raise my friend’s spirits, but I made the situation worse."
+    ];
+
+    let rotation = 0;
+
+    function spinWheel() {
+      const wheel = document.getElementById("wheel");
+      const result = document.getElementById("result");
+
+      const randomIndex = Math.floor(Math.random() * situations.length);
+      const randomSpin = 1440 + Math.floor(Math.random() * 720);
+
+      rotation += randomSpin;
+      wheel.style.transform = `rotate(${rotation}deg)`;
+
+      result.innerHTML = "Spinning...";
+
+      setTimeout(() => {
+        result.innerHTML = `💬 ${situations[randomIndex]}`;
+      }, 3000);
+    }
+  </script>
+
+</body>
+</html>
