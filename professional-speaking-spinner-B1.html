@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Professional challenge spinner</title>
+
+  <style>
+
+    body {
+      font-family: "Poppins", Arial, sans-serif;
+      background: linear-gradient(135deg, #ffffff, #e8f3f6, #fde6df);
+      color: #2f405e;
+      text-align: center;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #5f7f8d;
+      font-size: 2.2rem;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #f48d70;
+      font-weight: bold;
+      margin-bottom: 25px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: auto;
+      background: rgba(255,255,255,0.88);
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    button {
+      background-color: #f48d70;
+      color: white;
+      border: none;
+      padding: 15px 28px;
+      border-radius: 30px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 12px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #e08d8d;
+      transform: scale(1.03);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 25px;
+    }
+
+    .card {
+      background: #fff7f3;
+      border: 3px solid #f5c46a;
+      border-radius: 20px;
+      padding: 20px;
+      min-height: 170px;
+    }
+
+    .card h2 {
+      color: #f48d70;
+      font-size: 1.15rem;
+      margin-bottom: 15px;
+    }
+
+    .card p {
+      font-size: 1.15rem;
+      font-weight: bold;
+      line-height: 1.5;
+    }
+
+    .structure {
+      margin-top: 30px;
+      background: #f4ecff;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: left;
+    }
+
+    .structure h2 {
+      color: #5f7f8d;
+      text-align: center;
+    }
+
+    .structure ul {
+      font-size: 1.1rem;
+      line-height: 1.9;
+    }
+
+    .example-box {
+      display: none;
+      margin-top: 20px;
+      background: #e8f8ec;
+      border-radius: 20px;
+      padding: 22px;
+      text-align: left;
+      line-height: 1.8;
+      font-size: 1.05rem;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      color: #5f7f8d;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>💼 Professional challenge spinner</h1>
+
+    <p class="subtitle">
+      Practise workplace English, professional vocabulary and interview-style speaking 💜
+    </p>
+
+    <button onclick="generateChallenge()">
+      Spin the challenge 🎡
+    </button>
+
+    <div class="cards">
+
+      <div class="card">
+        <h2>Situation</h2>
+        <p id="situation">Click the button!</p>
+      </div>
+
+      <div class="card">
+        <h2>Vocabulary to use</h2>
+        <p id="vocabulary">Click the button!</p>
+      </div>
+
+      <div class="card">
+        <h2>Speaking task</h2>
+        <p id="task">Click the button!</p>
+      </div>
+
+      <div class="card">
+        <h2>Useful structure</h2>
+        <p id="structureCard">Click the button!</p>
+      </div>
+
+    </div>
+
+    <div class="structure">
+
+      <h2>🗣️ Speaking structure</h2>
+
+      <ul>
+        <li><strong>Context:</strong> What was the situation?</li>
+
+        <li><strong>Action:</strong> What did you do?</li>
+
+        <li><strong>Challenge / Problem:</strong> Why was it difficult?</li>
+
+        <li><strong>Result:</strong> What happened?</li>
+
+        <li><strong>Opinion / Reflection:</strong> What did you learn?</li>
+      </ul>
+
+    </div>
+
+    <button onclick="toggleExample()">
+      Show / hide example answer
+    </button>
+
+    <div class="example-box" id="exampleBox">
+
+      <p id="exampleText">
+        Click “Spin the challenge” first!
+      </p>
+
+    </div>
+
+    <div class="footer">
+      by Inglés con Cin 💜
+    </div>
+
+  </div>
+
+  <script>
+
+    const situations = [
+
+      "A difficult legal case",
+
+      "A contract dispute",
+
+      "A client with unusual transactions",
+
+      "A stressful deadline",
+
+      "A compliance review",
+
+      "A teamwork problem",
+
+      "A communication problem at work",
+
+      "A legal risk in a company",
+
+      "A meeting with different departments",
+
+      "A case involving many details"
+
+    ];
+
+    const vocabulary = [
+
+      "professional experience",
+
+      "challenging",
+
+      "to analyse",
+
+      "legal risk",
+
+      "organised",
+
+      "detail-oriented",
+
+      "to explain clearly",
+
+      "challenging + legal risk",
+
+      "to analyse + organised",
+
+      "detail-oriented + professional experience"
+
+    ];
+
+    const tasks = [
+
+      "Describe the situation.",
+
+      "Explain what you did.",
+
+      "Say why it was challenging.",
+
+      "Describe the result.",
+
+      "Say what you learned.",
+
+      "Give a professional answer for a job interview.",
+
+      "Explain how your skills helped you.",
+
+      "Describe the problem and the solution.",
+
+      "Give advice to a colleague.",
+
+      "Connect this experience with your current job."
+
+    ];
+
+    const structures = [
+
+      "One challenging situation happened when...",
+
+      "In my professional experience, I have learned that...",
+
+      "I had to analyse the situation carefully because...",
+
+      "What helped me most was...",
+
+      "It was challenging because...",
+
+      "One important thing I learned was...",
+
+      "I explained the situation clearly to...",
+
+      "This experience helped me become more...",
+
+      "In the end, we were able to...",
+
+      "I think this experience improved my..."
+
+    ];
+
+    const examples = [
+
+      "I worked on a difficult legal case involving a contract issue. I had to analyse several documents carefully and explain the risks to my team. It was challenging because there were many details involved, but I learned how important organisation is.",
+
+      "One challenging situation happened when I worked on a contract dispute. I reviewed documents, communicated with different departments and helped explain the legal risks clearly.",
+
+      "I once reviewed a client with unusual transactions. I analysed the information carefully and requested additional documentation. This experience helped me become more detail-oriented.",
+
+      "I had to work under a stressful deadline during an important compliance task. I stayed organised and focused on solving problems calmly.",
+
+      "During a compliance review, I had to analyse legal documents and explain possible risks clearly. It helped me improve my communication skills.",
+
+      "I experienced a teamwork problem when different departments had communication issues. I tried to explain the situation clearly and help everyone stay organised.",
+
+      "One communication problem at work happened when different teams misunderstood legal information. I had to explain things clearly and professionally.",
+
+      "I worked on a case involving a possible legal risk for the company. I analysed the situation carefully and communicated with different areas.",
+
+      "I participated in a meeting with different departments to discuss legal matters. It was challenging because everyone had different perspectives.",
+
+      "I worked on a case involving many details and documents. I had to stay very organised and pay attention to small details."
+
+    ];
+
+    function generateChallenge() {
+
+      const randomIndex =
+        Math.floor(Math.random() * situations.length);
+
+      document.getElementById("situation").innerText =
+        situations[randomIndex];
+
+      document.getElementById("vocabulary").innerText =
+        vocabulary[Math.floor(Math.random() * vocabulary.length)];
+
+      document.getElementById("task").innerText =
+        tasks[Math.floor(Math.random() * tasks.length)];
+
+      document.getElementById("structureCard").innerText =
+        structures[Math.floor(Math.random() * structures.length)];
+
+      document.getElementById("exampleText").innerText =
+        examples[randomIndex];
+
+    }
+
+    function toggleExample() {
+
+      const box =
+        document.getElementById("exampleBox");
+
+      if (box.style.display === "block") {
+
+        box.style.display = "none";
+
+      } else {
+
+        box.style.display = "block";
+
+      }
+
+    }
+
+  </script>
+
+</body>
+</html>
