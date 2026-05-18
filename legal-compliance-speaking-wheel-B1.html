@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Professional warm-up wheel</title>
+
+  <style>
+    body {
+      font-family: "Poppins", Arial, sans-serif;
+      background: linear-gradient(135deg, #ffffff, #e8f3f6, #fde6df);
+      color: #2f405e;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255,255,255,0.9);
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    h1 {
+      color: #5f7f8d;
+      font-size: 2.2rem;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #f48d70;
+      font-weight: bold;
+      margin-bottom: 25px;
+    }
+
+    .wheel-wrapper {
+      position: relative;
+      width: 460px;
+      height: 460px;
+      margin: 30px auto;
+    }
+
+    .pointer {
+  position: absolute;
+  top: 50%;
+  right: -18px;
+  transform: translateY(-50%) rotate(-90deg);
+  width: 0;
+  height: 0;
+  border-left: 22px solid transparent;
+  border-right: 22px solid transparent;
+  border-top: 40px solid #f48d70;
+  z-index: 10;
+};
+    }
+
+    canvas {
+      border-radius: 50%;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+    }
+
+    button {
+      background-color: #f48d70;
+      color: white;
+      border: none;
+      padding: 15px 28px;
+      border-radius: 30px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #e08d8d;
+      transform: scale(1.03);
+    }
+
+    .secondary-button {
+      background-color: #7293a0;
+    }
+
+    .secondary-button:hover {
+      background-color: #5f7f8d;
+    }
+
+    .result-box {
+      margin-top: 25px;
+      background: #fff7f3;
+      border: 3px solid #f5c46a;
+      border-radius: 25px;
+      padding: 25px;
+      min-height: 100px;
+    }
+
+    #result {
+      font-size: 1.5rem;
+      font-weight: bold;
+      line-height: 1.5;
+      color: #2f405e;
+    }
+
+    .support-box {
+      margin-top: 25px;
+      background: #f4ecff;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: left;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    .support-box h2 {
+      text-align: center;
+      color: #5f7f8d;
+      margin-top: 0;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      color: #5f7f8d;
+      font-weight: bold;
+    }
+
+    @media (max-width: 560px) {
+      .wheel-wrapper {
+        width: 330px;
+        height: 330px;
+      }
+
+      canvas {
+        width: 330px;
+        height: 330px;
+      }
+
+      #result {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>💼 Professional warm-up wheel</h1>
+
+    <p class="subtitle">
+      Start the class with a short professional speaking challenge 💜
+    </p>
+
+    <div class="wheel-wrapper">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="460" height="460"></canvas>
+    </div>
+
+    <button onclick="spinWheel()">
+      Spin the wheel 🎡
+    </button>
+
+    <button class="secondary-button" onclick="removeCurrentQuestion()">
+      Remove this question
+    </button>
+
+    <button class="secondary-button" onclick="resetWheel()">
+      Reset wheel
+    </button>
+
+    <div class="result-box">
+      <p id="result">Click the button to start!</p>
+    </div>
+
+    <div class="support-box">
+      <h2>Useful language</h2>
+
+      <p><strong>To start:</strong> I think... / In my experience... / At work, I usually...</p>
+
+      <p><strong>To explain:</strong> because... / for example... / especially when...</p>
+
+      <p><strong>To reflect:</strong> I have learned that... / This helps me... / I feel more confident when...</p>
+    </div>
+
+    <div class="footer">
+      by Inglés con Cin 💜
+    </div>
+
+  </div>
+
+  <script>
+
+    const originalQuestions = [
+      "How was your work week?",
+      "What part of your job do you enjoy the most?",
+      "Have you ever worked under a stressful deadline?",
+      "What professional achievement are you proud of?",
+      "Do you think teamwork is always easy?",
+      "What is more difficult: analysing information or explaining it clearly?",
+      "What advice would you give to someone starting in legal/compliance work?",
+      "Work under pressure OR work with difficult clients?",
+      "Solve problems OR explain problems?",
+      "Email communication OR meetings?"
+    ];
+
+    let questions = [...originalQuestions];
+
+    const colors = [
+      "#f48d70",
+      "#f5c46a",
+      "#7293a0",
+      "#beffc7",
+      "#e08d8d",
+      "#f7d9c4",
+      "#d8f3dc",
+      "#cde7f0",
+      "#f4ecff",
+      "#ffe5ec"
+    ];
+
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+
+    const size = canvas.width;
+    const center = size / 2;
+    const radius = center - 12;
+
+    let currentRotation = 0;
+    let isSpinning = false;
+    let currentQuestion = null;
+
+    function drawWheel() {
+
+      ctx.clearRect(0, 0, size, size);
+
+      if (questions.length === 0) {
+
+        ctx.beginPath();
+        ctx.arc(center, center, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#f4ecff";
+        ctx.fill();
+
+        ctx.fillStyle = "#5f7f8d";
+        ctx.font = "bold 22px Poppins, Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText("All done!", center, center);
+
+        return;
+      }
+
+      const sliceAngle = (2 * Math.PI) / questions.length;
+
+      for (let i = 0; i < questions.length; i++) {
+
+        const startAngle = currentRotation + i * sliceAngle;
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.arc(center, center, radius, startAngle, endAngle);
+        ctx.closePath();
+
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+
+        ctx.save();
+
+        ctx.translate(center, center);
+        ctx.rotate(startAngle + sliceAngle / 2);
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#2f405e";
+        ctx.font = "bold 9.5px Poppins, Arial";
+
+        const wrapped = wrapText(questions[i], 18);
+
+        const textRadius = radius * 0.58;
+        const lineHeight = 11;
+
+        wrapped.forEach((line, index) => {
+
+          ctx.fillText(
+            line,
+            textRadius,
+            (index - (wrapped.length - 1) / 2) * lineHeight
+          );
+
+        });
+
+        ctx.restore();
+      }
+
+      ctx.beginPath();
+      ctx.arc(center, center, 52, 0, 2 * Math.PI);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#f48d70";
+      ctx.stroke();
+
+      ctx.fillStyle = "#f48d70";
+      ctx.font = "bold 17px Poppins, Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      ctx.fillText("SPIN", center, center + 2);
+    }
+
+    function wrapText(text, maxLength) {
+
+      const words = text.split(" ");
+      const lines = [];
+
+      let line = "";
+
+      words.forEach(word => {
+
+        const testLine = line + word + " ";
+
+        if (testLine.length > maxLength && line !== "") {
+
+          lines.push(line.trim());
+          line = word + " ";
+
+        } else {
+
+          line = testLine;
+
+        }
+
+      });
+
+      lines.push(line.trim());
+
+      return lines.slice(0, 5);
+    }
+
+    function spinWheel() {
+
+      if (isSpinning || questions.length === 0) return;
+
+      isSpinning = true;
+
+      const sliceAngle = (2 * Math.PI) / questions.length;
+
+      const randomIndex =
+        Math.floor(Math.random() * questions.length);
+
+      const pointerAngle = 0;
+
+      const selectedSliceCenter =
+        randomIndex * sliceAngle + sliceAngle / 2;
+
+      const finalRotation =
+        pointerAngle - selectedSliceCenter + (Math.PI * 2 * 6);
+
+      const startRotation = currentRotation;
+
+      const totalRotation =
+        finalRotation - (currentRotation % (Math.PI * 2));
+
+      const duration = 3500;
+
+      const startTime = performance.now();
+
+      function animate(time) {
+
+        const elapsed = time - startTime;
+
+        const progress =
+          Math.min(elapsed / duration, 1);
+
+        const easedProgress =
+          1 - Math.pow(1 - progress, 4);
+
+        currentRotation =
+          startRotation + totalRotation * easedProgress;
+
+        drawWheel();
+
+        if (progress < 1) {
+
+          requestAnimationFrame(animate);
+
+        } else {
+
+          currentRotation =
+            currentRotation % (Math.PI * 2);
+
+          currentQuestion = questions[randomIndex];
+
+          document.getElementById("result").innerText =
+            currentQuestion;
+
+          isSpinning = false;
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function removeCurrentQuestion() {
+
+      if (!currentQuestion) {
+
+        document.getElementById("result").innerText =
+          "Spin the wheel first, then remove the question.";
+
+        return;
+      }
+
+      questions =
+        questions.filter(question => question !== currentQuestion);
+
+      currentQuestion = null;
+
+      currentRotation = 0;
+
+      document.getElementById("result").innerText =
+        "Question removed. Spin again!";
+
+      drawWheel();
+    }
+
+    function resetWheel() {
+
+      questions = [...originalQuestions];
+
+      currentQuestion = null;
+
+      currentRotation = 0;
+
+      document.getElementById("result").innerText =
+        "Wheel reset. Click the button to start!";
+
+      drawWheel();
+    }
+
+    drawWheel();
+
+  </script>
+
+</body>
+</html>
