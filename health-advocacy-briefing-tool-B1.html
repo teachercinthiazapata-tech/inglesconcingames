@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Global Health Advocacy Briefing Tool</title>
+
+  <style>
+
+    body {
+      font-family: Poppins, Arial, sans-serif;
+      background: #fdf7f4;
+      color: #2b2b2b;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: auto;
+      background: white;
+      border-radius: 28px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      border: 4px solid #7293a0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #7293a0;
+      font-size: 2.4rem;
+      margin-bottom: 5px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #e08d8d;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-top: 0;
+      margin-bottom: 35px;
+    }
+
+    .section {
+      background: #ffffff;
+      border-left: 8px solid #beffc7;
+      padding: 22px;
+      border-radius: 18px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .label {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #7293a0;
+      margin-bottom: 10px;
+    }
+
+    .content {
+      font-size: 1.15rem;
+      line-height: 1.8;
+    }
+
+    ul {
+      margin-top: 10px;
+      padding-left: 22px;
+    }
+
+    li {
+      margin-bottom: 12px;
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    button {
+      display: block;
+      margin: 35px auto 15px;
+      background: #f48d70;
+      color: white;
+      border: none;
+      padding: 16px 34px;
+      font-size: 1rem;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #e08d8d;
+      transform: scale(1.03);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 25px;
+      color: #7293a0;
+      font-size: 0.9rem;
+    }
+
+    .highlight {
+      color: #f48d70;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Global Health Advocacy Briefing Tool 🩺</h1>
+  <h2>HIV, Public Health & Health Equity Discussions</h2>
+
+  <div class="section">
+    <div class="label">🎲 Random Topic</div>
+    <div class="content" id="topic">Click the button to generate a briefing card.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">🔑 Key Word + IPA</div>
+    <div class="content" id="word">---</div>
+  </div>
+
+  <div class="section">
+    <div class="label">📘 Specialised Definition</div>
+    <div class="content" id="definition">---</div>
+  </div>
+
+  <div class="section">
+    <div class="label">🧩 Example in Context</div>
+    <div class="content" id="example">---</div>
+  </div>
+
+  <div class="section">
+    <div class="label">💬 Let’s discuss this</div>
+    <div class="content" id="discussion">---</div>
+  </div>
+
+  <div class="section">
+    <div class="label">🗣️ Useful phrases / words to use</div>
+    <ul id="phrases"></ul>
+  </div>
+
+  <button onclick="generateCard()">Generate New Briefing Card</button>
+
+  <div class="footer">
+    by @inglesconcin.ok 💜
+  </div>
+
+</div>
+
+<script>
+
+const cards = [
+
+{
+  topic: "HIV prevention and public health",
+  word: "prevention /prɪˈven.ʃən/",
+  definition: "Prevention refers to strategies, policies and interventions designed to reduce the risk of disease transmission and protect public health.",
+  example: "Community-based prevention programmes can improve HIV awareness and reduce transmission rates.",
+  discussion: "Why is prevention considered one of the most effective public health strategies?",
+  phrases: [
+    "public health campaigns /ˌpʌb.lɪk ˈhelθ kæmˌpeɪnz/",
+    "HIV prevention /eɪtʃ aɪ viː prɪˈven.ʃən/",
+    "awareness programmes /əˈweə.nəs ˈprəʊ.ɡræmz/",
+    "early intervention /ˈɜː.li ˌɪn.təˈven.ʃən/",
+    "community outreach /kəˈmjuː.nə.ti ˈaʊt.riːtʃ/",
+    "healthcare access /ˈhelθ.keər ˈæk.ses/"
+  ]
+},
+
+{
+  topic: "Stigma and discrimination in healthcare",
+  word: "stigma /ˈstɪɡ.mə/",
+  definition: "Stigma refers to negative attitudes, beliefs or discrimination directed toward individuals or groups based on characteristics such as health conditions, identity or social status.",
+  example: "HIV-related stigma may discourage people from seeking testing or medical treatment.",
+  discussion: "How can stigma affect healthcare access and wellbeing?",
+  phrases: [
+    "discrimination /dɪˌskrɪm.ɪˈneɪ.ʃən/",
+    "social barriers /ˈsəʊ.ʃəl ˈbær.i.əz/",
+    "fear of judgement /fɪə.r əv ˈdʒʌdʒ.mənt/",
+    "mental wellbeing /ˈmen.təl ˌwelˈbiː.ɪŋ/",
+    "public awareness /ˌpʌb.lɪk əˈweə.nəs/",
+    "inclusive healthcare /ɪnˈkluː.sɪv ˈhelθ.keər/"
+  ]
+},
+
+{
+  topic: "Access to healthcare services",
+  word: "healthcare access /ˈhelθ.keər ˈæk.ses/",
+  definition: "Healthcare access refers to the ability of individuals and communities to obtain timely, affordable and appropriate medical services.",
+  example: "Economic inequality may limit healthcare access for vulnerable populations.",
+  discussion: "What factors can limit access to healthcare services?",
+  phrases: [
+    "affordable healthcare /əˈfɔː.də.bəl ˈhelθ.keər/",
+    "vulnerable populations /ˈvʌl.nər.ə.bəl ˌpɒp.jəˈleɪ.ʃənz/",
+    "medical services /ˈmed.ɪ.kəl ˈsɜː.vɪ.sɪz/",
+    "public health systems /ˌpʌb.lɪk ˈhelθ ˈsɪs.təmz/",
+    "equal access /ˈiː.kwəl ˈæk.ses/",
+    "rural communities /ˈrʊə.rəl kəˈmjuː.nə.tiz/"
+  ]
+},
+
+{
+  topic: "Mental health and chronic illness",
+  word: "mental health /ˈmen.təl helθ/",
+  definition: "Mental health refers to emotional, psychological and social wellbeing, influencing how individuals think, feel and interact with others.",
+  example: "Living with chronic illnesses may affect both physical and mental health outcomes.",
+  discussion: "Why should mental health be included in public health discussions?",
+  phrases: [
+    "emotional wellbeing /ɪˈməʊ.ʃən.əl ˌwelˈbiː.ɪŋ/",
+    "psychological support /ˌsaɪ.kəˈlɒdʒ.ɪ.kəl səˈpɔːt/",
+    "chronic conditions /ˈkrɒn.ɪk kənˈdɪʃ.ənz/",
+    "quality of life /ˈkwɒl.ə.ti əv laɪf/",
+    "social support /ˈsəʊ.ʃəl səˈpɔːt/",
+    "holistic care /həˈlɪs.tɪk keər/"
+  ]
+},
+
+{
+  topic: "Health equity and social justice",
+  word: "health equity /helθ ˈek.wə.ti/",
+  definition: "Health equity refers to the principle that everyone should have a fair and just opportunity to achieve their highest possible level of health.",
+  example: "Health equity initiatives aim to reduce disparities in healthcare access and treatment outcomes.",
+  discussion: "Why is health equity an important global issue?",
+  phrases: [
+    "healthcare disparities /ˈhelθ.keər dɪˈspær.ə.tiz/",
+    "equal opportunities /ˈiː.kwəl ˌɒp.əˈtʃuː.nə.tiz/",
+    "systemic barriers /ˌsɪsˈtem.ɪk ˈbær.i.əz/",
+    "social determinants of health /ˈsəʊ.ʃəl dɪˈtɜː.mɪ.nənts əv helθ/",
+    "public investment /ˌpʌb.lɪk ɪnˈvest.mənt/",
+    "inclusive policies /ɪnˈkluː.sɪv ˈpɒl.ə.siz/"
+  ]
+},
+
+{
+  topic: "Community-based healthcare",
+  word: "community outreach /kəˈmjuː.nə.ti ˈaʊt.riːtʃ/",
+  definition: "Community outreach refers to activities and programmes designed to engage and support communities through education, healthcare and social services.",
+  example: "Community outreach programmes can improve HIV testing rates and healthcare education.",
+  discussion: "Why is community outreach essential in public health work?",
+  phrases: [
+    "local communities /ˈləʊ.kəl kəˈmjuː.nə.tiz/",
+    "healthcare education /ˈhelθ.keər ˌed.jʊˈkeɪ.ʃən/",
+    "prevention strategies /prɪˈven.ʃən ˈstræt.ə.dʒiz/",
+    "trust-building /ˈtrʌst ˌbɪl.dɪŋ/",
+    "social engagement /ˈsəʊ.ʃəl ɪnˈɡeɪdʒ.mənt/",
+    "community leaders /kəˈmjuː.nə.ti ˈliː.dəz/"
+  ]
+}
+
+];
+
+function generateCard() {
+
+  const randomCard = cards[Math.floor(Math.random() * cards.length)];
+
+  document.getElementById("topic").innerHTML =
+    `<span class="highlight">${randomCard.topic}</span>`;
+
+  document.getElementById("word").textContent =
+    randomCard.word;
+
+  document.getElementById("definition").textContent =
+    randomCard.definition;
+
+  document.getElementById("example").textContent =
+    randomCard.example;
+
+  document.getElementById("discussion").textContent =
+    randomCard.discussion;
+
+  const phrasesList = document.getElementById("phrases");
+  phrasesList.innerHTML = "";
+
+  randomCard.phrases.forEach(phrase => {
+    const li = document.createElement("li");
+    li.textContent = phrase;
+    phrasesList.appendChild(li);
+  });
+
+}
+
+</script>
+
+</body>
+</html>
