@@ -1,0 +1,114 @@
+<div id="game">
+  <h2>Match the place with the activity</h2>
+
+  <div class="grid">
+    <div>
+      <h3>Places</h3>
+      <div class="card" data-place="café">café</div>
+      <div class="card" data-place="park">park</div>
+      <div class="card" data-place="bookshop">bookshop</div>
+      <div class="card" data-place="museum">museum</div>
+      <div class="card" data-place="market">market</div>
+      <div class="card" data-place="cinema">cinema</div>
+      <div class="card" data-place="concert hall">concert hall</div>
+      <div class="card" data-place="riverfront">riverfront</div>
+    </div>
+
+    <div>
+      <h3>Activities</h3>
+      <button onclick="check(this, 'market')">buy local food</button>
+      <button onclick="check(this, 'café')">have a coffee</button>
+      <button onclick="check(this, 'cinema')">watch a film</button>
+      <button onclick="check(this, 'riverfront')">enjoy the view</button>
+      <button onclick="check(this, 'bookshop')">browse books</button>
+      <button onclick="check(this, 'park')">go for a walk</button>
+      <button onclick="check(this, 'concert hall')">listen to live music</button>
+      <button onclick="check(this, 'museum')">look at exhibitions</button>
+    </div>
+  </div>
+
+  <p id="message">First, click a place. Then, choose the correct activity.</p>
+</div>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #eef8f1;
+  }
+
+  #game {
+    max-width: 750px;
+    margin: 30px auto;
+    padding: 25px;
+    background: #fff8dc;
+    border-radius: 20px;
+    text-align: center;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+  }
+
+  .card, button {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px solid #d8b46a;
+    background: #ffffff;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .card.selected {
+    background: #ffe5a8;
+  }
+
+  .correct {
+    background: #b7f7c3 !important;
+  }
+
+  .wrong {
+    background: #ffb3b3 !important;
+  }
+
+  #message {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+</style>
+
+<script>
+  let selectedPlace = null;
+
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedPlace = card.dataset.place;
+      document.getElementById('message').textContent = 
+        "Now choose the activity for: " + selectedPlace;
+    });
+  });
+
+  function check(button, correctPlace) {
+    if (!selectedPlace) {
+      document.getElementById('message').textContent = "Choose a place first!";
+      return;
+    }
+
+    if (selectedPlace === correctPlace) {
+      button.classList.add('correct');
+      document.querySelector(`[data-place="${selectedPlace}"]`).classList.add('correct');
+      document.getElementById('message').textContent = "Great! That's correct.";
+    } else {
+      button.classList.add('wrong');
+      document.getElementById('message').textContent = "Try again!";
+      setTimeout(() => button.classList.remove('wrong'), 700);
+    }
+  }
+</script>
