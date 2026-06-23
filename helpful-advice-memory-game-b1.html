@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helpful Advice Memory Game</title>
+
+<style>
+body{
+font-family: Arial, sans-serif;
+background: linear-gradient(135deg,#f7eef8,#e9f4f7);
+margin:0;
+padding:20px;
+text-align:center;
+color:#344955;
+}
+
+h1{
+color:#ff1f78;
+}
+
+.subtitle{
+margin-bottom:20px;
+}
+
+.score{
+font-size:20px;
+font-weight:bold;
+margin-bottom:20px;
+}
+
+.board{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+max-width:1000px;
+margin:auto;
+}
+
+.card{
+height:150px;
+cursor:pointer;
+perspective:1000px;
+}
+
+.card-inner{
+width:100%;
+height:100%;
+position:relative;
+transform-style:preserve-3d;
+transition:transform .5s;
+}
+
+.card.flipped .card-inner,
+.card.matched .card-inner{
+transform:rotateY(180deg);
+}
+
+.front,
+.back{
+position:absolute;
+width:100%;
+height:100%;
+backface-visibility:hidden;
+border-radius:15px;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:15px;
+box-sizing:border-box;
+box-shadow:0 4px 10px rgba(0,0,0,.2);
+}
+
+.front{
+background:#344955;
+color:white;
+font-size:40px;
+}
+
+.back{
+background:white;
+transform:rotateY(180deg);
+font-size:16px;
+line-height:1.4;
+}
+
+.expression .back{
+color:#ff1f78;
+font-weight:bold;
+font-size:20px;
+}
+
+.matched .back{
+border:4px solid #4CAF50;
+}
+
+#message{
+margin-top:20px;
+font-size:20px;
+font-weight:bold;
+}
+
+button{
+margin-top:20px;
+padding:10px 20px;
+font-size:16px;
+border:none;
+border-radius:10px;
+background:#ff1f78;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#d81463;
+}
+
+@media(max-width:768px){
+.board{
+grid-template-columns:repeat(2,1fr);
+}
+}
+</style>
+
+</head>
+<body>
+
+<h1>🧠 Helpful Advice Memory Game</h1>
+
+<p class="subtitle">
+Match each expression with its definition.
+</p>
+
+<div class="score">
+Matches: <span id="score">0</span>/6
+</div>
+
+<div id="board" class="board"></div>
+
+<div id="message">
+Choose two cards to start.
+</div>
+
+<button onclick="startGame()">Restart</button>
+
+<script>
+
+const cardsData = [
+
+{
+id:"deal",
+type:"expression",
+text:"deal with"
+},
+
+{
+id:"deal",
+type:"definition",
+text:"To take action to manage a difficult situation or problem."
+},
+
+{
+id:"figure",
+type:"expression",
+text:"figure out"
+},
+
+{
+id:"figure",
+type:"definition",
+text:"To solve a problem or understand something after thinking carefully about it."
+},
+
+{
+id:"probably",
+type:"expression",
+text:"I'd probably..."
+},
+
+{
+id:"probably",
+type:"definition",
+text:"A phrase used when something is likely, but you are not completely sure."
+},
+
+{
+id:"better",
+type:"expression",
+text:"It's better to..."
+},
+
+{
+id:"better",
+type:"definition",
+text:"A phrase used to give advice or make a recommendation."
+},
+
+{
+id:"help",
+type:"expression",
+text:"ask for help"
+},
+
+{
+id:"help",
+type:"definition",
+text:"To get support or assistance from another person."
+},
+
+{
+id:"calm",
+type:"expression",
+text:"stay calm"
+},
+
+{
+id:"calm",
+type:"definition",
+text:"To remain relaxed and not panic when something difficult happens."
+}
+
+];
+
+const board = document.getElementById("board");
+const scoreDisplay = document.getElementById("score");
+const message = document.getElementById("message");
+
+let firstCard = null;
+let secondCard = null;
+let lockBoard = false;
+let matches = 0;
+
+function shuffle(array){
+return array.sort(() => Math.random() - 0.5);
+}
+
+function startGame(){
+
+board.innerHTML="";
+matches=0;
+scoreDisplay.textContent=matches;
+message.textContent="Choose two cards to start.";
+
+firstCard=null;
+secondCard=null;
+lockBoard=false;
+
+const shuffled = shuffle([...cardsData]);
+
+shuffled.forEach(item=>{
+
+const card=document.createElement("div");
+card.classList.add("card",item.type);
+card.dataset.id=item.id;
+card.dataset.type=item.type;
+
+card.innerHTML=`
+<div class="card-inner">
+<div class="front">?</div>
+<div class="back">${item.text}</div>
+</div>
+`;
+
+card.addEventListener("click",()=>flipCard(card));
+
+board.appendChild(card);
+
+});
+
+}
+
+function flipCard(card){
+
+if(lockBoard) return;
+if(card===firstCard) return;
+if(card.classList.contains("matched")) return;
+
+card.classList.add("flipped");
+
+if(!firstCard){
+firstCard=card;
+return;
+}
+
+secondCard=card;
+checkMatch();
+
+}
+
+function checkMatch(){
+
+const sameId=
+firstCard.dataset.id===secondCard.dataset.id;
+
+const differentType=
+firstCard.dataset.type!==secondCard.dataset.type;
+
+if(sameId && differentType){
+
+firstCard.classList.add("matched");
+secondCard.classList.add("matched");
+
+matches++;
+scoreDisplay.textContent=matches;
+
+message.textContent="✅ Great! That's a match.";
+
+firstCard=null;
+secondCard=null;
+
+if(matches===6){
+
+message.innerHTML=
+"🎉 Excellent! You matched all the expressions!";
+
+}
+
+}else{
+
+lockBoard=true;
+
+setTimeout(()=>{
+
+firstCard.classList.remove("flipped");
+secondCard.classList.remove("flipped");
+
+firstCard=null;
+secondCard=null;
+lockBoard=false;
+
+},1000);
+
+}
+
+}
+
+startGame();
+
+</script>
+
+</body>
+</html>
