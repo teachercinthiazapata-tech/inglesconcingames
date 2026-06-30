@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Survival English Matching Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #fff7f0;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #d96c75;
+  }
+
+  .instructions {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .game-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .column {
+    width: 30%;
+    min-width: 250px;
+  }
+
+  .card {
+    background: white;
+    border: 2px solid #f3b6b6;
+    border-radius: 14px;
+    padding: 14px;
+    margin: 10px;
+    cursor: pointer;
+    font-size: 17px;
+    box-shadow: 2px 2px 6px #ddd;
+    transition: 0.2s;
+  }
+
+  .card:hover {
+    background: #ffe3e3;
+  }
+
+  .selected {
+    background: #ffe0a8;
+    border-color: #e59b24;
+  }
+
+  .matched {
+    background: #c9f7c5;
+    border-color: #43a047;
+    cursor: default;
+  }
+
+  .wrong {
+    background: #ffc9c9;
+    border-color: #e53935;
+  }
+
+  button {
+    margin-top: 25px;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 10px;
+    background: #d96c75;
+    color: white;
+    font-size: 17px;
+    cursor: pointer;
+  }
+
+  #feedback {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Survival English Matching Game</h1>
+
+<p class="instructions">
+Match the <strong>expression</strong> with its <strong>IPA</strong> and its <strong>meaning</strong>.
+</p>
+
+<div class="game-container">
+
+  <div class="column">
+    <h2>Expression</h2>
+    <div class="card" data-id="1" data-type="expression">Could you repeat that?</div>
+    <div class="card" data-id="2" data-type="expression">Could you speak a little more slowly?</div>
+    <div class="card" data-id="3" data-type="expression">I didn't catch that.</div>
+    <div class="card" data-id="4" data-type="expression">Give me a second.</div>
+    <div class="card" data-id="5" data-type="expression">Let me think.</div>
+    <div class="card" data-id="6" data-type="expression">What does ___ mean?</div>
+  </div>
+
+  <div class="column">
+    <h2>IPA</h2>
+    <div class="card" data-id="4" data-type="ipa">/ɡɪv mi ə ˈsekənd/</div>
+    <div class="card" data-id="1" data-type="ipa">/kəd juː rɪˈpiːt ðæt/</div>
+    <div class="card" data-id="6" data-type="ipa">/wɒt dʌz ___ miːn/</div>
+    <div class="card" data-id="3" data-type="ipa">/aɪ ˈdɪdnt kætʃ ðæt/</div>
+    <div class="card" data-id="2" data-type="ipa">/kəd juː spiːk ə ˈlɪtl mɔː ˈsləʊli/</div>
+    <div class="card" data-id="5" data-type="ipa">/let mi θɪŋk/</div>
+  </div>
+
+  <div class="column">
+    <h2>Meaning</h2>
+    <div class="card" data-id="3" data-type="meaning">I didn't hear or understand what you said.</div>
+    <div class="card" data-id="5" data-type="meaning">I need a moment to organize my ideas.</div>
+    <div class="card" data-id="2" data-type="meaning">Please don't speak so fast.</div>
+    <div class="card" data-id="6" data-type="meaning">I don't know the meaning of this word.</div>
+    <div class="card" data-id="1" data-type="meaning">Please say it again.</div>
+    <div class="card" data-id="4" data-type="meaning">I need a little time before I answer.</div>
+  </div>
+
+</div>
+
+<div id="feedback"></div>
+
+<button onclick="resetGame()">Play again</button>
+
+<script>
+let selectedCards = [];
+
+const cards = document.querySelectorAll(".card");
+const feedback = document.getElementById("feedback");
+
+cards.forEach(card => {
+  card.addEventListener("click", () => {
+    if (card.classList.contains("matched")) return;
+
+    card.classList.add("selected");
+    selectedCards.push(card);
+
+    if (selectedCards.length === 3) {
+      checkMatch();
+    }
+  });
+});
+
+function checkMatch() {
+  const ids = selectedCards.map(card => card.dataset.id);
+  const types = selectedCards.map(card => card.dataset.type);
+
+  const sameId = ids.every(id => id === ids[0]);
+  const differentTypes = new Set(types).size === 3;
+
+  if (sameId && differentTypes) {
+    selectedCards.forEach(card => {
+      card.classList.remove("selected");
+      card.classList.add("matched");
+    });
+    feedback.textContent = "Great! That's a match!";
+  } else {
+    selectedCards.forEach(card => {
+      card.classList.add("wrong");
+    });
+
+    feedback.textContent = "Try again!";
+
+    setTimeout(() => {
+      selectedCards.forEach(card => {
+        card.classList.remove("selected", "wrong");
+      });
+    }, 800);
+  }
+
+  selectedCards = [];
+}
+
+function resetGame() {
+  cards.forEach(card => {
+    card.classList.remove("selected", "matched", "wrong");
+  });
+  feedback.textContent = "";
+}
+</script>
+
+</body>
+</html>
