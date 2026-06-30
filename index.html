@@ -1,163 +1,444 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interactive English Practice 💜</title>
 
   <style>
+    :root {
+      --bg: #f5d7bd;
+      --ink: #365866;
+      --muted: #6c8792;
+      --card: #fffaf6;
+      --shadow: rgba(54, 88, 102, 0.16);
+      --grammar: #f48d70;
+      --vocabulary: #8e7cc3;
+      --speaking: #5aa9a8;
+      --pronunciation: #d96c75;
+      --mixed: #f2b84b;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f5d7bd;
+      background: radial-gradient(circle at top left, #fff3e8 0, var(--bg) 42%, #efc5ad 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    .page {
+      width: min(1180px, 92%);
+      margin: 0 auto;
+      padding: 48px 0 36px;
+    }
+
+    header {
       text-align: center;
-      padding: 60px;
-      color: #365866;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(255,255,255,.7);
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
     }
 
     h1 {
-      font-size: 40px;
-      margin-bottom: 10px;
+      margin: 0;
+      font-size: clamp(34px, 5vw, 56px);
+      letter-spacing: -1px;
     }
 
-    p {
+    .subtitle {
+      max-width: 680px;
+      margin: 14px auto 0;
       font-size: 18px;
-      margin-bottom: 40px;
-      color: #5d7c89;
+      line-height: 1.5;
+      color: var(--muted);
     }
+
+    .toolbar {
+      background: rgba(255,250,246,.75);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.7);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 12px 30px var(--shadow);
+      margin: 28px 0;
     }
-.footer{
-    margin-top: 50px;
-    font-size:14px;
-    color:#5d7c89;
-}
 
-/* NUEVO */
+    .search-box {
+      width: 100%;
+      border: 2px solid transparent;
+      border-radius: 16px;
+      padding: 15px 18px;
+      font-size: 16px;
+      color: var(--ink);
+      background: white;
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(54,88,102,.08);
+    }
 
-.games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  max-width: 1000px;
-  margin: 30px auto;
-  padding: 0 20px;
-}
+    .search-box:focus { border-color: #f48d70; }
 
-.game-card {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 75px;
-  background: #ff8a73;
-  color: white;
-  text-decoration: none;
-  border-radius: 12px;
-  padding: 16px;
-  font-weight: bold;
-  text-align: center;
-  transition: .2s;
-}
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 14px;
+    }
 
-.game-card:hover{
-  background:#ff755d;
-  transform:translateY(-3px);
-}
+    .filter-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 15px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--ink);
+      background: white;
+      box-shadow: 0 5px 14px rgba(54,88,102,.10);
+      transition: .2s ease;
+    }
 
-</style>
+    .filter-btn:hover,
+    .filter-btn.active {
+      transform: translateY(-2px);
+      background: var(--ink);
+      color: white;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .game-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 168px;
+      padding: 20px;
+      border-radius: 22px;
+      text-decoration: none;
+      background: var(--card);
+      color: var(--ink);
+      overflow: hidden;
+      box-shadow: 0 14px 28px var(--shadow);
+      border: 1px solid rgba(255,255,255,.75);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 36px rgba(54,88,102,.22);
+    }
+
+    .game-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 8px;
+      background: var(--accent);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--accent) 16%, white);
+      font-size: 25px;
+    }
+
+    .level {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 9px;
+      border-radius: 999px;
+      color: white;
+      background: var(--accent);
+      white-space: nowrap;
+    }
+
+    .game-title {
+      font-size: 19px;
+      line-height: 1.2;
+      font-weight: 800;
+      margin: 0 0 10px;
+    }
+
+    .game-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .category {
+      margin-top: auto;
+      padding-top: 18px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+    }
+
+    .grammar { --accent: var(--grammar); }
+    .vocabulary { --accent: var(--vocabulary); }
+    .speaking { --accent: var(--speaking); }
+    .pronunciation { --accent: var(--pronunciation); }
+    .mixed { --accent: var(--mixed); }
+
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 28px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 44px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    footer a {
+      color: var(--ink);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+      .page { padding-top: 30px; }
+      .toolbar { border-radius: 18px; }
+      .game-card { min-height: 150px; }
+    }
+  </style>
 </head>
 
 <body>
+  <main class="page">
+    <header>
+      <div class="eyebrow">Inglés con Cin · Interactive Games</div>
+      <h1>Interactive English Practice 💜</h1>
+      <p class="subtitle">Practise English in a simple, interactive and enjoyable way. Choose a game, filter by skill, and start learning.</p>
+    </header>
 
-  <h1>Interactive English practice 💜</h1>
+    <section class="toolbar" aria-label="Search and filters">
+      <input id="searchInput" class="search-box" type="search" placeholder="🔍 Search games by name, skill or level..." />
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="grammar">Grammar</button>
+        <button class="filter-btn" data-filter="vocabulary">Vocabulary</button>
+        <button class="filter-btn" data-filter="speaking">Speaking</button>
+        <button class="filter-btn" data-filter="pronunciation">Pronunciation</button>
+        <button class="filter-btn" data-filter="mixed">Mixed Skills</button>
+      </div>
+    </section>
 
-  <p>
-  Practise English in a simple, interactive and enjoyable way.
-</p>
+    <section class="games-grid" id="gamesGrid">
+      <a href="slot-machine.html" class="game-card grammar" data-category="grammar" data-title="grammar slot machine present past a2">
+        <div class="card-top"><span class="icon">🎰</span><span class="level">A2</span></div>
+        <h2 class="game-title">Grammar Slot Machine</h2>
+        <p class="game-desc">Practise present and past forms with a quick interactive challenge.</p>
+        <div class="category">Grammar</div>
+      </a>
 
-<div class="games-grid">
+      <a href="ed-ending-pronunciation-A2-B1.html" class="game-card pronunciation" data-category="pronunciation" data-title="ed pronunciation endings a2 b1">
+        <div class="card-top"><span class="icon">🔊</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">-ED Pronunciation</h2>
+        <p class="game-desc">Practise regular past endings: /t/, /d/ and /ɪd/.</p>
+        <div class="category">Pronunciation</div>
+      </a>
 
-<a href="slot-machine.html" class="game-card">
-🎰 Grammar Slot Machine (A2)
-</a>
+      <a href="cruise-rules-challenge-modals-A2-B1.html" class="game-card grammar" data-category="grammar" data-title="cruise rules challenge modals a2 b1">
+        <div class="card-top"><span class="icon">🚢</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Cruise Rules Challenge</h2>
+        <p class="game-desc">Use modals to talk about rules, obligation and permission.</p>
+        <div class="category">Grammar</div>
+      </a>
 
-<a href="ed-ending-pronunciation-A2-B1.html" class="game-card">
-🔊 -ED Pronunciation (A2–B1)
-</a>
+      <a href="collocations-make-or-do-A2-B1.html" class="game-card vocabulary" data-category="vocabulary" data-title="make or do collocations a2 b1 vocabulary">
+        <div class="card-top"><span class="icon">💜</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Make or Do Challenge</h2>
+        <p class="game-desc">Review common collocations with make and do.</p>
+        <div class="category">Vocabulary</div>
+      </a>
 
-<a href="cruise-rules-challenge-modals-A2-B1.html" class="game-card">
-🚢 Cruise Rules Challenge
-</a>
+      <a href="weekend-plans-invitations-a2.html" class="game-card speaking" data-category="speaking" data-title="weekend plans invitations a2 b1 speaking">
+        <div class="card-top"><span class="icon">🌸</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Weekend Plans & Invitations</h2>
+        <p class="game-desc">Practise invitations, plans and friendly responses.</p>
+        <div class="category">Speaking</div>
+      </a>
 
-<a href="collocations-make-or-do-A2-B1.html" class="game-card">
-💜 Make or Do Challenge
-</a>
+      <a href="social_plans_memory_game_A2.html" class="game-card vocabulary" data-category="vocabulary" data-title="social plans memory game a2 b1 vocabulary speaking">
+        <div class="card-top"><span class="icon">💬</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Social Plans Memory Game</h2>
+        <p class="game-desc">Match useful expressions for social plans and invitations.</p>
+        <div class="category">Vocabulary</div>
+      </a>
 
-<a href="weekend-plans-invitations-a2.html" class="game-card">
-🌸 Weekend Plans & Invitations
-</a>
+      <a href="build_the_plan_be_going_to_A2-B1.html" class="game-card grammar" data-category="grammar" data-title="build the plan be going to a2 b1 grammar">
+        <div class="card-top"><span class="icon">🧩</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Build the Plan</h2>
+        <p class="game-desc">Practise be going to for plans and future intentions.</p>
+        <div class="category">Grammar</div>
+      </a>
 
-<a href="social_plans_memory_game_A2.html" class="game-card">
-💬 Social Plans Memory Game
-</a>
+      <a href="choose_the_correct_plan_A2-B1.html" class="game-card grammar" data-category="grammar" data-title="choose the correct plan a2 b1 grammar">
+        <div class="card-top"><span class="icon">📘</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Choose the Correct Plan</h2>
+        <p class="game-desc">Choose the best future-plan structure in context.</p>
+        <div class="category">Grammar</div>
+      </a>
 
-<a href="build_the_plan_be_going_to_A2-B1.html" class="game-card">
-🧩 Build the Plan
-</a>
+      <a href="Debt Advocacy Briefing Tool.html" class="game-card speaking" data-category="speaking" data-title="debt advocacy briefing tool public health global justice speaking b1">
+        <div class="card-top"><span class="icon">🌍</span><span class="level">B1</span></div>
+        <h2 class="game-title">Debt Advocacy Briefing Tool</h2>
+        <p class="game-desc">Generate briefing cards about debt reform, public health and global justice.</p>
+        <div class="category">Speaking</div>
+      </a>
 
-<a href="choose_the_correct_plan_A2-B1.html" class="game-card">
-📘 Choose the Correct Plan
-</a>
+      <a href="Cruise Crew Wheel.html" class="game-card speaking" data-category="speaking" data-title="cruise crew wheel scenarios speaking">
+        <div class="card-top"><span class="icon">🚢</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Cruise Crew Wheel</h2>
+        <p class="game-desc">Practise real cruise ship scenarios and quick reactions.</p>
+        <div class="category">Speaking</div>
+      </a>
 
-<a href="Debt Advocacy Briefing Tool.html" class="game-card">
-🌍 Debt Advocacy Briefing Tool
-</a>
+      <a href="What would you say_cruise scenarios_B1.html" class="game-card speaking" data-category="speaking" data-title="what would you say cruise scenarios b1 speaking">
+        <div class="card-top"><span class="icon">🎭</span><span class="level">B1</span></div>
+        <h2 class="game-title">What Would You Say?</h2>
+        <p class="game-desc">React naturally to real cruise ship situations.</p>
+        <div class="category">Speaking</div>
+      </a>
 
-<a href="Cruise Crew Wheel.html" class="game-card">
-🚢 Cruise Crew Wheel
-</a>
+      <a href="oh-no-what-should-i-do-B1.html" class="game-card grammar" data-category="grammar" data-title="oh no what should i do advice should shouldn't b1">
+        <div class="card-top"><span class="icon">🎡</span><span class="level">B1</span></div>
+        <h2 class="game-title">Oh No... What Should I Do?</h2>
+        <p class="game-desc">Practise giving advice with should and shouldn’t.</p>
+        <div class="category">Grammar</div>
+      </a>
 
-<a href="What would you say_cruise scenarios_B1.html" class="game-card">
-🎭 What Would You Say?
-</a>
+      <a href="professional-speaking-spinner-B1.html" class="game-card speaking" data-category="speaking" data-title="professional challenge spinner workplace english interview speaking b1">
+        <div class="card-top"><span class="icon">💼</span><span class="level">B1</span></div>
+        <h2 class="game-title">Professional Challenge Spinner</h2>
+        <p class="game-desc">Practise workplace English and interview-style speaking.</p>
+        <div class="category">Speaking</div>
+      </a>
 
-<a href="oh-no-what-should-i-do-B1.html" class="game-card">
-🎡 Oh No... What Should I Do?
-</a>
+      <a href="legal-compliance-speaking-wheel-B1.html" class="game-card speaking" data-category="speaking" data-title="legal compliance speaking wheel b1">
+        <div class="card-top"><span class="icon">⚖️</span><span class="level">B1</span></div>
+        <h2 class="game-title">Legal Compliance Speaking Wheel</h2>
+        <p class="game-desc">Practise legal and compliance-related speaking prompts.</p>
+        <div class="category">Speaking</div>
+      </a>
 
-<a href="professional-speaking-spinner-B1.html" class="game-card">
-💼 Professional Challenge Spinner
-</a>
+      <a href="make-and-do-challenge-board-a2.html" class="game-card vocabulary" data-category="vocabulary" data-title="make do cards challenge board a2 vocabulary">
+        <div class="card-top"><span class="icon">🃏</span><span class="level">A2</span></div>
+        <h2 class="game-title">Make & Do Cards</h2>
+        <p class="game-desc">Review high-frequency make and do combinations.</p>
+        <div class="category">Vocabulary</div>
+      </a>
 
-<a href="legal-compliance-speaking-wheel-B1.html" class="game-card">
-⚖️ Legal Compliance Speaking Wheel
-</a>
+      <a href="health-advocacy-briefing-tool-B1.html" class="game-card speaking" data-category="speaking" data-title="health advocacy briefing tool b1 public health speaking">
+        <div class="card-top"><span class="icon">❤️</span><span class="level">B1</span></div>
+        <h2 class="game-title">Health Advocacy Briefing Tool</h2>
+        <p class="game-desc">Practise public health advocacy language and briefing skills.</p>
+        <div class="category">Speaking</div>
+      </a>
 
-<a href="make-and-do-challenge-board-a2.html" class="game-card">
-🃏 Make & Do Cards
-</a>
+      <a href="places-activities-matching-game_a2.html" class="game-card vocabulary" data-category="vocabulary" data-title="places activities review game a2 vocabulary matching">
+        <div class="card-top"><span class="icon">🎯</span><span class="level">A2</span></div>
+        <h2 class="game-title">Places & Activities Review</h2>
+        <p class="game-desc">Match places with common activities and everyday contexts.</p>
+        <div class="category">Vocabulary</div>
+      </a>
 
-<a href="health-advocacy-briefing-tool-B1.html" class="game-card">
-❤️ Health Advocacy Briefing Tool
-</a>
+      <a href="helpful-advice-memory-game-b1.html" class="game-card vocabulary" data-category="vocabulary" data-title="helpful advice memory game b1 vocabulary should advice">
+        <div class="card-top"><span class="icon">🧠</span><span class="level">B1</span></div>
+        <h2 class="game-title">Helpful Advice Memory Game</h2>
+        <p class="game-desc">Review expressions for giving helpful advice in everyday situations.</p>
+        <div class="category">Vocabulary</div>
+      </a>
 
-<a href="places-activities-matching-game_a2.html" class="game-card">
-🎯 Places & Activities Review
-</a>
+      <a href="Asking-for-Clarification-matching-game.html" class="game-card mixed" data-category="mixed" data-title="asking for clarification matching game expression ipa meaning a2 b1">
+        <div class="card-top"><span class="icon">❓</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Asking for Clarification</h2>
+        <p class="game-desc">Match useful questions with IPA and meaning.</p>
+        <div class="category">Mixed Skills</div>
+      </a>
+    </section>
 
-<a href="helpful-advice-memory-game-b1.html" class="game-card">
-🧠 Helpful Advice Memory Game
-</a>
+    <div class="empty-state" id="emptyState">No games found. Try another word or filter 💜</div>
 
-<a href="Asking-for-Clarification-matching-game.html" class="game-card">
-❓ Asking for Clarification
-</a>
+    <footer>
+      by Inglés con Cin 💜<br />
+      <a href="https://www.instagram.com/inglesconcin.ok/" target="_blank" rel="noopener">@inglesconcin.ok</a>
+    </footer>
+  </main>
 
-</div>
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.game-card');
+    const emptyState = document.getElementById('emptyState');
+    let activeFilter = 'all';
 
-<div class="footer">
-by Inglés con Cin 💜
-<br>
-@inglesconcin.ok
-</div>
- 
+    function updateCards() {
+      const query = searchInput.value.toLowerCase().trim();
+      let visibleCount = 0;
 
+      cards.forEach(card => {
+        const title = card.dataset.title.toLowerCase();
+        const category = card.dataset.category;
+        const matchesSearch = title.includes(query);
+        const matchesFilter = activeFilter === 'all' || category === activeFilter;
+        const shouldShow = matchesSearch && matchesFilter;
+
+        card.style.display = shouldShow ? 'flex' : 'none';
+        if (shouldShow) visibleCount++;
+      });
+
+      emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    searchInput.addEventListener('input', updateCards);
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        activeFilter = button.dataset.filter;
+        updateCards();
+      });
+    });
+  </script>
 </body>
 </html>
