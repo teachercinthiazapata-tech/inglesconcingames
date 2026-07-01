@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Everyday English Review Challenge</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f7efe5;
+  color:#365866;
+  margin:0;
+  padding:20px;
+}
+.container{
+  max-width:900px;
+  margin:auto;
+}
+h1{
+  text-align:center;
+  color:#4b6b73;
+}
+h2{
+  text-align:center;
+  font-weight:400;
+  color:#4b6b73;
+}
+.card{
+  background:#fffaf6;
+  border-radius:20px;
+  padding:22px;
+  margin:22px 0;
+  box-shadow:0 10px 25px rgba(54,88,102,.15);
+}
+.question{
+  font-size:20px;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+button{
+  display:block;
+  width:100%;
+  margin:8px 0;
+  padding:13px;
+  border:none;
+  border-radius:12px;
+  background:#4b6b73;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+button:hover{
+  background:#365159;
+}
+.feedback{
+  margin-top:15px;
+  padding:14px;
+  border-radius:12px;
+  display:none;
+  font-size:16px;
+}
+.correct{
+  background:#dff3e3;
+  color:#276738;
+}
+.incorrect{
+  background:#ffe0df;
+  color:#9b2f2f;
+}
+input{
+  width:100%;
+  padding:13px;
+  font-size:16px;
+  border-radius:12px;
+  border:2px solid #ddd;
+}
+.check-btn{
+  background:#f28c8c;
+}
+.score{
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  background:#fff;
+  padding:18px;
+  border-radius:18px;
+  margin:20px 0;
+}
+.section-title{
+  background:#4b6b73;
+  color:white;
+  padding:12px;
+  border-radius:14px;
+  text-align:center;
+}
+.small{
+  font-size:14px;
+  color:#6c8792;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Everyday English Review Challenge</h1>
+<h2>Topic: Advice, Future Plans & Travel Communication</h2>
+
+<div class="score" id="scoreBox">Score: 0 / 0</div>
+
+<div class="section-title">Exercise 1 — Choose the correct answer</div>
+
+<div class="card">
+  <div class="question">1. I usually _____ exercise after work.</div>
+  <button onclick="check(this,true,'Correct! We say: do exercise.')">do</button>
+  <button onclick="check(this,false,'Not quite. We use DO with exercise.')">make</button>
+  <button onclick="check(this,false,'Not quite. The correct collocation is do exercise.')">have</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">2. If I don't understand a word, I _____ ask again.</div>
+  <button onclick="check(this,true,'Excellent! First Conditional: If + Present Simple, will + infinitive.')">will</button>
+  <button onclick="check(this,false,'Not quite. Use WILL in the main clause.')">am</button>
+  <button onclick="check(this,false,'Remember: should + infinitive, not should to.')">should to</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">3. Tomorrow I'm _____ visit a friend.</div>
+  <button onclick="check(this,false,'Almost, but we need the complete form: going to.')">going</button>
+  <button onclick="check(this,true,'Great! Be going to is used for future plans.')">going to</button>
+  <button onclick="check(this,false,'Will is possible in other contexts, but here the structure is: I am going to visit.')">will</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">4. You _____ panic if someone speaks quickly.</div>
+  <button onclick="check(this,false,'This gives advice, but the meaning is wrong. We want negative advice.')">should</button>
+  <button onclick="check(this,true,'Correct! You should not panic = You shouldn’t panic.')">shouldn't</button>
+  <button onclick="check(this,false,'Not quite. Use should/shouldn’t to give advice.')">don't</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="section-title">Exercise 2 — Find the mistake</div>
+
+<div class="card">
+  <div class="question">5. Correct this sentence: She don't make progress every week.</div>
+  <input id="q5" placeholder="Write the correct sentence">
+  <button class="check-btn" onclick="checkInput('q5','She doesn’t make progress every week.','Correct! With she/he/it, use doesn’t + infinitive.')">Check</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">6. Correct this sentence: If I will get lost, I'll ask for help.</div>
+  <input id="q6" placeholder="Write the correct sentence">
+  <button class="check-btn" onclick="checkInput('q6','If I get lost, I’ll ask for help.','Excellent! In the if-clause, use Present Simple, not will.')">Check</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">7. Correct this sentence: You should to ask again.</div>
+  <input id="q7" placeholder="Write the correct sentence">
+  <button class="check-btn" onclick="checkInput('q7','You should ask again.','Correct! Should + infinitive without TO.')">Check</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="section-title">Exercise 3 — Vocabulary Challenge</div>
+
+<div class="card">
+  <div class="question">8. You are nervous before an interview. What should you do?</div>
+  <button onclick="check(this,true,'Correct! Stay calm is perfect advice.')">stay calm</button>
+  <button onclick="check(this,false,'Not quite. Make progress is positive, but it doesn’t fit this situation.')">make progress</button>
+  <button onclick="check(this,false,'Careful! We say do homework, not make homework.')">make homework</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">9. You understand the meaning from context.</div>
+  <button onclick="check(this,false,'Ask for help is useful, but here you understand alone.')">ask for help</button>
+  <button onclick="check(this,true,'Correct! To figure something out means to understand it.')">figure it out</button>
+  <button onclick="check(this,false,'Make progress is good, but it is not the exact meaning here.')">make progress</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">10. You have a difficult problem at work.</div>
+  <button onclick="check(this,true,'Correct! You can deal with a problem.')">deal with it</button>
+  <button onclick="check(this,false,'Not quite. We don’t usually say make a problem in this context.')">make it</button>
+  <button onclick="check(this,false,'Do it is possible for a task, but deal with it is better for a problem.')">do it</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="section-title">Exercise 4 — Complete with ONE word</div>
+
+<div class="card">
+  <div class="question">11. If I feel stressed, I should stay _____.</div>
+  <input id="q11" placeholder="One word">
+  <button class="check-btn" onclick="checkInput('q11','calm','Correct! stay calm')">Check</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">12. I usually make _____ for English.</div>
+  <input id="q12" placeholder="One word">
+  <button class="check-btn" onclick="checkInput('q12','time','Correct! make time for English')">Check</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">13. Tomorrow I’m going _____ study English.</div>
+  <input id="q13" placeholder="One word">
+  <button class="check-btn" onclick="checkInput('q13','to','Correct! be going to + infinitive')">Check</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">14. If I don’t know a word, I’ll try to figure it _____.</div>
+  <input id="q14" placeholder="One word">
+  <button class="check-btn" onclick="checkInput('q14','out','Correct! figure it out')">Check</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="section-title">Exercise 5 — Asking for Clarification</div>
+
+<div class="card">
+  <div class="question">15. Someone speaks very fast. Choose the best response.</div>
+  <button onclick="check(this,true,'Perfect! This is polite and useful.')">Could you speak a little more slowly, please?</button>
+  <button onclick="check(this,false,'This is not polite or helpful enough.')">You speak bad.</button>
+  <button onclick="check(this,false,'This ends the conversation. Try asking for clarification.')">I don’t speak English.</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="card">
+  <div class="question">16. You didn’t understand the last sentence.</div>
+  <button onclick="check(this,true,'Correct! This is a natural clarification phrase.')">Could you repeat that, please?</button>
+  <button onclick="check(this,false,'Not quite. This asks for meaning, not repetition.')">Where are you from?</button>
+  <button onclick="check(this,false,'This is too vague. Ask clearly.')">Yes, okay.</button>
+  <div class="feedback"></div>
+</div>
+
+<div class="section-title">Finish</div>
+
+<div class="card">
+  <div class="question">Send your results</div>
+
+  <p>
+    When you finish the challenge, click the button below to send your score and answers to your teacher.
+  </p>
+
+  <button class="check-btn" onclick="sendResults()">
+      Send results to your teacher
+  </button>
+
+</div>
+
+<form id="resultsForm"
+      action="https://formsubmit.co/teachercinthiazapata@gmail.com"
+      method="POST"
+      style="display:none;">
+
+    <input type="hidden" name="_subject" value="Everyday English Review Challenge">
+
+    <input type="hidden" name="_captcha" value="false">
+
+    <input type="hidden" name="_template" value="table">
+
+    <textarea id="resultsField"
+              name="Results"></textarea>
+
+</form>
+
+<script>
+
+let score = 0;
+let total = 0;
+let results = [];
+
+function updateScore(){
+  document.getElementById("scoreBox").innerText = "Score: " + score + " / " + total;
+}
+
+function check(button, isCorrect, message){
+  const card = button.parentElement;
+  const question = card.querySelector(".question").innerText;
+const answer = button.innerText;
+  const feedback = card.querySelector(".feedback");
+
+  if(card.dataset.answered === "true") return;
+  card.dataset.answered = "true";
+  total++;
+
+  if(isCorrect){
+    score++;
+    feedback.className = "feedback correct";
+  } else {
+    feedback.className = "feedback incorrect";
+  }
+  results.push({
+    question: question,
+    answer: answer,
+    result: isCorrect ? "Correct" : "Incorrect",
+    feedback: message
+});
+
+  feedback.innerHTML = message;
+  feedback.style.display = "block";
+  updateScore();
+}
+
+function normalize(text){
+  return text
+    .toLowerCase()
+    .replace(/[’']/g,"'")
+    .replace(/[.!?]/g,"")
+    .trim();
+}
+
+function checkInput(inputId, correctAnswer, message){
+  const input = document.getElementById(inputId);
+  const card = input.parentElement;
+  const question = card.querySelector(".question").innerText;
+  const feedback = card.querySelector(".feedback");
+
+  if(card.dataset.answered === "true") return;
+  card.dataset.answered = "true";
+  total++;
+
+  const userAnswer = normalize(input.value);
+  const correct = normalize(correctAnswer);
+
+  if(userAnswer === correct){
+    score++;
+    feedback.className = "feedback correct";
+    feedback.innerHTML = message;
+  } else {
+    feedback.className = "feedback incorrect";
+    feedback.innerHTML = "Not quite. Suggested answer: <strong>" + correctAnswer + "</strong>";
+  }
+results.push({
+    question: question,
+    answer: input.value,
+    result: userAnswer === correct ? "Correct" : "Incorrect",
+    feedback: userAnswer === correct ? message : "Suggested answer: " + correctAnswer
+});
+  feedback.style.display = "block";
+  updateScore();
+}
+function sendResults(){
+
+  let text = "";
+
+  text += "Everyday English Review Challenge\n\n";
+  text += "Score: " + score + " / " + total + "\n\n";
+
+  results.forEach(function(item,index){
+    text += (index+1) + ". " + item.question + "\n";
+    text += "Answer: " + item.answer + "\n";
+    text += "Result: " + item.result + "\n";
+    text += "Feedback: " + item.feedback + "\n\n";
+  });
+
+  if(results.length === 0){
+    text += "No answers completed yet.\n";
+  }
+
+  document.getElementById("resultsField").value = text;
+  document.getElementById("resultsForm").submit();
+
+}
+</script>
+
+</body>
+</html>
