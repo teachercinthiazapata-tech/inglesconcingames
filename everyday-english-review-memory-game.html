@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Everyday English Review Memory Game</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f7efe5;
+  text-align: center;
+  padding: 20px;
+}
+h1 { color: #4b6b73; }
+h2{
+    color:#4b6b73;
+    font-weight:400;
+    font-size:24px;
+    margin-top:-10px;
+    margin-bottom:25px;
+}
+.instructions {
+  max-width: 750px;
+  margin: 0 auto 20px;
+  background: #fff7ef;
+  padding: 15px;
+  border-radius: 15px;
+  font-size: 18px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 150px);
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.card {
+  height: 100px;
+  background: #4b6b73;
+  color: white;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 17px;
+  padding: 10px;
+  transition: 0.3s;
+}
+.card.flipped, .card.matched {
+  background: #f28c8c;
+  color: #222;
+  cursor: default;
+}
+#taskBox {
+  margin: 25px auto;
+  max-width: 750px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 15px;
+  font-size: 20px;
+  display: none;
+}
+button {
+  margin-top: 20px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  background: #4b6b73;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+button:hover { background: #365159; }
+</style>
+</head>
+<body>
+
+<h1>Review Memory Game</h1>
+
+<h2>Topic: Everyday English – Advice, Future Plans &amp; Travel Communication</h2>
+
+<div class="instructions">
+  <p><strong>Instructions:</strong> Find two matching cards. When you find a pair, read the challenge and build a personal sentence.</p>
+  <p>Review focus: <strong>Present Simple, make/do, should, first conditional, will, be going to, asking for clarification and survival English.</strong></p>
+</div>
+
+<div class="grid" id="gameBoard"></div>
+
+<div id="taskBox">
+  <p id="taskText"></p>
+  <p><strong>Can you build a personal sentence?</strong></p>
+</div>
+
+<button onclick="restartGame()">Restart Game</button>
+
+<script>
+const expressions = [
+  "make progress",
+  "make time",
+  "make a decision",
+  "do exercise",
+  "deal with",
+  "figure out",
+  "ask for help",
+  "stay calm"
+];
+
+const tasks = {
+  "make progress": {
+    instruction: "Make one sentence using the First Conditional: if-clause in Present Simple + main clause with will.",
+    example: "Example: If I practise English for ten minutes every day, I will make progress."
+  },
+  "make time": {
+    instruction: "Make one sentence using Present Simple and an adverb of frequency.",
+    example: "Example: I usually make time for English after work."
+  },
+  "make a decision": {
+    instruction: "Make one sentence using be going to for a future plan.",
+    example: "Example: I am going to make a decision about my weekend plans tomorrow."
+  },
+  "do exercise": {
+    instruction: "Make one sentence using Present Simple in the negative form.",
+    example: "Example: I don't usually do exercise at night."
+  },
+  "deal with": {
+    instruction: "Make one sentence using should to give advice.",
+    example: "Example: If you feel stressed, you should deal with the problem step by step."
+  },
+  "figure out": {
+    instruction: "Make one sentence using the First Conditional with will.",
+    example: "Example: If I don't understand a word, I will try to figure it out from context."
+  },
+  "ask for help": {
+    instruction: "Make one sentence using should to give advice in a travel situation.",
+    example: "Example: If you get lost in a new city, you should ask for help."
+  },
+  "stay calm": {
+    instruction: "Make one sentence using should not / shouldn't.",
+    example: "Example: If someone speaks too fast, you shouldn't panic. You should stay calm."
+  }
+};
+
+let cards = [...expressions, ...expressions];
+let firstCard = null;
+let secondCard = null;
+let lockBoard = false;
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function createBoard() {
+  const board = document.getElementById("gameBoard");
+  board.innerHTML = "";
+  document.getElementById("taskBox").style.display = "none";
+  cards = shuffle([...expressions, ...expressions]);
+
+  cards.forEach((text, index) => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.dataset.value = text;
+    card.dataset.index = index;
+    card.innerText = "?";
+    card.addEventListener("click", flipCard);
+    board.appendChild(card);
+  });
+}
+
+function flipCard() {
+  if (lockBoard) return;
+  if (this.classList.contains("flipped") || this.classList.contains("matched")) return;
+
+  this.classList.add("flipped");
+  this.innerText = this.dataset.value;
+
+  if (!firstCard) {
+    firstCard = this;
+    return;
+  }
+
+  secondCard = this;
+  checkMatch();
+}
+
+function checkMatch() {
+  const isMatch = firstCard.dataset.value === secondCard.dataset.value;
+
+  if (isMatch) {
+    firstCard.classList.add("matched");
+    secondCard.classList.add("matched");
+    showSpeakingTask(firstCard.dataset.value);
+    resetTurn();
+  } else {
+    lockBoard = true;
+    setTimeout(() => {
+      firstCard.classList.remove("flipped");
+      secondCard.classList.remove("flipped");
+      firstCard.innerText = "?";
+      secondCard.innerText = "?";
+      resetTurn();
+    }, 1000);
+  }
+}
+
+function showSpeakingTask(expression) {
+  const taskBox = document.getElementById("taskBox");
+  const taskText = document.getElementById("taskText");
+  const task = tasks[expression];
+
+  taskText.innerHTML = `
+    <strong>You found:</strong> ${expression}<br><br>
+    <strong>Challenge:</strong> ${task.instruction}<br><br>
+    <em>${task.example}</em>
+  `;
+
+  taskBox.style.display = "block";
+}
+
+function resetTurn() {
+  firstCard = null;
+  secondCard = null;
+  lockBoard = false;
+}
+
+function restartGame() {
+  firstCard = null;
+  secondCard = null;
+  lockBoard = false;
+  createBoard();
+}
+
+createBoard();
+</script>
+
+</body>
+</html>
