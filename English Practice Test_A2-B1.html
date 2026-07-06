@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ceci Review Interactive Test A2-B1</title>
+<style>
+  :root{
+    --bg:#fff7f2;
+    --card:#ffffff;
+    --accent:#b889c8;
+    --accent2:#f4a7a3;
+    --accent3:#84b6a3;
+    --text:#3a2f3f;
+    --muted:#74677a;
+    --ok:#2f8f5b;
+    --bad:#c94f4f;
+    --soft:#f7e9ff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:linear-gradient(135deg,#fff7f2,#f5ecff,#edf8f2);
+    color:var(--text);
+    min-height:100vh;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:28px 16px 60px}
+  header{
+    background:var(--card);
+    border-radius:28px;
+    padding:28px;
+    box-shadow:0 10px 30px rgba(70,40,90,.12);
+    border:2px solid rgba(184,137,200,.18);
+  }
+  h1{margin:0 0 8px;font-size:clamp(28px,4vw,44px);line-height:1.05;color:#6f4d86}
+  h2{margin:0 0 16px;font-size:24px;color:#6f4d86}
+  h3{margin:0 0 12px;font-size:19px;color:#7d5b91}
+  p{line-height:1.55}
+  .tag{display:inline-block;background:var(--soft);color:#6f4d86;border-radius:999px;padding:8px 14px;font-weight:700;margin:6px 6px 0 0}
+  .progressBox{margin:22px 0;background:#fff;border-radius:999px;overflow:hidden;height:18px;border:1px solid #e8d8ef}
+  .progressBar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.3s}
+  .scoreLine{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-weight:700}
+  .section{display:none;background:var(--card);border-radius:28px;padding:24px;margin-top:22px;box-shadow:0 10px 30px rgba(70,40,90,.10);border:2px solid rgba(184,137,200,.14)}
+  .section.active{display:block}
+  .question{background:#fffafc;border:1px solid #efdff4;border-radius:20px;padding:18px;margin:16px 0}
+  .question p{margin:0 0 12px;font-weight:750}
+  .options{display:grid;gap:10px}
+  label.option{display:block;padding:12px 14px;border:1.5px solid #e6d7ed;border-radius:16px;cursor:pointer;background:#fff;transition:.15s}
+  label.option:hover{transform:translateY(-1px);border-color:var(--accent)}
+  input[type="radio"]{margin-right:8px}
+  input[type="text"], textarea{
+    width:100%;border:1.5px solid #e2d2eb;border-radius:14px;padding:12px 14px;font-size:16px;background:#fff;color:var(--text)
+  }
+  textarea{min-height:90px;resize:vertical}
+  .feedback{display:none;margin-top:10px;padding:10px 12px;border-radius:14px;font-weight:700}
+  .feedback.ok{background:#eaf7ef;color:var(--ok)}
+  .feedback.bad{background:#fff0f0;color:var(--bad)}
+  .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  button{
+    border:0;border-radius:999px;padding:13px 18px;font-weight:800;font-size:15px;cursor:pointer;color:white;background:var(--accent);box-shadow:0 6px 15px rgba(111,77,134,.18)
+  }
+  button.secondary{background:var(--accent3)}
+  button.soft{background:#8b7aa1}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .resultCard{display:none;background:#fff;border-radius:28px;padding:26px;margin-top:22px;box-shadow:0 10px 30px rgba(70,40,90,.12);border:2px solid rgba(132,182,163,.25)}
+  .mini{font-size:14px;color:var(--muted)}
+  .affirmation{font-size:20px;font-weight:850;background:#fff2f4;border-radius:22px;padding:18px;color:#7d5b91}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Ceci Review Interactive Test</h1>
+    <p><strong>A2-B1 Review Challenge</strong> · Places · Daily habits · The Good Place · Would like to · Adverbs of frequency · Should / Shouldn’t · Reading</p>
+    <span class="tag">35 questions</span><span class="tag">Personal reflection</span><span class="tag">Send results to teacher</span>
+    <div class="progressBox"><div id="progressBar" class="progressBar"></div></div>
+    <div class="scoreLine"><span id="sectionInfo">Section 1 / 8</span><span id="scoreInfo">Score: 0 / 35</span></div>
+  </header>
+
+  <main id="quiz"></main>
+
+  <section id="reflection" class="section">
+    <h2>Personal Reflection</h2>
+    <div class="question">
+      <p>1. Today I feel...</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="feel" value="confident">confident</label>
+        <label class="option"><input type="radio" name="feel" value="relaxed">relaxed</label>
+        <label class="option"><input type="radio" name="feel" value="motivated">motivated</label>
+        <label class="option"><input type="radio" name="feel" value="nervous">nervous</label>
+        <label class="option"><input type="radio" name="feel" value="proud of myself">proud of myself</label>
+      </div>
+    </div>
+    <div class="question"><p>2. Today I reviewed...</p><input id="ref1" type="text" placeholder="Example: adverbs of frequency and The Good Place vocabulary"></div>
+    <div class="question"><p>3. One word or phrase I want to remember is...</p><input id="ref2" type="text" placeholder="Example: lie low"></div>
+    <div class="question"><p>4. English helps me...</p><textarea id="ref3" placeholder="Write one personal sentence."></textarea></div>
+    <div class="affirmation">I enjoy speaking English, and I trust my learning journey.</div>
+    <div class="btns">
+      <button class="soft" onclick="prevSection()">Back</button>
+      <button onclick="finishQuiz()">Finish test</button>
+    </div>
+  </section>
+
+  <section id="finalResult" class="resultCard">
+    <h2>Your results</h2>
+    <p id="finalMessage"></p>
+    <p id="finalScore"></p>
+    <div class="btns">
+      <button onclick="sendResults()">Send results to my teacher</button>
+      <button class="secondary" onclick="location.reload()">Try again</button>
+    </div>
+    <p class="mini">When you click the button, your answers and reflection will be sent to your teacher.</p>
+  </section>
+
+  <form id="resultsForm" action="https://formsubmit.co/cinthiaezapata@gmail.com" method="POST" style="display:none;">
+    <input type="hidden" name="_subject" value="Ceci Review Interactive Test A2-B1 Results">
+    <input type="hidden" name="_captcha" value="false">
+    <textarea id="resultsField" name="results"></textarea>
+  </form>
+</div>
+
+<script>
+const sections = [
+  {
+    title:"Section 1 — Places & Activities",
+    intro:"Choose the best answer.",
+    questions:[
+      {q:"Where can you browse books?", options:["museum","bookshop","cinema"], answer:"bookshop", fb:"A bookshop is a place where you can browse or buy books."},
+      {q:"A park is a good place to...", options:["go for a walk","watch a film","buy a ticket"], answer:"go for a walk", fb:"We often go for a walk in a park."},
+      {q:"You can enjoy the view at the...", options:["riverfront","bookshop","concert hall"], answer:"riverfront", fb:"The riverfront is a good place to enjoy the view."},
+      {q:"At a museum, you can...", options:["learn about history","take care of plants","call a friend"], answer:"learn about history", fb:"Museums are great places to learn about history, art or science."},
+      {q:"I like cafés because I can...", options:["have a coffee","borrow books","watch a concert"], answer:"have a coffee", fb:"At a café, you can have a coffee and relax."}
+    ]
+  },
+  {
+    title:"Section 2 — Daily Habits and Small Joys",
+    intro:"Review everyday habits.",
+    questions:[
+      {q:"I usually ____ before bed.", options:["read","market","café"], answer:"read", fb:"Read before bed is a daily habit."},
+      {q:"She likes to ____ plants.", options:["take care of","grab","tell"], answer:"take care of", fb:"The phrase is take care of plants."},
+      {q:"I sometimes ____ a friend when I feel lonely.", options:["call","watch","spend"], answer:"call", fb:"You call a friend."},
+      {q:"One thing that makes me happy is ____ to music.", options:["listening","telling","grabbing"], answer:"listening", fb:"The phrase is listen to music. After is, we can use listening."},
+      {q:"Choose the correct phrase.", options:["make a coffee","have a coffee","do a coffee"], answer:"have a coffee", fb:"In this context, the natural phrase is have a coffee."}
+    ]
+  },
+  {
+    title:"Section 3 — The Good Place Vocabulary",
+    intro:"Choose the best phrase in context.",
+    questions:[
+      {q:"If you want to be honest, you should...", options:["tell the truth","lie low","be selfish"], answer:"tell the truth", fb:"Tell the truth means be honest."},
+      {q:"If you don’t want attention, you can...", options:["lie low","grab a seat","make a bad choice"], answer:"lie low", fb:"Lie low means keep a low profile."},
+      {q:"If you did something wrong, you might...", options:["feel remorse","earn your place","watch a series"], answer:"feel remorse", fb:"Feel remorse means feel sorry about something wrong."},
+      {q:"Afterlife means...", options:["life after death","a quiet place","a difficult choice"], answer:"life after death", fb:"The afterlife is life after death."},
+      {q:"Please ____ a seat.", options:["grab","tell","earn"], answer:"grab", fb:"Grab a seat means take a seat."}
+    ]
+  },
+  {
+    title:"Section 4 — Grammar: Would Like To",
+    intro:"Complete with the correct form.",
+    questions:[
+      {q:"I ____ like to visit a museum.", options:["would","to","am"], answer:"would", fb:"The structure is would like to + verb."},
+      {q:"Would you ____ to try local food?", options:["like","would","love"], answer:"like", fb:"Question form: Would you like to...?"},
+      {q:"I’d love ____ go to a concert.", options:["to","like","a"], answer:"to", fb:"The phrase is I’d love to + verb."},
+      {q:"She’d like ____ coffee.", options:["a","to","go"], answer:"a", fb:"Would like + noun: She’d like a coffee."},
+      {q:"Choose the correct sentence.", options:["I would like visit a museum.","I would like to visit a museum.","I would to like visit a museum."], answer:"I would like to visit a museum.", fb:"Correct: would like to + verb."}
+    ]
+  },
+  {
+    title:"Section 5 — Grammar: Adverbs of Frequency",
+    intro:"Order the sentence. Remember: with normal verbs, the adverb goes before the verb. With verb to be, the adverb goes after be.",
+    questions:[
+      {q:"Order: usually / I / read / before bed", options:["I usually read before bed.","I read usually before bed.","Usually I before bed read."], answer:"I usually read before bed.", fb:"With normal verbs, the adverb goes before the verb: I usually read."},
+      {q:"Order: often / she / is / relaxed / after a walk", options:["She is often relaxed after a walk.","She often is relaxed after a walk.","She is relaxed often after a walk."], answer:"She is often relaxed after a walk.", fb:"With verb to be, the adverb goes after be: she is often relaxed."},
+      {q:"Order: never / we / watch / TV / during the week", options:["We never watch TV during the week.","We watch never TV during the week.","We are never watch TV during the week."], answer:"We never watch TV during the week.", fb:"With normal verbs, the adverb goes before the verb: we never watch."},
+      {q:"Order: always / I / am / happy / after music", options:["I am always happy after music.","I always am happy after music.","I am happy always after music."], answer:"I am always happy after music.", fb:"With verb to be, the adverb goes after am: I am always happy."},
+      {q:"Order: sometimes / She / calls / a friend", options:["She sometimes calls a friend.","She calls sometimes a friend.","She is sometimes calls a friend."], answer:"She sometimes calls a friend.", fb:"With normal verbs, the adverb goes before the main verb: She sometimes calls."}
+    ]
+  },
+  {
+    title:"Section 6 — Grammar: Should / Shouldn’t",
+    intro:"Choose the best advice.",
+    questions:[
+      {q:"People ____ help others in difficult situations.", options:["should","shouldn’t","to should"], answer:"should", fb:"Should is used for advice."},
+      {q:"You ____ lie to your friends.", options:["shouldn’t","should","to should"], answer:"shouldn’t", fb:"You shouldn’t lie to your friends."},
+      {q:"If you make a mistake, you ____ tell the truth.", options:["should","shouldn’t","are"], answer:"should", fb:"You should tell the truth."},
+      {q:"A good person shouldn’t ____ selfish.", options:["be","to be","being"], answer:"be", fb:"After should/shouldn’t, use the base verb: be."},
+      {q:"Choose the correct sentence.", options:["You should to help your friend.","You should help your friend.","You should helping your friend."], answer:"You should help your friend.", fb:"Correct: should + base verb."}
+    ]
+  },
+  {
+    title:"Section 7 — Reading: Lilian’s Sunday",
+    intro:"Read the text and answer.",
+    reading:"Last Sunday, Lilian wanted to have a perfect day. In the morning, she went to a small café because she wanted to relax. She usually reads before bed, but that morning she read at the café. In the afternoon, she wanted to visit the market, but her friend called and asked for help. At first, Lilian felt tired. Then she thought, “A good person should help others.” So she helped her friend. In the evening, she felt proud of her choice.",
+    questions:[
+      {q:"Where did Lilian go in the morning?", options:["to a café","to a cinema","to a concert hall"], answer:"to a café", fb:"She went to a small café."},
+      {q:"Why did she go there?", options:["to relax","to work","to buy books"], answer:"to relax", fb:"She wanted to relax before a busy week."},
+      {q:"What does she usually do before bed?", options:["reads","goes to the market","visits a museum"], answer:"reads", fb:"She usually reads before bed."},
+      {q:"What did she want to do in the afternoon?", options:["visit the market","watch a series","go to the museum"], answer:"visit the market", fb:"Her original plan was to visit the market."},
+      {q:"How did she feel in the evening?", options:["proud","angry","bored"], answer:"proud", fb:"She felt proud of her choice."}
+    ]
+  }
+];
+
+let currentSection = 0;
+let score = 0;
+let total = sections.reduce((sum,sec)=>sum+sec.questions.length,0);
+let answered = {};
+let results = [];
+
+const quiz = document.getElementById("quiz");
+
+function buildQuiz(){
+  sections.forEach((sec,sIndex)=>{
+    const section = document.createElement("section");
+    section.className = "section" + (sIndex === 0 ? " active" : "");
+    section.id = "section" + sIndex;
+    let html = `<h2>${sec.title}</h2><p>${sec.intro}</p>`;
+    if(sec.reading){ html += `<div class="question"><p>Reading text</p><p style="font-weight:500">${sec.reading}</p></div>`; }
+    sec.questions.forEach((item,qIndex)=>{
+      const qId = `s${sIndex}q${qIndex}`;
+      html += `<div class="question"><p>${qIndex+1}. ${item.q}</p><div class="options">`;
+      item.options.forEach(opt=>{
+        html += `<label class="option"><input type="radio" name="${qId}" value="${escapeHtml(opt)}" onchange="checkAnswer(${sIndex},${qIndex}, this.value)">${opt}</label>`;
+      });
+      html += `</div><div id="fb-${qId}" class="feedback"></div></div>`;
+    });
+    html += `<div class="btns">`;
+    if(sIndex>0) html += `<button class="soft" onclick="prevSection()">Back</button>`;
+    html += `<button onclick="nextSection()">${sIndex === sections.length-1 ? "Go to reflection" : "Next section"}</button>`;
+    html += `</div>`;
+    section.innerHTML = html;
+    quiz.appendChild(section);
+  });
+  updateScore();
+}
+
+function escapeHtml(str){
+  return str.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+
+function checkAnswer(sIndex,qIndex,value){
+  const item = sections[sIndex].questions[qIndex];
+  const qId = `s${sIndex}q${qIndex}`;
+  const key = qId;
+  const isCorrect = value === item.answer;
+  const feedback = document.getElementById("fb-" + qId);
+
+  if(!answered[key]){
+    if(isCorrect) score++;
+    answered[key] = true;
+  } else {
+    const previous = results.find(r=>r.id===key);
+    if(previous && previous.result === "Correct" && !isCorrect) score--;
+    if(previous && previous.result === "Incorrect" && isCorrect) score++;
+  }
+
+  results = results.filter(r=>r.id!==key);
+  results.push({
+    id:key,
+    section:sections[sIndex].title,
+    question:item.q,
+    answer:value,
+    correctAnswer:item.answer,
+    result:isCorrect ? "Correct" : "Incorrect",
+    feedback:item.fb
+  });
+
+  feedback.className = "feedback " + (isCorrect ? "ok" : "bad");
+  feedback.innerHTML = isCorrect ? "✅ Correct! " + item.fb : "💜 Not quite. Correct answer: <strong>" + item.answer + "</strong>. " + item.fb;
+  feedback.style.display = "block";
+  updateScore();
+}
+
+function showSection(index){
+  document.querySelectorAll(".section").forEach(sec=>sec.classList.remove("active"));
+  document.getElementById("finalResult").style.display = "none";
+  if(index < sections.length){
+    document.getElementById("section"+index).classList.add("active");
+  } else {
+    document.getElementById("reflection").classList.add("active");
+  }
+  currentSection = index;
+  updateScore();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function nextSection(){
+  if(currentSection < sections.length) showSection(currentSection+1);
+}
+
+function prevSection(){
+  if(currentSection > 0) showSection(currentSection-1);
+}
+
+function updateScore(){
+  const completed = Object.keys(answered).length;
+  const percent = Math.round((completed / total) * 100);
+  document.getElementById("progressBar").style.width = percent + "%";
+  document.getElementById("scoreInfo").textContent = "Score: " + score + " / " + total;
+  document.getElementById("sectionInfo").textContent = currentSection < sections.length ? "Section " + (currentSection+1) + " / 8" : "Personal Reflection";
+}
+
+function finishQuiz(){
+  document.querySelectorAll(".section").forEach(sec=>sec.classList.remove("active"));
+  const final = document.getElementById("finalResult");
+  const percentage = Math.round((score / total) * 100);
+  let message = "Great job, Ceci!";
+  if(percentage >= 90) message = "Excellent work, Ceci! You are doing beautifully.";
+  else if(percentage >= 70) message = "Great job, Ceci! Keep practising and trusting the process.";
+  else message = "Good practice, Ceci! Review the feedback and try again.";
+  document.getElementById("finalMessage").textContent = message;
+  document.getElementById("finalScore").innerHTML = `<strong>Final score:</strong> ${score} / ${total} (${percentage}%)`;
+  final.style.display = "block";
+  document.getElementById("progressBar").style.width = "100%";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function getReflection(){
+  const feel = document.querySelector('input[name="feel"]:checked');
+  return {
+    feel: feel ? feel.value : "No answer",
+    reviewed: document.getElementById("ref1").value || "No answer",
+    remember: document.getElementById("ref2").value || "No answer",
+    helps: document.getElementById("ref3").value || "No answer"
+  };
+}
+
+function sendResults(){
+  const reflection = getReflection();
+  let text = "Ceci Review Interactive Test A2-B1\n\n";
+  text += "Score: " + score + " / " + total + "\n\n";
+
+  results.sort((a,b)=>a.id.localeCompare(b.id)).forEach(function(item,index){
+    text += (index+1) + ". " + item.section + "\n";
+    text += "Question: " + item.question + "\n";
+    text += "Answer: " + item.answer + "\n";
+    text += "Correct answer: " + item.correctAnswer + "\n";
+    text += "Result: " + item.result + "\n";
+    text += "Feedback: " + item.feedback + "\n\n";
+  });
+
+  if(results.length === 0){ text += "No answers completed yet.\n"; }
+
+  text += "PERSONAL REFLECTION\n";
+  text += "Today I feel: " + reflection.feel + "\n";
+  text += "Today I reviewed: " + reflection.reviewed + "\n";
+  text += "Word or phrase to remember: " + reflection.remember + "\n";
+  text += "English helps me: " + reflection.helps + "\n";
+
+  document.getElementById("resultsField").value = text;
+  document.getElementById("resultsForm").submit();
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
