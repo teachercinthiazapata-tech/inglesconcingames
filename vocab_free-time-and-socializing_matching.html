@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Matching -- Class 5 -- Diana</title>
+<style>
+  :root{
+    --peach:#F6D9C4; --mint:#CDEAE0; --coral:#E8836B; --navy:#1F3864; --cream:#FFFBF4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg,var(--peach),var(--mint));
+    min-height:100vh; padding:24px; color:var(--navy);
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{text-align:center;font-size:1.5rem;margin-bottom:4px;}
+  p.sub{text-align:center;margin-top:0;color:#4a5a75;}
+  .board{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px; background:var(--cream);
+    border-radius:16px; padding:20px; box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  }
+  @media (max-width:600px){ .board{grid-template-columns:1fr;} }
+  .col h2{font-size:1rem; margin:0 0 10px; color:var(--coral);}
+  .card{
+    background:white; border:2px solid #e2e2e2; border-radius:10px; padding:10px 14px;
+    margin-bottom:10px; cursor:pointer; transition:all .15s ease; font-size:0.95rem;
+  }
+  .card:hover{border-color:var(--coral);}
+  .card.selected{border-color:var(--navy); background:#EDF1FB;}
+  .card.correct{background:#d9f2e3; border-color:#3aa76d; cursor:default;}
+  .card.wrong{background:#fbdada; border-color:#d1504a; animation:shake .3s;}
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+  .status{text-align:center; margin-top:16px; font-weight:bold; min-height:1.4em;}
+  .score{text-align:center; margin-top:8px; color:#4a5a75;}
+  button.reset{
+    display:block; margin:18px auto 0; background:var(--navy); color:white; border:none;
+    padding:10px 20px; border-radius:8px; cursor:pointer; font-size:0.95rem;
+  }
+  button.reset:hover{opacity:0.9;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vocabulary Matching -- Class 5</h1>
+  <p class="sub">Match each word or phrase to its meaning. Click one on the left, then click the matching meaning on the right.</p>
+  <div class="board">
+    <div class="col">
+      <h2>Words &amp; Phrases</h2>
+      <div id="words"></div>
+    </div>
+    <div class="col">
+      <h2>Meanings</h2>
+      <div id="defs"></div>
+    </div>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="score" id="score"></div>
+  <button class="reset" onclick="init()">Play again</button>
+</div>
+
+<script>
+const pairs = [
+  {word:"to hang out", def:"To spend relaxed time with friends, informally."},
+  {word:"to catch up", def:"To meet someone and talk about what has happened recently."},
+  {word:"to get together", def:"To meet with one or more people, usually socially."},
+  {word:"small talk", def:"Light, friendly conversation about unimportant things."},
+  {word:"a colleague", def:"A person you work with."},
+  {word:"to have something in common", def:"To share an interest, experience, or characteristic with someone."},
+  {word:"to introduce (yourself)", def:"To tell someone your name when you meet them for the first time."},
+  {word:"a networking event", def:"A social event where professionals meet to make contacts."},
+];
+
+let selectedWord = null;
+let matchedCount = 0;
+let attempts = 0;
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function init(){
+  matchedCount = 0;
+  attempts = 0;
+  selectedWord = null;
+  document.getElementById('status').textContent = '';
+  document.getElementById('score').textContent = '';
+
+  const wordsBox = document.getElementById('words');
+  const defsBox = document.getElementById('defs');
+  wordsBox.innerHTML = '';
+  defsBox.innerHTML = '';
+
+  const shuffledWords = shuffle(pairs);
+  const shuffledDefs = shuffle(pairs);
+
+  shuffledWords.forEach(pr => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.textContent = pr.word;
+    el.dataset.word = pr.word;
+    el.onclick = () => selectWord(el, pr.word);
+    wordsBox.appendChild(el);
+  });
+
+  shuffledDefs.forEach(pr => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.textContent = pr.def;
+    el.dataset.word = pr.word;
+    el.onclick = () => selectDef(el, pr.word);
+    defsBox.appendChild(el);
+  });
+}
+
+function selectWord(el, word){
+  if(el.classList.contains('correct')) return;
+  document.querySelectorAll('#words .card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedWord = {el, word};
+}
+
+function selectDef(el, word){
+  if(el.classList.contains('correct')) return;
+  if(!selectedWord){
+    document.getElementById('status').textContent = 'Choose a word on the left first!';
+    return;
+  }
+  attempts++;
+  if(selectedWord.word === word){
+    selectedWord.el.classList.remove('selected');
+    selectedWord.el.classList.add('correct');
+    el.classList.add('correct');
+    matchedCount++;
+    document.getElementById('status').textContent = 'Correct! ✅';
+    selectedWord = null;
+    if(matchedCount === pairs.length){
+      document.getElementById('status').textContent = 'All matched! Great job, Diana!';
+      document.getElementById('score').textContent = 'Attempts: ' + attempts + ' / ' + pairs.length + ' minimum';
+    }
+  } else {
+    el.classList.add('wrong');
+    document.getElementById('status').textContent = 'Not quite -- try again.';
+    setTimeout(()=> el.classList.remove('wrong'), 300);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
