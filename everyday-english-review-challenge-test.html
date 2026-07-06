@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ceci Review Interactive Test A2-B1</title>
+<title> Review Interactive Test A2-B1</title>
 <style>
   :root{
     --bg:#fff7f2;
@@ -71,7 +71,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Ceci Review Interactive Test</h1>
+    <h1> Review Interactive Test</h1>
     <p><strong>A2-B1 Review Challenge</strong> · Places · Daily habits · The Good Place · Would like to · Adverbs of frequency · Should / Shouldn’t · Reading</p>
     <span class="tag">35 questions</span><span class="tag">Personal reflection</span><span class="tag">Send results to teacher</span>
     <div class="progressBox"><div id="progressBar" class="progressBar"></div></div>
@@ -114,7 +114,7 @@
   </section>
 
   <form id="resultsForm" action="https://formsubmit.co/cinthiaezapata@gmail.com" method="POST" style="display:none;">
-    <input type="hidden" name="_subject" value="Ceci Review Interactive Test A2-B1 Results">
+    <input type="hidden" name="_subject" value="Review Interactive Test A2-B1 Results">
     <input type="hidden" name="_captcha" value="false">
     <textarea id="resultsField" name="results"></textarea>
   </form>
@@ -305,10 +305,10 @@ function finishQuiz(){
   document.querySelectorAll(".section").forEach(sec=>sec.classList.remove("active"));
   const final = document.getElementById("finalResult");
   const percentage = Math.round((score / total) * 100);
-  let message = "Great job, Ceci!";
-  if(percentage >= 90) message = "Excellent work, Ceci! You are doing beautifully.";
-  else if(percentage >= 70) message = "Great job, Ceci! Keep practising and trusting the process.";
-  else message = "Good practice, Ceci! Review the feedback and try again.";
+  let message = "Great job!";
+  if(percentage >= 90) message = "Excellent work! You are doing beautifully.";
+  else if(percentage >= 70) message = "Great job! Keep practising and trusting the process.";
+  else message = "Good practice! Review the feedback and try again.";
   document.getElementById("finalMessage").textContent = message;
   document.getElementById("finalScore").innerHTML = `<strong>Final score:</strong> ${score} / ${total} (${percentage}%)`;
   final.style.display = "block";
@@ -328,7 +328,7 @@ function getReflection(){
 
 function sendResults(){
   const reflection = getReflection();
-  let text = "Ceci Review Interactive Test A2-B1\n\n";
+  let text = "Review Interactive Test A2-B1\n\n";
   text += "Score: " + score + " / " + total + "\n\n";
 
   results.sort((a,b)=>a.id.localeCompare(b.id)).forEach(function(item,index){
