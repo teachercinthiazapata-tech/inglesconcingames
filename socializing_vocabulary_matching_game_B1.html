@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>InglesConCin - Vocabulary Matching Game</title>
+<style>
+  :root {
+    --peach: #f6c6a0;
+    --coral: #f2846b;
+    --mint: #b8e3c9;
+    --navy: #2f3b52;
+    --cream: #fdf3ea;
+    --card-back: #4a5a78;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+    background: var(--cream);
+    margin: 0;
+    padding: 24px;
+    color: var(--navy);
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    color: var(--coral);
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--navy);
+    opacity: 0.75;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 18px;
+    font-weight: bold;
+  }
+  .stats span { color: var(--coral); }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 560px) {
+    .board { grid-template-columns: repeat(2, 1fr); }
+  }
+  .card {
+    aspect-ratio: 3 / 2;
+    background: var(--card-back);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.15s, background 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card.expression { background: var(--coral); }
+  .card.meaning { background: var(--mint); color: var(--navy); }
+  .card.hidden-text { font-size: 1.6rem; background: var(--card-back); color: white; }
+  .card.matched {
+    background: #d8d8d8 !important;
+    color: #999 !important;
+    cursor: default;
+    box-shadow: none;
+  }
+  .card.selected {
+    outline: 3px solid var(--navy);
+  }
+  .footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+  }
+  button {
+    background: var(--navy);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 24px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  button:hover { background: var(--coral); }
+  .win-message {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 1.1rem;
+    color: var(--coral);
+    font-weight: bold;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Socializing Abroad — Matching Game</h1>
+  <p class="subtitle">Find the pair: expression ↔ meaning. Tap two cards to reveal them.</p>
+  <div class="stats">
+    <div>Attempts: <span id="attempts">0</span></div>
+    <div>Matches: <span id="matches">0</span>/8</div>
+  </div>
+  <div class="board" id="board"></div>
+  <p class="win-message" id="winMsg">🎉 Great job, Karen! You matched them all!</p>
+  <div class="footer">
+    <button onclick="initGame()">Restart Game</button>
+  </div>
+</div>
+
+<script>
+const pairs = [
+  { expr: "break the ice", meaning: "to say or do something so people feel more relaxed meeting for the first time" },
+  { expr: "make small talk", meaning: "to have a light, casual conversation about unimportant topics" },
+  { expr: "have things in common", meaning: "to share interests or experiences with someone" },
+  { expr: "get along with", meaning: "to have a friendly relationship with someone" },
+  { expr: "keep in touch", meaning: "to continue communicating with someone regularly" },
+  { expr: "feel like an outsider", meaning: "to feel like you don't belong to a group or place" },
+  { expr: "fit in", meaning: "to feel comfortable and accepted in a group or place" },
+  { expr: "broaden your horizons", meaning: "to increase your knowledge and experience of the world" }
+];
+
+let cards = [];
+let flipped = [];
+let matchedCount = 0;
+let attempts = 0;
+let lock = false;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function initGame() {
+  matchedCount = 0;
+  attempts = 0;
+  flipped = [];
+  lock = false;
+  document.getElementById("attempts").textContent = "0";
+  document.getElementById("matches").textContent = "0";
+  document.getElementById("winMsg").style.display = "none";
+
+  cards = [];
+  pairs.forEach((p, idx) => {
+    cards.push({ id: idx, type: "expression", text: p.expr, revealed: false, matched: false });
+    cards.push({ id: idx, type: "meaning", text: p.meaning, revealed: false, matched: false });
+  });
+  shuffle(cards);
+  render();
+}
+
+function render() {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  cards.forEach((card, i) => {
+    const div = document.createElement("div");
+    div.className = "card " + (card.revealed || card.matched ? card.type : "hidden-text");
+    if (card.matched) div.className += " matched";
+    div.textContent = card.revealed || card.matched ? card.text : "?";
+    div.onclick = () => handleClick(i);
+    board.appendChild(div);
+  });
+}
+
+function handleClick(i) {
+  if (lock) return;
+  const card = cards[i];
+  if (card.revealed || card.matched) return;
+
+  card.revealed = true;
+  flipped.push(i);
+  render();
+
+  if (flipped.length === 2) {
+    attempts++;
+    document.getElementById("attempts").textContent = attempts;
+    lock = true;
+    const [a, b] = flipped;
+    if (cards[a].id === cards[b].id && cards[a].type !== cards[b].type) {
+      cards[a].matched = true;
+      cards[b].matched = true;
+      matchedCount++;
+      document.getElementById("matches").textContent = matchedCount;
+      flipped = [];
+      lock = false;
+      render();
+      if (matchedCount === pairs.length) {
+        document.getElementById("winMsg").style.display = "block";
+      }
+    } else {
+      setTimeout(() => {
+        cards[a].revealed = false;
+        cards[b].revealed = false;
+        flipped = [];
+        lock = false;
+        render();
+      }, 900);
+    }
+  }
+}
+
+initGame();
+</script>
+</body>
+</html>
