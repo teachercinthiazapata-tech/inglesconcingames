@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legal &amp; Advocacy Vocabulary Matching</title>
+<style>
+  :root{
+    --red:#C8102E; --navy:#1F3864; --cream:#FFFBF4; --lightgray:#EEF1F6; --gold:#E8A23B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg,var(--navy),var(--red));
+    min-height:100vh; padding:24px; color:var(--navy);
+  }
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{text-align:center;font-size:1.5rem;margin-bottom:4px;color:white;}
+  p.sub{text-align:center;margin-top:0;color:#f2e6e6;}
+  .board{
+    display:grid; grid-template-columns:1fr 1fr 1.4fr; gap:14px; background:var(--cream);
+    border-radius:16px; padding:20px; box-shadow:0 6px 18px rgba(0,0,0,0.25);
+  }
+  @media (max-width:760px){ .board{grid-template-columns:1fr;} }
+  .col h2{font-size:1rem; margin:0 0 10px; color:var(--red);}
+  .card{
+    background:white; border:2px solid var(--lightgray); border-radius:10px; padding:10px 14px;
+    margin-bottom:10px; cursor:pointer; transition:all .15s ease; font-size:0.95rem;
+  }
+  .card:hover{border-color:var(--gold);}
+  .card.selected{border-color:var(--navy); background:#EDF1FB;}
+  .card.locked{border-color:var(--navy); background:#EDF1FB; cursor:default;}
+  .card.correct{background:#d9f2e3; border-color:#3aa76d; cursor:default;}
+  .card.wrong{background:#fbdada; border-color:#d1504a; animation:shake .3s;}
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+  .status{text-align:center; margin-top:16px; font-weight:bold; min-height:1.4em; color:white;}
+  .score{text-align:center; margin-top:8px; color:#f2e6e6;}
+  button.reset{
+    display:block; margin:18px auto 0; background:var(--gold); color:var(--navy); border:none;
+    padding:10px 20px; border-radius:8px; cursor:pointer; font-size:0.95rem; font-weight:bold;
+  }
+  button.reset:hover{opacity:0.9;}
+  .steptip{text-align:center; color:#f2e6e6; font-size:0.8rem; margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Legal &amp; Advocacy Vocabulary Matching</h1>
+  <p class="sub">Useful verbs for legal, advocacy and conference contexts. Match each word, its IPA, and its definition.</p>
+  <p class="steptip">Step 1: click a word &nbsp;|&nbsp; Step 2: click its IPA &nbsp;|&nbsp; Step 3: click its definition</p>
+  <div class="board">
+    <div class="col">
+      <h2>Word</h2>
+      <div id="words"></div>
+    </div>
+    <div class="col">
+      <h2>IPA (UK)</h2>
+      <div id="ipas"></div>
+    </div>
+    <div class="col">
+      <h2>Definition</h2>
+      <div id="defs"></div>
+    </div>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="score" id="score"></div>
+  <button class="reset" onclick="init()">Play again</button>
+</div>
+
+<script>
+const pairs = [
+  {word:"coordinate", ipa:"/kəʊˈɔːdɪneɪt/", def:"To organize, manage and bring together people, actions or resources to achieve a goal."},
+  {word:"advocate", ipa:"/ˈædvəkeɪt/", def:"To publicly support, defend or promote a cause, policy or group of people."},
+  {word:"submit", ipa:"/səbˈmɪt/", def:"To formally present a document, report or legal filing to an authority or court."},
+  {word:"document", ipa:"/ˈdɒkjument/", def:"To collect, record and preserve information or evidence in a systematic way."},
+  {word:"dismiss", ipa:"/dɪsˈmɪs/", def:"To formally close a legal case due to insufficient evidence or legal grounds."},
+  {word:"disregard", ipa:"/ˌdɪsrɪˈɡɑːd/", def:"To ignore or fail to give proper importance to relevant information, rights or standards."}
+];
+
+let selectedWord = null;
+let selectedIPA = null;
+let matchedCount = 0;
+let attempts = 0;
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function init(){
+  matchedCount = 0;
+  attempts = 0;
+  selectedWord = null;
+  selectedIPA = null;
+  document.getElementById('status').textContent = '';
+  document.getElementById('score').textContent = '';
+
+  const wordsBox = document.getElementById('words');
+  const ipasBox = document.getElementById('ipas');
+  const defsBox = document.getElementById('defs');
+  wordsBox.innerHTML = '';
+  ipasBox.innerHTML = '';
+  defsBox.innerHTML = '';
+
+  shuffle(pairs).forEach(function(p){
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.textContent = p.word;
+    el.dataset.word = p.word;
+    el.onclick = function(){ selectWord(el, p.word); };
+    wordsBox.appendChild(el);
+  });
+
+  shuffle(pairs).forEach(function(p){
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.textContent = p.ipa;
+    el.dataset.word = p.word;
+    el.onclick = function(){ selectIPA(el, p.word); };
+    ipasBox.appendChild(el);
+  });
+
+  shuffle(pairs).forEach(function(p){
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.textContent = p.def;
+    el.dataset.word = p.word;
+    el.onclick = function(){ selectDef(el, p.word); };
+    defsBox.appendChild(el);
+  });
+}
+
+function selectWord(el, word){
+  if(el.classList.contains('correct')){ return; }
+  if(selectedWord){ selectedWord.el.classList.remove('selected','locked'); }
+  if(selectedIPA){ selectedIPA.el.classList.remove('selected','locked'); }
+  selectedIPA = null;
+  const cards = document.querySelectorAll('#words .card');
+  cards.forEach(function(c){
+    if(!c.classList.contains('correct')){ c.classList.remove('selected'); }
+  });
+  el.classList.add('selected');
+  selectedWord = {el: el, word: word};
+  document.getElementById('status').textContent = 'Now click the matching IPA.';
+}
+
+function selectIPA(el, word){
+  if(el.classList.contains('correct')){ return; }
+  if(!selectedWord){
+    document.getElementById('status').textContent = 'Choose a word first!';
+    return;
+  }
+  if(selectedIPA){ return; }
+  attempts++;
+  if(selectedWord.word === word){
+    selectedWord.el.classList.remove('selected');
+    selectedWord.el.classList.add('locked');
+    el.classList.add('locked');
+    selectedIPA = {el: el, word: word};
+    document.getElementById('status').textContent = 'Correct IPA! Now click the matching definition.';
+  } else {
+    el.classList.add('wrong');
+    document.getElementById('status').textContent = 'Not quite -- try another IPA.';
+    setTimeout(function(){ el.classList.remove('wrong'); }, 300);
+  }
+}
+
+function selectDef(el, word){
+  if(el.classList.contains('correct')){ return; }
+  if(!selectedWord || !selectedIPA){
+    document.getElementById('status').textContent = 'Match the word and IPA first!';
+    return;
+  }
+  attempts++;
+  if(selectedWord.word === word && selectedIPA.word === word){
+    selectedWord.el.classList.remove('locked');
+    selectedWord.el.classList.add('correct');
+    selectedIPA.el.classList.remove('locked');
+    selectedIPA.el.classList.add('correct');
+    el.classList.add('correct');
+    matchedCount++;
+    selectedWord = null;
+    selectedIPA = null;
+    document.getElementById('status').textContent = 'All three matched!';
+    if(matchedCount === pairs.length){
+      document.getElementById('status').textContent = 'All matched! Great job!';
+      document.getElementById('score').textContent = 'Attempts: ' + attempts + ' / ' + (pairs.length * 2) + ' minimum';
+    }
+  } else {
+    el.classList.add('wrong');
+    document.getElementById('status').textContent = 'Not quite -- try another definition.';
+    setTimeout(function(){ el.classList.remove('wrong'); }, 300);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
