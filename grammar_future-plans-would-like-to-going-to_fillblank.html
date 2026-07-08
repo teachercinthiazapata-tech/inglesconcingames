@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Practice -- would like to / going to -- Justina</title>
+<style>
+  :root{ --peach:#F6D9C4; --mint:#CDEAE0; --coral:#E8836B; --navy:#1F3864; --cream:#FFFBF4; }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI', Arial, sans-serif; background:linear-gradient(135deg,var(--mint),var(--peach));
+    min-height:100vh; padding:24px; color:var(--navy);
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  h1{text-align:center;font-size:1.4rem;margin-bottom:4px;}
+  p.sub{text-align:center;margin-top:0;color:#4a5a75;}
+  .hint{
+    background:white; border-radius:12px; padding:14px 18px; margin-bottom:18px; font-size:0.9rem;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  }
+  .hint b{color:var(--coral);}
+  .q{
+    background:var(--cream); border-radius:14px; padding:16px 18px; margin-bottom:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  }
+  .q p{margin:0 0 10px; font-size:1rem;}
+  .options{display:flex; gap:10px; flex-wrap:wrap;}
+  .opt{
+    background:white; border:2px solid #e2e2e2; border-radius:8px; padding:8px 16px; cursor:pointer;
+    font-size:0.95rem; transition:all .15s;
+  }
+  .opt:hover{border-color:var(--coral);}
+  .opt.correct{background:#d9f2e3; border-color:#3aa76d;}
+  .opt.wrong{background:#fbdada; border-color:#d1504a;}
+  .feedback{margin-top:8px; font-size:0.88rem; min-height:1.2em; font-weight:bold;}
+  .result{
+    text-align:center; font-size:1.1rem; font-weight:bold; margin-top:20px; min-height:1.4em;
+  }
+  button.reset{
+    display:block; margin:14px auto 0; background:var(--navy); color:white; border:none;
+    padding:10px 20px; border-radius:8px; cursor:pointer; font-size:0.95rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Would like to / Going to</h1>
+  <p class="sub">Choose the best option to complete each sentence about future plans.</p>
+  <div class="hint">
+    <b>Reminder:</b> use <b>would like to</b> for a wish or desire, and <b>going to</b> for something you've already decided to do.
+  </div>
+  <div id="quiz"></div>
+  <div class="result" id="result"></div>
+  <button class="reset" onclick="init()">Try again</button>
+</div>
+
+<script>
+const questions = [
+  {
+    text: "I ______ study a master's abroad someday -- it's always been my dream.",
+    options: ["would like to", "going to"],
+    correct: "would like to",
+    explain: "This describes a wish/dream, not a fixed plan yet -- use would like to."
+  },
+  {
+    text: "I ______ take the Cambridge level test this Friday. I already booked it.",
+    options: ["would like to", "going to"],
+    correct: "going to",
+    explain: "This is already decided and scheduled -- use going to."
+  },
+  {
+    text: "She ______ apply to a program in France next year.",
+    options: ["would like to", "going to"],
+    correct: "going to",
+    explain: "A concrete, decided plan -- going to."
+  },
+  {
+    text: "I ______ feel more confident speaking English -- that's my goal.",
+    options: ["would like to", "going to"],
+    correct: "would like to",
+    explain: "A general wish/goal, not a scheduled action -- would like to."
+  },
+  {
+    text: "We ______ practice speaking every week from now on.",
+    options: ["would like to", "going to"],
+    correct: "going to",
+    explain: "A decided plan for how classes will work -- going to."
+  },
+];
+
+let score = 0;
+let answered = 0;
+
+function init(){
+  score = 0; answered = 0;
+  document.getElementById('result').textContent = '';
+  const quiz = document.getElementById('quiz');
+  quiz.innerHTML = '';
+  questions.forEach((q, idx) => {
+    const div = document.createElement('div');
+    div.className = 'q';
+    const p = document.createElement('p');
+    p.textContent = (idx+1) + ". " + q.text;
+    div.appendChild(p);
+    const optsDiv = document.createElement('div');
+    optsDiv.className = 'options';
+    q.options.forEach(opt => {
+      const btn = document.createElement('div');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.onclick = () => checkAnswer(div, btn, opt, q);
+      optsDiv.appendChild(btn);
+    });
+    div.appendChild(optsDiv);
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    div.appendChild(fb);
+    quiz.appendChild(div);
+  });
+}
+
+function checkAnswer(container, btn, chosen, q){
+  const opts = container.querySelectorAll('.opt');
+  if(container.dataset.done) return;
+  container.dataset.done = "true";
+  answered++;
+  opts.forEach(o => {
+    if(o.textContent === q.correct) o.classList.add('correct');
+    else if(o === btn) o.classList.add('wrong');
+  });
+  const fb = container.querySelector('.feedback');
+  if(chosen === q.correct){
+    score++;
+    fb.textContent = "Correct! " + q.explain;
+  } else {
+    fb.textContent = "Not quite. " + q.explain;
+  }
+  if(answered === questions.length){
+    document.getElementById('result').textContent = "Score: " + score + " / " + questions.length;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
