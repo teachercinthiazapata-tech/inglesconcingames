@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Review Wheel — verb + to-infinitive / have to, don't have to</title>
+<style>
+  :root{
+    --navy:#1B2A4A; --peach:#FFE8D6; --mint:#D8F3DC; --coral:#FFD6D6;
+    --yellow:#FFF3B0; --blue:#BDE0FE; --text:#1B2A4A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    justify-content:flex-start; padding:24px 16px 48px;
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#FFF7EE,#FFFFFF);
+    color:var(--text);
+  }
+  h1{font-size:1.3rem; text-align:center; margin:0 0 4px;}
+  p.sub{text-align:center; color:#666; margin:0 0 20px; font-size:0.95rem; max-width:480px;}
+  .wheel-wrap{position:relative; width:min(90vw,340px); height:min(90vw,340px); margin:10px auto 18px;}
+  .pointer{
+    position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+    width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent;
+    border-top:26px solid var(--navy); z-index:5;
+  }
+  canvas{
+    display:block; width:100%; height:100%; border-radius:50%;
+    box-shadow:0 6px 18px rgba(27,42,74,0.25);
+  }
+  button{
+    font-size:1.05rem; padding:12px 30px; border-radius:999px; border:none;
+    background:var(--navy); color:#fff; cursor:pointer; font-weight:600;
+    box-shadow:0 4px 10px rgba(27,42,74,0.3);
+  }
+  button:active{transform:scale(0.97);}
+  #result{
+    margin-top:20px; max-width:480px; min-height:70px; text-align:center;
+    background:#fff; border:2px solid var(--peach); border-radius:16px; padding:16px 20px;
+    font-size:1.1rem; line-height:1.4;
+  }
+  #result .tag{font-weight:700; color:#B5651D; display:block; margin-bottom:6px; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px;}
+</style>
+</head>
+<body>
+
+<h1>Grammar Review Wheel</h1>
+<p class="sub">Reviewing Class 57: verb + to-infinitive and have to / don't have to. Spin and answer out loud with a full sentence!</p>
+
+<div class="wheel-wrap">
+  <div class="pointer"></div>
+  <canvas id="wheel" width="600" height="600"></canvas>
+</div>
+
+<button id="spinBtn">SPIN THE WHEEL</button>
+
+<div id="result">
+  <span class="tag">Your prompt</span>
+  Press "Spin the wheel" to get your first review question!
+</div>
+
+<script>
+const segments = [
+  { label: "want to", color: "#FFE8D6", prompt: "Make a sentence about something you want to do this month, using \"want to\"." },
+  { label: "have to", color: "#D8F3DC", prompt: "Make a sentence about a responsibility you have this week, using \"have to\"." },
+  { label: "decide to", color: "#FFD6D6", prompt: "Make a sentence about something you decided to do recently, using \"decide to\"." },
+  { label: "don't have to", color: "#BDE0FE", prompt: "Make a sentence about something you don't have to do today, using \"don't have to\"." },
+  { label: "need to", color: "#FFF3B0", prompt: "Make a sentence about something urgent, using \"need to\"." },
+  { label: "has to", color: "#FFE8D6", prompt: "Make a sentence about someone else's obligation, using \"has to\"." },
+  { label: "refuse to", color: "#D8F3DC", prompt: "Make a sentence about something you would refuse to do, using \"refuse to\"." },
+  { label: "doesn't have to", color: "#FFD6D6", prompt: "Make a sentence about something optional for a friend or family member, using \"doesn't have to\"." },
+  { label: "hope to", color: "#BDE0FE", prompt: "Make a sentence about a future goal, using \"hope to\"." },
+  { label: "True/False", color: "#FFF3B0", prompt: "True or False: In the Good Place, people have to pay for frozen yogurt. Answer using have to / don't have to and explain why." },
+];
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const cx = canvas.width / 2, cy = canvas.height / 2, radius = canvas.width / 2 - 6;
+const n = segments.length;
+const arc = (2 * Math.PI) / n;
+let currentRotation = 0;
+let spinning = false;
+
+function drawWheel(rotation){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(rotation);
+  for(let i=0;i<n;i++){
+    const start = i*arc, end = start+arc;
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.arc(0,0,radius,start,end);
+    ctx.closePath();
+    ctx.fillStyle = segments[i].color;
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.rotate(start + arc/2);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#1B2A4A";
+    ctx.font = "bold 22px -apple-system, Segoe UI, Roboto, sans-serif";
+    ctx.fillText(segments[i].label, radius - 16, 8);
+    ctx.restore();
+  }
+  ctx.restore();
+
+  ctx.beginPath();
+  ctx.arc(cx,cy,radius+3,0,2*Math.PI);
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = "#1B2A4A";
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(cx,cy,20,0,2*Math.PI);
+  ctx.fillStyle = "#1B2A4A";
+  ctx.fill();
+}
+
+function spin(){
+  if(spinning) return;
+  spinning = true;
+  const extraTurns = 5 + Math.random()*3;
+  const randomOffset = Math.random()*2*Math.PI;
+  const targetRotation = currentRotation + extraTurns*2*Math.PI + randomOffset;
+  const duration = 3800;
+  const start = performance.now();
+  const startRotation = currentRotation;
+
+  function easeOutCubic(t){ return 1 - Math.pow(1-t,3); }
+
+  function animate(now){
+    const elapsed = now - start;
+    const t = Math.min(elapsed/duration, 1);
+    const eased = easeOutCubic(t);
+    currentRotation = startRotation + (targetRotation-startRotation)*eased;
+    drawWheel(currentRotation);
+    if(t<1){
+      requestAnimationFrame(animate);
+    } else {
+      spinning = false;
+      const normalized = ((2*Math.PI) - (currentRotation % (2*Math.PI))) % (2*Math.PI);
+      const pointerAngle = (normalized + Math.PI/2) % (2*Math.PI);
+      const index = Math.floor(pointerAngle / arc) % n;
+      showResult(segments[index]);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function showResult(segment){
+  const box = document.getElementById("result");
+  box.innerHTML = '<span class="tag">' + segment.label + '</span>' + segment.prompt;
+}
+
+document.getElementById("spinBtn").addEventListener("click", spin);
+drawWheel(0);
+</script>
+</body>
+</html>
