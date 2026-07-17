@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class 1 Review -- Justina</title>
+<style>
+  :root{ --peach:#F6D9C4; --mint:#CDEAE0; --coral:#E8836B; --navy:#1F3864; --cream:#FFFBF4; --lav:#CBA9E3; }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI', Arial, sans-serif; background:linear-gradient(135deg,var(--lav),var(--mint));
+    min-height:100vh; padding:24px; color:var(--navy);
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  h1{text-align:center;font-size:1.5rem;margin-bottom:2px;}
+  p.sub{text-align:center;margin-top:0;color:#4a5a75;}
+  .progress{
+    display:flex; justify-content:center; gap:8px; margin:14px 0 20px;
+  }
+  .dot{width:12px;height:12px;border-radius:50%;background:#ffffffaa;border:2px solid var(--navy);}
+  .dot.done{background:var(--coral); border-color:var(--coral);}
+  .dot.active{background:var(--navy); border-color:var(--navy);}
+  .card{
+    background:var(--cream); border-radius:16px; padding:22px 24px; box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    min-height:260px; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .round-label{font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--coral); font-weight:bold; margin-bottom:6px;}
+  .q-text{font-size:1.1rem; margin:0 0 18px; line-height:1.4;}
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    background:white; border:2px solid #e2e2e2; border-radius:10px; padding:12px 16px; cursor:pointer;
+    font-size:1rem; transition:all .15s;
+  }
+  .opt:hover{border-color:var(--coral);}
+  .opt.correct{background:#d9f2e3; border-color:#3aa76d;}
+  .opt.wrong{background:#fbdada; border-color:#d1504a;}
+  .feedback{margin-top:14px; font-size:0.92rem; font-weight:bold; min-height:1.4em;}
+  .nav{display:flex; justify-content:flex-end; margin-top:14px;}
+  button.next{
+    background:var(--navy); color:white; border:none; padding:10px 22px; border-radius:8px;
+    cursor:pointer; font-size:0.95rem; opacity:0.4; pointer-events:none; transition:opacity .2s;
+  }
+  button.next.ready{opacity:1; pointer-events:auto;}
+  .final{ text-align:center; }
+  .final h2{color:var(--navy);}
+  .final .score{font-size:2rem; font-weight:bold; color:var(--coral); margin:14px 0;}
+  button.reset{
+    background:var(--navy); color:white; border:none; padding:10px 22px; border-radius:8px;
+    cursor:pointer; font-size:0.95rem; margin-top:10px;
+  }
+  .banner{
+    text-align:center; font-weight:bold; color:var(--navy); margin-bottom:6px; font-size:1rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Class 1 Review</h1>
+  <p class="sub">Round 1: Vocabulary &middot; Round 2: Would like to / Going to</p>
+  <div class="progress" id="progress"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+const vocabQuestions = [
+  { q: "lawyer", options: ["A person who practices law", "A person who teaches at a university", "A person who fixes computers"], correct: 0 },
+  { q: "to graduate", options: ["To start a new job", "To complete a degree program", "To take a vacation"], correct: 1 },
+  { q: "opportunity", options: ["A problem that has no solution", "A chance to do something that can improve your life", "A rule you must follow"], correct: 1 },
+  { q: "challenge", options: ["Something difficult that tests your ability", "A type of celebration", "A short break from work"], correct: 0 },
+  { q: "confident", options: ["Feeling sure of yourself", "Feeling tired all the time", "Feeling confused about a topic"], correct: 0 },
+  { q: "fluent", options: ["Able to translate perfectly", "Able to speak smoothly and naturally", "Able to write very fast"], correct: 1 },
+  { q: "abroad", options: ["In or to a foreign country", "In your own hometown", "In a formal meeting"], correct: 0 },
+  { q: "comfortable (with)", options: ["Feeling bored", "Feeling at ease, not anxious", "Feeling extremely excited"], correct: 1 },
+];
+
+const grammarQuestions = [
+  { text: "You've always dreamed of living in another country, but nothing is planned yet.\nI ______ live abroad someday.", options: ["would like to", "am going to"], correct: 0, explain: "A dream/wish with no fixed plan -- would like to." },
+  { text: "You already booked your flight and packed your bags.\nI ______ travel to Brazil next week.", options: ["would like to", "am going to"], correct: 1, explain: "Already decided and scheduled -- going to." },
+  { text: "She hasn't decided anything yet, but she often talks about this goal.\nShe ______ improve her English this year.", options: ["would like to", "is going to"], correct: 0, explain: "A wish/goal, not yet a fixed decision -- would like to." },
+  { text: "It's already confirmed: the interview is booked for Monday.\nI ______ have my interview on Monday.", options: ["would like to", "am going to"], correct: 1, explain: "A confirmed, scheduled event -- going to." },
+  { text: "We haven't chosen a date, but we often say we want to do this.\nWe ______ visit Europe one day.", options: ["would like to", "are going to"], correct: 0, explain: "A shared wish, no fixed date -- would like to." },
+  { text: "He already signed the contract yesterday.\nHe ______ start the new job in March.", options: ["would like to", "is going to"], correct: 1, explain: "Already decided/signed -- going to." },
+];
+
+let round = 1;
+let idx = 0;
+let score = 0;
+let total = vocabQuestions.length + grammarQuestions.length;
+
+function renderProgress(){
+  const box = document.getElementById('progress');
+  box.innerHTML = '';
+  const totalDots = vocabQuestions.length + grammarQuestions.length;
+  let doneCount = round === 1 ? idx : vocabQuestions.length + idx;
+  for(let i=0;i<totalDots;i++){
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < doneCount ? ' done' : (i === doneCount ? ' active' : ''));
+    box.appendChild(d);
+  }
+}
+
+function renderCard(){
+  renderProgress();
+  const card = document.getElementById('card');
+  card.innerHTML = '';
+
+  if(round === 1 && idx < vocabQuestions.length){
+    const item = vocabQuestions[idx];
+    const label = document.createElement('div');
+    label.className = 'round-label';
+    label.textContent = 'Round 1 -- Vocabulary  (' + (idx+1) + ' / ' + vocabQuestions.length + ')';
+    const q = document.createElement('div');
+    q.className = 'q-text';
+    q.innerHTML = 'What does <b>' + item.q + '</b> mean?';
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    const nav = document.createElement('div');
+    nav.className = 'nav';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'next';
+    nextBtn.textContent = 'Next';
+    nextBtn.onclick = () => { idx++; if(idx>=vocabQuestions.length){ round=2; idx=0; } renderCard(); };
+    nav.appendChild(nextBtn);
+
+    item.options.forEach((optText, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'opt';
+      btn.textContent = optText;
+      btn.onclick = () => {
+        if(card.dataset.answered) return;
+        card.dataset.answered = 'true';
+        const allOpts = opts.querySelectorAll('.opt');
+        allOpts.forEach((o, oi) => { if(oi === item.correct) o.classList.add('correct'); });
+        if(i === item.correct){ score++; fb.textContent = 'Correct!'; }
+        else { btn.classList.add('wrong'); fb.textContent = 'Not quite -- the right meaning is highlighted.'; }
+        nextBtn.classList.add('ready');
+      };
+      opts.appendChild(btn);
+    });
+
+    card.dataset.answered = '';
+    card.appendChild(label);
+    card.appendChild(q);
+    card.appendChild(opts);
+    card.appendChild(fb);
+    card.appendChild(nav);
+
+  } else if(round === 2 && idx < grammarQuestions.length){
+    const item = grammarQuestions[idx];
+    const label = document.createElement('div');
+    label.className = 'round-label';
+    label.textContent = 'Round 2 -- Would like to / Going to  (' + (idx+1) + ' / ' + grammarQuestions.length + ')';
+    const q = document.createElement('div');
+    q.className = 'q-text';
+    q.textContent = item.text;
+    q.style.whiteSpace = 'pre-line';
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    const nav = document.createElement('div');
+    nav.className = 'nav';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'next';
+    nextBtn.textContent = idx === grammarQuestions.length - 1 ? 'See Score' : 'Next';
+    nextBtn.onclick = () => { idx++; renderCard(); };
+    nav.appendChild(nextBtn);
+
+    item.options.forEach((optText, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'opt';
+      btn.textContent = optText;
+      btn.onclick = () => {
+        if(card.dataset.answered) return;
+        card.dataset.answered = 'true';
+        const allOpts = opts.querySelectorAll('.opt');
+        allOpts.forEach((o, oi) => { if(oi === item.correct) o.classList.add('correct'); });
+        if(i === item.correct){ score++; fb.textContent = 'Correct! ' + item.explain; }
+        else { btn.classList.add('wrong'); fb.textContent = 'Not quite. ' + item.explain; }
+        nextBtn.classList.add('ready');
+      };
+      opts.appendChild(btn);
+    });
+
+    card.dataset.answered = '';
+    card.appendChild(label);
+    card.appendChild(q);
+    card.appendChild(opts);
+    card.appendChild(fb);
+    card.appendChild(nav);
+
+  } else {
+    const div = document.createElement('div');
+    div.className = 'final';
+    const banner = document.createElement('div');
+    banner.className = 'banner';
+    banner.textContent = 'Review complete!';
+    const h2 = document.createElement('h2');
+    h2.textContent = 'Great work, Justina';
+    const scoreEl = document.createElement('div');
+    scoreEl.className = 'score';
+    scoreEl.textContent = score + ' / ' + total;
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'reset';
+    resetBtn.textContent = 'Play again';
+    resetBtn.onclick = () => { round=1; idx=0; score=0; renderCard(); };
+    div.appendChild(banner);
+    div.appendChild(h2);
+    div.appendChild(scoreEl);
+    div.appendChild(resetBtn);
+    card.appendChild(div);
+  }
+}
+
+renderCard();
+</script>
+</body>
+</html>
