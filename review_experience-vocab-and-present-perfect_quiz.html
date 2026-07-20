@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class 2 Review -- Justina</title>
+<style>
+  :root{ --peach:#F6D9C4; --mint:#CDEAE0; --coral:#E8836B; --navy:#1F3864; --cream:#FFFBF4; --lav:#CBA9E3; }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI', Arial, sans-serif; background:linear-gradient(135deg,var(--lav),var(--mint));
+    min-height:100vh; padding:24px; color:var(--navy);
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  h1{text-align:center;font-size:1.5rem;margin-bottom:2px;}
+  p.sub{text-align:center;margin-top:0;color:#4a5a75;}
+  .hint{
+    background:white; border-radius:12px; padding:12px 18px; margin-bottom:16px; font-size:0.88rem;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  }
+  .hint b{color:var(--coral);}
+  .progress{ display:flex; justify-content:center; gap:8px; margin:14px 0 20px; flex-wrap:wrap; }
+  .dot{width:12px;height:12px;border-radius:50%;background:#ffffffaa;border:2px solid var(--navy);}
+  .dot.done{background:var(--coral); border-color:var(--coral);}
+  .dot.active{background:var(--navy); border-color:var(--navy);}
+  .card{
+    background:var(--cream); border-radius:16px; padding:22px 24px; box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    min-height:260px; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .round-label{font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--coral); font-weight:bold; margin-bottom:6px;}
+  .q-text{font-size:1.05rem; margin:0 0 18px; line-height:1.5; white-space:pre-line;}
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    background:white; border:2px solid #e2e2e2; border-radius:10px; padding:12px 16px; cursor:pointer;
+    font-size:0.98rem; transition:all .15s;
+  }
+  .opt:hover{border-color:var(--coral);}
+  .opt.correct{background:#d9f2e3; border-color:#3aa76d;}
+  .opt.wrong{background:#fbdada; border-color:#d1504a;}
+  .feedback{margin-top:14px; font-size:0.9rem; font-weight:bold; min-height:1.4em;}
+  .nav{display:flex; justify-content:flex-end; margin-top:14px;}
+  button.next{
+    background:var(--navy); color:white; border:none; padding:10px 22px; border-radius:8px;
+    cursor:pointer; font-size:0.95rem; opacity:0.4; pointer-events:none; transition:opacity .2s;
+  }
+  button.next.ready{opacity:1; pointer-events:auto;}
+  .final{ text-align:center; }
+  .final h2{color:var(--navy);}
+  .final .score{font-size:2rem; font-weight:bold; color:var(--coral); margin:14px 0;}
+  button.reset{
+    background:var(--navy); color:white; border:none; padding:10px 22px; border-radius:8px;
+    cursor:pointer; font-size:0.95rem; margin-top:10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Class 2 Review</h1>
+  <p class="sub">Round 1: Vocabulary &middot; Round 2: Present Perfect or Past Simple?</p>
+  <div class="hint">
+    <b>Reminder:</b> a specific, finished time (yesterday, in 2023, last year) → Past Simple. An unspecified time, or something still true up to now (this month, so far, never) → Present Perfect.
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+const vocabQuestions = [
+  { q: "experience", options: ["Knowledge or skill gained by doing something over time", "A written test at the end of a course", "A type of legal document"], correct: 0 },
+  { q: "skill", options: ["A type of contract", "The ability to do something well, usually learned through practice", "A meeting with a client"], correct: 1 },
+  { q: "achievement", options: ["A daily task at work", "A mistake that needs correcting", "Something you have successfully completed or reached"], correct: 2 },
+  { q: "to improve", options: ["To get better at something", "To forget something completely", "To repeat the same mistake"], correct: 0 },
+  { q: "responsible (for)", options: ["Uninterested in a task", "Having a duty to deal with or take care of something", "On vacation from work"], correct: 1 },
+  { q: "to handle", options: ["To ignore a problem", "To deal with a situation, problem, or responsibility", "To cancel a meeting"], correct: 1 },
+  { q: "background", options: ["A person's education, experience, and history", "A future goal", "A type of legal case"], correct: 0 },
+  { q: "growth", options: ["A sudden change of plans", "The process of developing or improving", "A break from studying"], correct: 1 },
+];
+
+const grammarQuestions = [
+  { text: "I ___ my law degree in 2023.\n(a specific, finished time)", options: ["graduated", "have graduated"], correct: 0, explain: "\"In 2023\" is a specific finished time -- Past Simple." },
+  { text: "I ___ worked in an international environment.\n(no specific time -- experience up to now)", options: ["never worked", "have never worked"], correct: 1, explain: "No specific time, just experience up to now -- Present Perfect." },
+  { text: "I ___ a new client yesterday.\n(a specific, finished time)", options: ["met", "have met"], correct: 0, explain: "\"Yesterday\" is a specific finished time -- Past Simple." },
+  { text: "This month, my English ___ a lot.\n(an unfinished time period, still going on)", options: ["improved", "has improved"], correct: 1, explain: "\"This month\" is still happening -- Present Perfect." },
+  { text: "I ___ that case last year.\n(a specific, finished time)", options: ["handled", "have handled"], correct: 0, explain: "\"Last year\" is a specific finished time -- Past Simple." },
+  { text: "I ___ several achievements so far in my career.\n(unspecified time, up to now)", options: ["had", "have had"], correct: 1, explain: "\"So far\" means up to now, no specific moment -- Present Perfect." },
+];
+
+let round = 1;
+let idx = 0;
+let score = 0;
+let total = vocabQuestions.length + grammarQuestions.length;
+
+function renderProgress(){
+  const box = document.getElementById('progress');
+  box.innerHTML = '';
+  const totalDots = vocabQuestions.length + grammarQuestions.length;
+  let doneCount = round === 1 ? idx : vocabQuestions.length + idx;
+  for(let i=0;i<totalDots;i++){
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < doneCount ? ' done' : (i === doneCount ? ' active' : ''));
+    box.appendChild(d);
+  }
+}
+
+function renderCard(){
+  renderProgress();
+  const card = document.getElementById('card');
+  card.innerHTML = '';
+
+  if(round === 1 && idx < vocabQuestions.length){
+    const item = vocabQuestions[idx];
+    const label = document.createElement('div');
+    label.className = 'round-label';
+    label.textContent = 'Round 1 -- Vocabulary  (' + (idx+1) + ' / ' + vocabQuestions.length + ')';
+    const q = document.createElement('div');
+    q.className = 'q-text';
+    q.innerHTML = 'What does <b>' + item.q + '</b> mean?';
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    const nav = document.createElement('div');
+    nav.className = 'nav';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'next';
+    nextBtn.textContent = 'Next';
+    nextBtn.onclick = () => { idx++; if(idx>=vocabQuestions.length){ round=2; idx=0; } renderCard(); };
+    nav.appendChild(nextBtn);
+
+    item.options.forEach((optText, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'opt';
+      btn.textContent = optText;
+      btn.onclick = () => {
+        if(card.dataset.answered) return;
+        card.dataset.answered = 'true';
+        const allOpts = opts.querySelectorAll('.opt');
+        allOpts.forEach((o, oi) => { if(oi === item.correct) o.classList.add('correct'); });
+        if(i === item.correct){ score++; fb.textContent = 'Correct!'; }
+        else { btn.classList.add('wrong'); fb.textContent = 'Not quite -- the right meaning is highlighted.'; }
+        nextBtn.classList.add('ready');
+      };
+      opts.appendChild(btn);
+    });
+
+    card.dataset.answered = '';
+    card.appendChild(label);
+    card.appendChild(q);
+    card.appendChild(opts);
+    card.appendChild(fb);
+    card.appendChild(nav);
+
+  } else if(round === 2 && idx < grammarQuestions.length){
+    const item = grammarQuestions[idx];
+    const label = document.createElement('div');
+    label.className = 'round-label';
+    label.textContent = 'Round 2 -- Present Perfect or Past Simple?  (' + (idx+1) + ' / ' + grammarQuestions.length + ')';
+    const q = document.createElement('div');
+    q.className = 'q-text';
+    q.textContent = item.text;
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    const nav = document.createElement('div');
+    nav.className = 'nav';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'next';
+    nextBtn.textContent = idx === grammarQuestions.length - 1 ? 'See Score' : 'Next';
+    nextBtn.onclick = () => { idx++; renderCard(); };
+    nav.appendChild(nextBtn);
+
+    item.options.forEach((optText, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'opt';
+      btn.textContent = optText;
+      btn.onclick = () => {
+        if(card.dataset.answered) return;
+        card.dataset.answered = 'true';
+        const allOpts = opts.querySelectorAll('.opt');
+        allOpts.forEach((o, oi) => { if(oi === item.correct) o.classList.add('correct'); });
+        if(i === item.correct){ score++; fb.textContent = 'Correct! ' + item.explain; }
+        else { btn.classList.add('wrong'); fb.textContent = 'Not quite. ' + item.explain; }
+        nextBtn.classList.add('ready');
+      };
+      opts.appendChild(btn);
+    });
+
+    card.dataset.answered = '';
+    card.appendChild(label);
+    card.appendChild(q);
+    card.appendChild(opts);
+    card.appendChild(fb);
+    card.appendChild(nav);
+
+  } else {
+    const div = document.createElement('div');
+    div.className = 'final';
+    const banner = document.createElement('div');
+    banner.style.fontWeight = 'bold';
+    banner.style.marginBottom = '6px';
+    banner.textContent = 'Review complete!';
+    const h2 = document.createElement('h2');
+    h2.textContent = 'Great work, Justina';
+    const scoreEl = document.createElement('div');
+    scoreEl.className = 'score';
+    scoreEl.textContent = score + ' / ' + total;
+    const note = document.createElement('p');
+    note.style.fontSize = '0.9rem';
+    note.style.color = '#4a5a75';
+    note.textContent = 'Present Perfect takes time to feel natural -- recognizing it is the first step, and you just practiced exactly that.';
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'reset';
+    resetBtn.textContent = 'Play again';
+    resetBtn.onclick = () => { round=1; idx=0; score=0; renderCard(); };
+    div.appendChild(banner);
+    div.appendChild(h2);
+    div.appendChild(scoreEl);
+    div.appendChild(note);
+    div.appendChild(resetBtn);
+    card.appendChild(div);
+  }
+}
+
+renderCard();
+</script>
+</body>
+</html>
