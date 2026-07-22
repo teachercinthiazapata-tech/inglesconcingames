@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class 57 &amp; 58 Review Challenge — A2</title>
+<style>
+  :root{
+    --navy:#1B2A4A; --peach:#FFE8D6; --mint:#D8F3DC; --coral:#FFD6D6;
+    --yellow:#FFF3B0; --blue:#BDE0FE; --purple:#EEE3F8; --purple-strong:#C79EEA;
+    --good:#5FAE62; --bad:#E2685F; --muted:#5B7386;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:28px 16px 48px; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(circle at top left,#fff3e8 0,#FBEADA 45%,#f3d9c2 100%);
+    color:var(--navy);
+  }
+  .card{
+    width:min(640px,94vw); background:#fff; border-radius:26px; padding:28px 26px 26px;
+    box-shadow:0 16px 34px rgba(27,42,74,.16); position:relative; overflow:hidden;
+  }
+  h1{font-size:1.4rem; margin:0 0 6px; text-align:center;}
+  .sub{text-align:center; color:var(--muted); font-size:.95rem; margin:0 0 20px;}
+  .progress-wrap{background:var(--peach); border-radius:999px; height:14px; overflow:hidden; margin-bottom:22px;}
+  .progress-bar{background:linear-gradient(90deg,#C25FD6,#EE6FA6); height:100%; width:0%; transition:width .35s ease;}
+  .tag{
+    display:inline-block; font-size:.72rem; font-weight:800; letter-spacing:.5px; text-transform:uppercase;
+    padding:5px 12px; border-radius:999px; margin-bottom:14px;
+  }
+  .tag.vocab{background:var(--purple); color:#4B2170;}
+  .tag.grammar{background:var(--coral); color:#8a2f2a;}
+  .question{font-size:1.15rem; font-weight:700; margin:0 0 20px; line-height:1.4;}
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    text-align:left; border:2px solid #F0E3D3; background:#FDF6EF; border-radius:16px;
+    padding:13px 16px; font-size:1rem; cursor:pointer; color:var(--navy); transition:.15s ease;
+    font-family:inherit;
+  }
+  .opt:hover{border-color:var(--purple-strong); transform:translateY(-1px);}
+  .opt.correct{background:#E4F5E1; border-color:var(--good); color:#245c27; font-weight:700;}
+  .opt.incorrect{background:#FBE3E1; border-color:var(--bad); color:#7a2b26; font-weight:700;}
+  .opt[disabled]{cursor:default;}
+  .feedback{
+    margin-top:16px; padding:14px 16px; border-radius:14px; font-size:.95rem; line-height:1.4; display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.good{background:#E4F5E1; color:#245c27;}
+  .feedback.bad{background:#FBE3E1; color:#7a2b26;}
+  .nextBtn{
+    margin-top:18px; width:100%; border:none; border-radius:999px; padding:14px; font-size:1.05rem;
+    font-weight:700; background:var(--navy); color:#fff; cursor:pointer; display:none;
+  }
+  .nextBtn.show{display:block;}
+  .start-screen, .end-screen{text-align:center;}
+  .start-screen p, .end-screen p{color:var(--muted); line-height:1.5;}
+  .bigBtn{
+    border:none; border-radius:999px; padding:16px 34px; font-size:1.1rem; font-weight:800;
+    background:linear-gradient(90deg,#C25FD6,#EE6FA6); color:#fff; cursor:pointer; margin-top:10px;
+  }
+  .score-circle{
+    width:150px; height:150px; border-radius:50%; margin:18px auto; display:flex; align-items:center;
+    justify-content:center; flex-direction:column; background:var(--purple); border:6px solid var(--purple-strong);
+  }
+  .score-circle .num{font-size:2.2rem; font-weight:800; color:#4B2170;}
+  .score-circle .lbl{font-size:.8rem; color:#4B2170; font-weight:600;}
+  footer{margin-top:18px; text-align:center; color:var(--muted); font-size:.85rem;}
+</style>
+</head>
+<body>
+
+<div class="card" id="card"></div>
+<footer>By @inglesconcin.ok · Class 57 &amp; 58 review, The Good Place</footer>
+
+<script>
+const questions = [
+  { type:"vocab", q:"What does “kill switch” mean?", options:[
+      "A button that shuts a machine down completely",
+      "A key used to start a car",
+      "A type of video game"
+    ], correct:0, explain:"A kill switch is a control that shuts something down completely, often as a safety measure." },
+  { type:"vocab", q:"“To shut down” means...", options:[
+      "To turn something on",
+      "To stop working or operating completely",
+      "To make something louder"
+    ], correct:1, explain:"To shut down = to stop a machine, system or business from operating." },
+  { type:"vocab", q:"“Retirement” refers to...", options:[
+      "A type of vacation",
+      "Stopping work, often permanently",
+      "A promotion at work"
+    ], correct:1, explain:"Retirement is the act of leaving a job or role for good." },
+  { type:"vocab", q:"“To confess” means...", options:[
+      "To admit you did something wrong",
+      "To hide a secret forever",
+      "To ask someone a question"
+    ], correct:0, explain:"To confess = to openly admit a mistake, crime or secret." },
+  { type:"vocab", q:"“To get away with something” means...", options:[
+      "To travel somewhere new",
+      "To do something wrong without being caught or punished",
+      "To give something away for free"
+    ], correct:1, explain:"To get away with something = to avoid consequences for doing something wrong." },
+  { type:"vocab", q:"“To blame someone” means...", options:[
+      "To say someone is responsible for something bad",
+      "To thank someone for their help",
+      "To forgive someone completely"
+    ], correct:0, explain:"To blame someone = to hold them responsible for a mistake or problem." },
+  { type:"vocab", q:"“To eat someone up inside” describes...", options:[
+      "Being extremely hungry",
+      "Constant guilt or worry that doesn't go away",
+      "Enjoying a delicious meal"
+    ], correct:1, explain:"This idiom describes ongoing guilt, regret or worry that bothers someone over time." },
+  { type:"vocab", q:"“To wreak havoc” means...", options:[
+      "To cause a lot of damage or chaos",
+      "To clean up a mess perfectly",
+      "To relax quietly at home"
+    ], correct:0, explain:"To wreak havoc = to cause serious damage, chaos or disorder." },
+  { type:"vocab", q:"“To go nuts” means...", options:[
+      "To eat a healthy snack",
+      "To become very upset, crazy, or extremely excited",
+      "To fall asleep quickly"
+    ], correct:1, explain:"To go nuts = to become very upset, wild, or overly excited." },
+  { type:"vocab", q:"“To count on someone” means...", options:[
+      "To ignore someone completely",
+      "To trust or rely on someone",
+      "To count how many people are in a room"
+    ], correct:1, explain:"To count on someone = to trust them to help or support you." },
+  { type:"grammar", q:"Choose the correct option: “You ___ wear a seatbelt in the car — it's the law.”", options:[
+      "must", "mustn't", "don't have to"
+    ], correct:0, explain:"“It's the law” signals a strong obligation, so we use must." },
+  { type:"grammar", q:"Choose the correct option: “We ___ forget her birthday this year!”", options:[
+      "must", "mustn't", "have to"
+    ], correct:1, explain:"Forgetting would be a serious mistake to avoid — this is a strong warning, so mustn't." },
+  { type:"grammar", q:"Choose the correct option: “If you study, you ___ the exam.”", options:[
+      "will pass", "would pass", "passes"
+    ], correct:0, explain:"First conditional: If + present simple, ... will + base verb." },
+  { type:"grammar", q:"Choose the correct option: “If it ___ tomorrow, we will stay home.”", options:[
+      "will rain", "rains", "raining"
+    ], correct:1, explain:"The if-clause always uses present simple — never “will” — even though the meaning is future." },
+  { type:"grammar", q:"Find the mistake: “If she will tell the truth, he will forgive her.”", options:[
+      "It's correct as it is",
+      "“will” shouldn't be in the if-clause — it should be “If she tells the truth...”",
+      "“forgive” should be “forgives”"
+    ], correct:1, explain:"“Will” never appears in the if-clause; it only goes in the result clause." },
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+const card = document.getElementById("card");
+
+function renderStart(){
+  card.innerHTML = `
+    <div class="start-screen">
+      <h1>Class 57 &amp; 58 Review Challenge</h1>
+      <p>15 quick questions mixing vocabulary from The Good Place (Episodes 6 &amp; 7) with must/mustn't and the first conditional.</p>
+      <button class="bigBtn" id="startBtn">START</button>
+    </div>
+  `;
+  document.getElementById("startBtn").addEventListener("click", () => {
+    current = 0; score = 0;
+    renderQuestion();
+  });
+}
+
+function renderQuestion(){
+  answered = false;
+  const item = questions[current];
+  const pct = Math.round((current / questions.length) * 100);
+  const tagLabel = item.type === "vocab" ? "Vocabulary" : "Grammar";
+  const tagClass = item.type === "vocab" ? "vocab" : "grammar";
+
+  card.innerHTML = `
+    <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+    <span class="tag ${tagClass}">${tagLabel} · Question ${current+1} of ${questions.length}</span>
+    <p class="question">${item.q}</p>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="nextBtn" id="nextBtn">${current === questions.length-1 ? "SEE MY SCORE" : "NEXT"}</button>
+  `;
+
+  const optionsEl = document.getElementById("options");
+  item.options.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.className = "opt";
+    btn.textContent = opt;
+    btn.addEventListener("click", () => selectOption(i));
+    optionsEl.appendChild(btn);
+  });
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    current++;
+    if(current < questions.length){
+      renderQuestion();
+    } else {
+      renderEnd();
+    }
+  });
+}
+
+function selectOption(i){
+  if(answered) return;
+  answered = true;
+  const item = questions[current];
+  const buttons = document.querySelectorAll(".opt");
+  buttons.forEach((b, idx) => {
+    b.disabled = true;
+    if(idx === item.correct) b.classList.add("correct");
+    else if(idx === i) b.classList.add("incorrect");
+  });
+
+  const fb = document.getElementById("feedback");
+  if(i === item.correct){
+    score++;
+    fb.className = "feedback show good";
+    fb.textContent = "Correct! " + item.explain;
+  } else {
+    fb.className = "feedback show bad";
+    fb.textContent = "Not quite. " + item.explain;
+  }
+
+  document.getElementById("nextBtn").classList.add("show");
+}
+
+function renderEnd(){
+  const pct = Math.round((score / questions.length) * 100);
+  let msg = "Great effort — keep reviewing and it'll click!";
+  if(pct >= 80) msg = "Amazing work, Flor! You've really got this.";
+  else if(pct >= 60) msg = "Nice job! Just a bit more practice on the tricky ones.";
+
+  card.innerHTML = `
+    <div class="end-screen">
+      <h1>All done!</h1>
+      <div class="score-circle">
+        <div class="num">${score}/${questions.length}</div>
+        <div class="lbl">${pct}%</div>
+      </div>
+      <p>${msg}</p>
+      <button class="bigBtn" id="restartBtn">TRY AGAIN</button>
+    </div>
+  `;
+  document.getElementById("restartBtn").addEventListener("click", renderStart);
+}
+
+renderStart();
+</script>
+</body>
+</html>
