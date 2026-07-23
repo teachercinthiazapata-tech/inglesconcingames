@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class 24 Review -- Karen</title>
+<style>
+  :root{ --peach:#F6D9C4; --mint:#CDEAE0; --coral:#E8836B; --navy:#1F3864; --cream:#FFFBF4; --lav:#CBA9E3; }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI', Arial, sans-serif; background:linear-gradient(135deg,var(--lav),var(--mint));
+    min-height:100vh; padding:24px; color:var(--navy);
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  h1{text-align:center;font-size:1.5rem;margin-bottom:2px;}
+  p.sub{text-align:center;margin-top:0;color:#4a5a75;}
+  .hint{
+    background:white; border-radius:12px; padding:12px 18px; margin-bottom:16px; font-size:0.88rem;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  }
+  .hint b{color:var(--coral);}
+  .progress{ display:flex; justify-content:center; gap:8px; margin:14px 0 20px; flex-wrap:wrap; }
+  .dot{width:12px;height:12px;border-radius:50%;background:#ffffffaa;border:2px solid var(--navy);}
+  .dot.done{background:var(--coral); border-color:var(--coral);}
+  .dot.active{background:var(--navy); border-color:var(--navy);}
+  .card{
+    background:var(--cream); border-radius:16px; padding:22px 24px; box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    min-height:260px; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .round-label{font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--coral); font-weight:bold; margin-bottom:6px;}
+  .q-text{font-size:1.05rem; margin:0 0 18px; line-height:1.5; white-space:pre-line;}
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    background:white; border:2px solid #e2e2e2; border-radius:10px; padding:12px 16px; cursor:pointer;
+    font-size:0.98rem; transition:all .15s;
+  }
+  .opt:hover{border-color:var(--coral);}
+  .opt.correct{background:#d9f2e3; border-color:#3aa76d;}
+  .opt.wrong{background:#fbdada; border-color:#d1504a;}
+  .feedback{margin-top:14px; font-size:0.9rem; font-weight:bold; min-height:1.4em;}
+  .nav{display:flex; justify-content:flex-end; margin-top:14px;}
+  button.next{
+    background:var(--navy); color:white; border:none; padding:10px 22px; border-radius:8px;
+    cursor:pointer; font-size:0.95rem; opacity:0.4; pointer-events:none; transition:opacity .2s;
+  }
+  button.next.ready{opacity:1; pointer-events:auto;}
+  .final{ text-align:center; }
+  .final h2{color:var(--navy);}
+  .final .score{font-size:2rem; font-weight:bold; color:var(--coral); margin:14px 0;}
+  button.reset{
+    background:var(--navy); color:white; border:none; padding:10px 22px; border-radius:8px;
+    cursor:pointer; font-size:0.95rem; margin-top:10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Class 24 Review</h1>
+  <p class="sub">Round 1: Socializing Vocabulary &middot; Round 2: Present Perfect (ever/never)</p>
+  <div class="hint">
+    <b>Reminder:</b> use <b>ever</b> in questions (Have you ever...?) and <b>never</b> in affirmative sentences with a negative meaning (I've never...).
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+const vocabQuestions = [
+  { q: "break the ice", options: ["To make people feel more comfortable in a social situation", "To end a friendship suddenly", "To cancel plans at the last minute"], correct: 0 },
+  { q: "make small talk", options: ["To argue about an unimportant topic", "To have a light, casual conversation about unimportant things", "To speak very quietly"], correct: 1 },
+  { q: "have things in common", options: ["To disagree about everything", "To share similar interests, experiences, or opinions with someone", "To live in the same building as someone"], correct: 1 },
+  { q: "get along with (someone)", options: ["To have a friendly, positive relationship with someone", "To avoid someone completely", "To work for someone"], correct: 0 },
+  { q: "keep in touch", options: ["To stop talking to someone forever", "To continue communicating with someone over time, even from far away", "To meet someone for the first time"], correct: 1 },
+  { q: "feel like an outsider", options: ["To feel confident and included in a group", "To feel like you don't belong or fit in with a group", "To feel tired after a long day"], correct: 1 },
+  { q: "fit in", options: ["To feel comfortable and accepted within a group", "To be too big for a space", "To leave a group or place"], correct: 0 },
+  { q: "broaden your horizons", options: ["To narrow down your options", "To expand your knowledge and experiences of the world", "To plan a trip in detail"], correct: 1 },
+];
+
+const grammarQuestions = [
+  { text: "___ you ever lived in another country?\n(question about life experience, no specific time)", options: ["Do", "Have"], correct: 1, explain: "Questions about life experience up to now use 'Have/Has + ever'." },
+  { text: "I've ___ tried currywurst -- maybe I should!\n(negative meaning, affirmative sentence)", options: ["ever", "never"], correct: 1, explain: "'Never' goes in affirmative sentences and already carries a negative meaning -- no extra 'not' needed." },
+  { text: "___ she ever felt like an outsider in Berlin?\n(question about experience)", options: ["Has", "Does"], correct: 0, explain: "Present Perfect questions use Have/Has, not Do/Does." },
+  { text: "They ___ never visited the Brandenburg Gate.\n(negative experience, no specific time)", options: ["have", "did"], correct: 0, explain: "'Have/has + never + past participle' -- Present Perfect, not Past Simple." },
+  { text: "I've already made a few friends here, but I haven't joined a club ___.\n(not yet, but expected)", options: ["yet", "ever"], correct: 0, explain: "'Yet' is used with negative Present Perfect to say something hasn't happened but is expected to." },
+  { text: "Have you ___ broken the ice with a stranger in a funny way?\n(question about experience, any time in your life)", options: ["ever", "never"], correct: 0, explain: "'Ever' is the one used in questions -- 'at any time in your life'." },
+];
+
+let round = 1;
+let idx = 0;
+let score = 0;
+let total = vocabQuestions.length + grammarQuestions.length;
+
+function renderProgress(){
+  const box = document.getElementById('progress');
+  box.innerHTML = '';
+  const totalDots = vocabQuestions.length + grammarQuestions.length;
+  let doneCount = round === 1 ? idx : vocabQuestions.length + idx;
+  for(let i=0;i<totalDots;i++){
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < doneCount ? ' done' : (i === doneCount ? ' active' : ''));
+    box.appendChild(d);
+  }
+}
+
+function renderCard(){
+  renderProgress();
+  const card = document.getElementById('card');
+  card.innerHTML = '';
+
+  if(round === 1 && idx < vocabQuestions.length){
+    const item = vocabQuestions[idx];
+    const label = document.createElement('div');
+    label.className = 'round-label';
+    label.textContent = 'Round 1 -- Vocabulary  (' + (idx+1) + ' / ' + vocabQuestions.length + ')';
+    const q = document.createElement('div');
+    q.className = 'q-text';
+    q.innerHTML = 'What does <b>' + item.q + '</b> mean?';
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    const nav = document.createElement('div');
+    nav.className = 'nav';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'next';
+    nextBtn.textContent = 'Next';
+    nextBtn.onclick = () => { idx++; if(idx>=vocabQuestions.length){ round=2; idx=0; } renderCard(); };
+    nav.appendChild(nextBtn);
+
+    item.options.forEach((optText, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'opt';
+      btn.textContent = optText;
+      btn.onclick = () => {
+        if(card.dataset.answered) return;
+        card.dataset.answered = 'true';
+        const allOpts = opts.querySelectorAll('.opt');
+        allOpts.forEach((o, oi) => { if(oi === item.correct) o.classList.add('correct'); });
+        if(i === item.correct){ score++; fb.textContent = 'Correct!'; }
+        else { btn.classList.add('wrong'); fb.textContent = 'Not quite -- the right meaning is highlighted.'; }
+        nextBtn.classList.add('ready');
+      };
+      opts.appendChild(btn);
+    });
+
+    card.dataset.answered = '';
+    card.appendChild(label);
+    card.appendChild(q);
+    card.appendChild(opts);
+    card.appendChild(fb);
+    card.appendChild(nav);
+
+  } else if(round === 2 && idx < grammarQuestions.length){
+    const item = grammarQuestions[idx];
+    const label = document.createElement('div');
+    label.className = 'round-label';
+    label.textContent = 'Round 2 -- Present Perfect (ever/never)  (' + (idx+1) + ' / ' + grammarQuestions.length + ')';
+    const q = document.createElement('div');
+    q.className = 'q-text';
+    q.textContent = item.text;
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    const nav = document.createElement('div');
+    nav.className = 'nav';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'next';
+    nextBtn.textContent = idx === grammarQuestions.length - 1 ? 'See Score' : 'Next';
+    nextBtn.onclick = () => { idx++; renderCard(); };
+    nav.appendChild(nextBtn);
+
+    item.options.forEach((optText, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'opt';
+      btn.textContent = optText;
+      btn.onclick = () => {
+        if(card.dataset.answered) return;
+        card.dataset.answered = 'true';
+        const allOpts = opts.querySelectorAll('.opt');
+        allOpts.forEach((o, oi) => { if(oi === item.correct) o.classList.add('correct'); });
+        if(i === item.correct){ score++; fb.textContent = 'Correct! ' + item.explain; }
+        else { btn.classList.add('wrong'); fb.textContent = 'Not quite. ' + item.explain; }
+        nextBtn.classList.add('ready');
+      };
+      opts.appendChild(btn);
+    });
+
+    card.dataset.answered = '';
+    card.appendChild(label);
+    card.appendChild(q);
+    card.appendChild(opts);
+    card.appendChild(fb);
+    card.appendChild(nav);
+
+  } else {
+    const div = document.createElement('div');
+    div.className = 'final';
+    const banner = document.createElement('div');
+    banner.style.fontWeight = 'bold';
+    banner.style.marginBottom = '6px';
+    banner.textContent = 'Review complete!';
+    const h2 = document.createElement('h2');
+    h2.textContent = 'Great work, Karen';
+    const scoreEl = document.createElement('div');
+    scoreEl.className = 'score';
+    scoreEl.textContent = score + ' / ' + total;
+    const note = document.createElement('p');
+    note.style.fontSize = '0.9rem';
+    note.style.color = '#4a5a75';
+    note.textContent = "You don't need to understand everything to keep going -- every review like this makes the next real conversation easier.";
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'reset';
+    resetBtn.textContent = 'Play again';
+    resetBtn.onclick = () => { round=1; idx=0; score=0; renderCard(); };
+    div.appendChild(banner);
+    div.appendChild(h2);
+    div.appendChild(scoreEl);
+    div.appendChild(note);
+    div.appendChild(resetBtn);
+    card.appendChild(div);
+  }
+}
+
+renderCard();
+</script>
+</body>
+</html>
