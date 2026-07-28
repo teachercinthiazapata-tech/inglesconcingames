@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Matching: Everyday Plans & Appointments</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .app {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 900px;
+    width: 100%;
+    padding: 32px 36px 36px;
+    box-shadow: 0 20px 50px rgba(80, 60, 130, 0.25);
+  }
+  h1 {
+    text-align: center;
+    color: #5b3fa0;
+    margin: 0 0 4px;
+    font-size: 1.6em;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7a6a99;
+    margin: 0 0 20px;
+    font-size: 0.95em;
+  }
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e3d9f7;
+    transition: background 0.3s;
+  }
+  .dot.done { background: #7bd8a8; }
+  .score-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 18px;
+    font-weight: 600;
+    color: #5b3fa0;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .col h2 {
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9a8bc4;
+    text-align: center;
+    margin: 0 0 10px;
+  }
+  .card {
+    background: #f5f1fd;
+    border: 2px solid #e3d9f7;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 0.98em;
+    color: #3d2e63;
+    transition: all 0.2s;
+    line-height: 1.35;
+  }
+  .card:hover { border-color: #b79dee; transform: translateY(-1px); }
+  .card.selected { background: #d9c8fb; border-color: #7c5cd6; }
+  .card.matched { background: #d7f7e6; border-color: #6ed4a0; color: #2f6e4f; cursor: default; opacity: 0.85; }
+  .card.wrong { animation: shake 0.35s; border-color: #f08a8a; background: #fde3e3; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .word-label { font-weight: 700; color: #5b3fa0; }
+  .final-screen {
+    text-align: center;
+    padding: 30px 10px;
+  }
+  .final-screen h2 { color: #5b3fa0; margin-bottom: 8px; }
+  .final-score {
+    font-size: 2.4em;
+    font-weight: 800;
+    color: #4fae82;
+    margin: 10px 0;
+  }
+  button.action {
+    background: #7c5cd6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 26px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 14px;
+    transition: background 0.2s;
+  }
+  button.action:hover { background: #6647bd; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Vocabulary Matching</h1>
+  <p class="subtitle">Everyday Plans &amp; Appointments -- click a word, then click its matching meaning or example.</p>
+
+  <div class="progress-dots" id="dots"></div>
+  <div class="score-row">
+    <span id="matchedCount">Matched: 0 / 8</span>
+    <span id="attemptsCount">Attempts: 0</span>
+  </div>
+
+  <div class="board" id="board">
+    <div class="col">
+      <h2>Word</h2>
+      <div id="wordsCol"></div>
+    </div>
+    <div class="col">
+      <h2>Meaning / Example</h2>
+      <div id="defsCol"></div>
+    </div>
+  </div>
+
+  <div class="final-screen hidden" id="finalScreen">
+    <h2>Nice work!</h2>
+    <p>You matched all 8 words.</p>
+    <div class="final-score" id="finalScoreText"></div>
+    <button class="action" id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<script>
+const pairs = [
+  { word: "plan", clue: "Something you've decided to do at a future time -- \"Do you have any ___ for the weekend?\"" },
+  { word: "appointment", clue: "A fixed arrangement to meet someone at a set time -- \"I have a dentist ___ on Tuesday.\"" },
+  { word: "to reschedule", clue: "To change a plan to a different day or time -- \"Can we ___ our coffee for Friday?\"" },
+  { word: "to catch up", clue: "To meet or talk with someone you haven't seen in a while -- \"I'm ___ with an old friend.\"" },
+  { word: "errand", clue: "A short trip to do a small task, like the bank or pharmacy -- \"I'm running ___ this morning.\"" },
+  { word: "free / busy", clue: "Available, or occupied with things to do -- \"Sorry, I'm ___ this weekend.\"" },
+  { word: "to drop by", clue: "To visit someone briefly and casually -- \"I'm ___ my parents' house on Sunday.\"" },
+  { word: "to look forward to", clue: "To feel happy and excited about something coming up -- \"I'm ___ the weekend.\"" },
+];
+
+let selectedWord = null;
+let selectedDef = null;
+let matchedCount = 0;
+let attempts = 0;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildBoard() {
+  const wordsCol = document.getElementById("wordsCol");
+  const defsCol = document.getElementById("defsCol");
+  const dotsEl = document.getElementById("dots");
+  wordsCol.innerHTML = "";
+  defsCol.innerHTML = "";
+  dotsEl.innerHTML = "";
+
+  const shuffledWords = shuffle(pairs);
+  const shuffledDefs = shuffle(pairs);
+
+  shuffledWords.forEach(p => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.dataset.word = p.word;
+    el.innerHTML = `<span class="word-label">${p.word}</span>`;
+    el.addEventListener("click", () => selectWord(el, p.word));
+    wordsCol.appendChild(el);
+  });
+
+  shuffledDefs.forEach(p => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.dataset.word = p.word;
+    el.textContent = p.clue;
+    el.addEventListener("click", () => selectDef(el, p.word));
+    defsCol.appendChild(el);
+  });
+
+  for (let i = 0; i < pairs.length; i++) {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  }
+}
+
+function selectWord(el, word) {
+  if (el.classList.contains("matched")) return;
+  document.querySelectorAll("#wordsCol .card").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  selectedWord = { el, word };
+  tryMatch();
+}
+
+function selectDef(el, word) {
+  if (el.classList.contains("matched")) return;
+  document.querySelectorAll("#defsCol .card").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  selectedDef = { el, word };
+  tryMatch();
+}
+
+function tryMatch() {
+  if (!selectedWord || !selectedDef) return;
+  attempts++;
+  document.getElementById("attemptsCount").textContent = `Attempts: ${attempts}`;
+
+  if (selectedWord.word === selectedDef.word) {
+    selectedWord.el.classList.remove("selected");
+    selectedDef.el.classList.remove("selected");
+    selectedWord.el.classList.add("matched");
+    selectedDef.el.classList.add("matched");
+    matchedCount++;
+    document.getElementById("matchedCount").textContent = `Matched: ${matchedCount} / 8`;
+    const dots = document.querySelectorAll(".dot");
+    if (dots[matchedCount - 1]) dots[matchedCount - 1].classList.add("done");
+    selectedWord = null;
+    selectedDef = null;
+    if (matchedCount === pairs.length) {
+      setTimeout(showFinal, 500);
+    }
+  } else {
+    const w = selectedWord.el, d = selectedDef.el;
+    w.classList.add("wrong");
+    d.classList.add("wrong");
+    setTimeout(() => {
+      w.classList.remove("selected", "wrong");
+      d.classList.remove("selected", "wrong");
+      selectedWord = null;
+      selectedDef = null;
+    }, 450);
+  }
+}
+
+function showFinal() {
+  document.getElementById("board").classList.add("hidden");
+  document.querySelector(".score-row").classList.add("hidden");
+  document.getElementById("dots").classList.add("hidden");
+  document.getElementById("finalScreen").classList.remove("hidden");
+  document.getElementById("finalScoreText").textContent = `${attempts} attempts for 8 matches`;
+}
+
+document.getElementById("playAgainBtn").addEventListener("click", () => {
+  matchedCount = 0;
+  attempts = 0;
+  selectedWord = null;
+  selectedDef = null;
+  document.getElementById("matchedCount").textContent = "Matched: 0 / 8";
+  document.getElementById("attemptsCount").textContent = "Attempts: 0";
+  document.getElementById("board").classList.remove("hidden");
+  document.querySelector(".score-row").classList.remove("hidden");
+  document.getElementById("dots").classList.remove("hidden");
+  document.getElementById("finalScreen").classList.add("hidden");
+  buildBoard();
+});
+
+buildBoard();
+</script>
+</body>
+</html>
