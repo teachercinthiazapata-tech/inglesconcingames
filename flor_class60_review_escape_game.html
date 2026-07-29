@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Good Place: Vocabulary &amp; Grammar Escape</title>
+<style>
+  :root{
+    --navy:#1B2A4A; --peach:#FFE8D6; --mint:#D8F3DC; --coral:#FFD6D6;
+    --yellow:#FFF3B0; --blue:#BDE0FE; --purple:#EEE3F8; --purple-strong:#C79EEA;
+    --good:#5FAE62; --bad:#E2685F; --muted:#5B7386;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:28px 16px 48px; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(circle at top left,#12213d 0,#1B2A4A 55%,#0f1a30 100%);
+    color:var(--navy);
+  }
+  .card{
+    width:min(660px,94vw); background:#fff; border-radius:26px; padding:26px 24px;
+    box-shadow:0 20px 44px rgba(0,0,0,.35); position:relative; overflow:hidden;
+  }
+  h1{font-size:1.3rem; margin:0 0 6px; text-align:center;}
+  .sub{text-align:center; color:var(--muted); font-size:.92rem; margin:0 0 16px; line-height:1.4;}
+  .doors{display:flex; justify-content:center; gap:10px; margin-bottom:18px;}
+  .door{
+    width:34px; height:44px; border-radius:6px 6px 3px 3px; background:var(--peach);
+    border:2px solid #E0C6A6; display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; transition:.3s ease;
+  }
+  .door.unlocked{background:var(--mint); border-color:var(--good);}
+  .stage-label{
+    display:inline-block; font-size:.72rem; font-weight:800; letter-spacing:.5px; text-transform:uppercase;
+    padding:5px 12px; border-radius:999px; margin-bottom:12px; background:var(--purple); color:#4B2170;
+  }
+  .instructions{font-size:.95rem; margin-bottom:16px; line-height:1.4;}
+  .match-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media(max-width:520px){ .match-grid{grid-template-columns:1fr;} }
+  .col-title{font-size:.8rem; font-weight:800; text-transform:uppercase; color:var(--muted); margin-bottom:8px; letter-spacing:.4px;}
+  .match-card{
+    text-align:left; width:100%; border:2px solid #F0E3D3; background:#FDF6EF; border-radius:14px;
+    padding:11px 14px; font-size:.92rem; cursor:pointer; color:var(--navy); margin-bottom:10px;
+    font-family:inherit; transition:.15s ease;
+  }
+  .match-card:hover{border-color:var(--purple-strong); transform:translateY(-1px);}
+  .match-card.selected{border-color:var(--navy); background:var(--purple); font-weight:700;}
+  .match-card.correct{background:var(--mint); border-color:var(--good); color:#245c27; font-weight:700; cursor:default;}
+  .match-card.wrong-flash{background:var(--coral); border-color:var(--bad);}
+  .match-card[disabled]{cursor:default;}
+  .lock-question{font-size:1.05rem; font-weight:700; margin:0 0 16px; line-height:1.4;}
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    text-align:left; border:2px solid #F0E3D3; background:#FDF6EF; border-radius:16px;
+    padding:12px 15px; font-size:.98rem; cursor:pointer; color:var(--navy); transition:.15s ease; font-family:inherit;
+  }
+  .opt:hover{border-color:var(--purple-strong); transform:translateY(-1px);}
+  .opt.correct{background:var(--mint); border-color:var(--good); color:#245c27; font-weight:700;}
+  .opt.incorrect{background:var(--coral); border-color:var(--bad); color:#7a2b26; font-weight:700;}
+  .opt[disabled]{cursor:default;}
+  .feedback{margin-top:14px; padding:13px 15px; border-radius:14px; font-size:.9rem; line-height:1.4; display:none;}
+  .feedback.show{display:block;}
+  .feedback.good{background:var(--mint); color:#245c27;}
+  .feedback.bad{background:var(--coral); color:#7a2b26;}
+  .nextBtn{
+    margin-top:16px; width:100%; border:none; border-radius:999px; padding:13px; font-size:1rem;
+    font-weight:700; background:var(--navy); color:#fff; cursor:pointer; display:none;
+  }
+  .nextBtn.show{display:block;}
+  .start-screen, .end-screen{text-align:center;}
+  .start-screen p, .end-screen p{color:var(--muted); line-height:1.5;}
+  .bigBtn{
+    border:none; border-radius:999px; padding:15px 32px; font-size:1.05rem; font-weight:800;
+    background:linear-gradient(90deg,#C25FD6,#EE6FA6); color:#fff; cursor:pointer; margin-top:8px;
+  }
+  .lock-icon{font-size:3.2rem; margin:6px 0;}
+  .progress-note{font-size:.82rem; color:var(--muted); text-align:center; margin-top:2px;}
+  footer{margin-top:16px; text-align:center; color:#cfd7e8; font-size:.82rem;}
+</style>
+</head>
+<body>
+
+<div class="card" id="card"></div>
+<footer>The Good Place — vocabulary &amp; grammar review</footer>
+
+<script>
+const vocabPairs = [
+  { word:"kill switch", def:"A button or control that shuts a machine down completely, often as a safety measure." },
+  { word:"to shut down", def:"To stop a machine, system, or business from operating completely." },
+  { word:"retirement", def:"Stopping work, often permanently, usually later in life." },
+  { word:"to confess", def:"To admit that you did something wrong or made a mistake." },
+  { word:"to get away with something", def:"To do something wrong without being caught or punished." },
+  { word:"to blame someone", def:"To say that someone is responsible for something bad." },
+  { word:"to eat someone up inside", def:"To cause someone constant guilt or worry that doesn't go away." },
+  { word:"to wreak havoc", def:"To cause a lot of damage, chaos, or disorder." },
+  { word:"to go nuts", def:"To become very upset, wild, or extremely excited." },
+  { word:"to count on someone", def:"To trust or rely on someone for help or support." },
+];
+
+const lockQuestions = [
+  { q:"You ___ tell the truth if you want people to trust you again.", options:["must","mustn't","will"], correct:0, explain:"A strong, necessary obligation calls for must." },
+  { q:"We ___ leave without saying goodbye — it would be really rude.", options:["must","mustn't","don't have to"], correct:1, explain:"This describes something to avoid (prohibited/wrong to do), so mustn't." },
+  { q:"If she practices a little every day, her English ___ fast.", options:["improves","will improve","improved"], correct:1, explain:"First conditional: If + present simple, ... will + base verb." },
+  { q:"If it rains tomorrow, we ___ the speaking activity inside.", options:["will do","would do","do"], correct:0, explain:"Real, possible future condition + will-result." },
+  { q:"Find the mistake: \"If she will finish her homework, she will feel proud.\"", options:["It's correct as it is","\"will\" shouldn't be in the if-clause","\"feel\" should be \"feels\""], correct:1, explain:"Will never appears in the if-clause — only in the result clause." },
+];
+
+let shuffledWords = [], shuffledDefs = [], matchedCount = 0;
+let selectedWordIdx = null, selectedDefIdx = null;
+let lockCurrent = 0, lockScore = 0, lockAnswered = false;
+
+const card = document.getElementById("card");
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function renderDoors(unlockedCount, total){
+  let html = '<div class="doors">';
+  for(let i=0;i<total;i++){
+    html += `<div class="door ${i < unlockedCount ? 'unlocked' : ''}">${i < unlockedCount ? '🔓' : '🔒'}</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderStart(){
+  card.innerHTML = `
+    <div class="start-screen">
+      <div class="lock-icon">🚪</div>
+      <h1>Vocabulary &amp; Grammar Escape</h1>
+      <p>Two rounds stand between you and the exit: first match the vocabulary, then unlock the grammar doors. Answer everything correctly to escape!</p>
+      <button class="bigBtn" id="startBtn">START</button>
+    </div>
+  `;
+  document.getElementById("startBtn").addEventListener("click", startMatch);
+}
+
+function startMatch(){
+  shuffledWords = shuffle(vocabPairs.map((p,i)=>({...p, idx:i})));
+  shuffledDefs = shuffle(vocabPairs.map((p,i)=>({...p, idx:i})));
+  matchedCount = 0;
+  selectedWordIdx = null; selectedDefIdx = null;
+  renderMatch();
+}
+
+function renderMatch(){
+  card.innerHTML = `
+    ${renderDoors(matchedCount, vocabPairs.length)}
+    <span class="stage-label">Round 1 · Vocabulary Match</span>
+    <p class="instructions">Click a word, then click its matching meaning. Match all ${vocabPairs.length} pairs to unlock the next room.</p>
+    <div class="match-grid">
+      <div>
+        <div class="col-title">Words</div>
+        <div id="wordCol"></div>
+      </div>
+      <div>
+        <div class="col-title">Meanings</div>
+        <div id="defCol"></div>
+      </div>
+    </div>
+    <p class="progress-note" id="progNote">${matchedCount} of ${vocabPairs.length} matched</p>
+  `;
+  const wordCol = document.getElementById("wordCol");
+  const defCol = document.getElementById("defCol");
+  shuffledWords.forEach((item, i) => {
+    const btn = document.createElement("button");
+    btn.className = "match-card";
+    btn.textContent = item.word;
+    btn.dataset.idx = item.idx;
+    if(item.matched) { btn.classList.add("correct"); btn.disabled = true; }
+    btn.addEventListener("click", () => selectWord(i, btn));
+    wordCol.appendChild(btn);
+  });
+  shuffledDefs.forEach((item, i) => {
+    const btn = document.createElement("button");
+    btn.className = "match-card";
+    btn.textContent = item.def;
+    btn.dataset.idx = item.idx;
+    if(item.matched) { btn.classList.add("correct"); btn.disabled = true; }
+    btn.addEventListener("click", () => selectDef(i, btn));
+    defCol.appendChild(btn);
+  });
+}
+
+function selectWord(i, btn){
+  if(shuffledWords[i].matched) return;
+  document.querySelectorAll("#wordCol .match-card").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedWordIdx = i;
+  tryMatch();
+}
+function selectDef(i, btn){
+  if(shuffledDefs[i].matched) return;
+  document.querySelectorAll("#defCol .match-card").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedDefIdx = i;
+  tryMatch();
+}
+
+function tryMatch(){
+  if(selectedWordIdx === null || selectedDefIdx === null) return;
+  const w = shuffledWords[selectedWordIdx];
+  const d = shuffledDefs[selectedDefIdx];
+  const wordBtn = document.querySelectorAll("#wordCol .match-card")[selectedWordIdx];
+  const defBtn = document.querySelectorAll("#defCol .match-card")[selectedDefIdx];
+  if(w.idx === d.idx){
+    w.matched = true; d.matched = true;
+    matchedCount++;
+    selectedWordIdx = null; selectedDefIdx = null;
+    if(matchedCount === vocabPairs.length){
+      setTimeout(startLock, 500);
+    } else {
+      renderMatch();
+    }
+  } else {
+    wordBtn.classList.add("wrong-flash");
+    defBtn.classList.add("wrong-flash");
+    setTimeout(() => {
+      wordBtn.classList.remove("selected","wrong-flash");
+      defBtn.classList.remove("selected","wrong-flash");
+      selectedWordIdx = null; selectedDefIdx = null;
+    }, 500);
+  }
+}
+
+function startLock(){
+  lockCurrent = 0; lockScore = 0;
+  renderLock();
+}
+
+function renderLock(){
+  lockAnswered = false;
+  const item = lockQuestions[lockCurrent];
+  card.innerHTML = `
+    ${renderDoors(vocabPairs.length + lockCurrent, vocabPairs.length + lockQuestions.length)}
+    <span class="stage-label">Round 2 · Grammar Lock ${lockCurrent+1} of ${lockQuestions.length}</span>
+    <p class="lock-question">${item.q}</p>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="nextBtn" id="nextBtn">${lockCurrent === lockQuestions.length-1 ? "ESCAPE!" : "NEXT DOOR"}</button>
+  `;
+  const optionsEl = document.getElementById("options");
+  item.options.forEach((opt,i) => {
+    const btn = document.createElement("button");
+    btn.className = "opt";
+    btn.textContent = opt;
+    btn.addEventListener("click", () => selectLockOption(i));
+    optionsEl.appendChild(btn);
+  });
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    lockCurrent++;
+    if(lockCurrent < lockQuestions.length) renderLock();
+    else renderEnd();
+  });
+}
+
+function selectLockOption(i){
+  if(lockAnswered) return;
+  lockAnswered = true;
+  const item = lockQuestions[lockCurrent];
+  const buttons = document.querySelectorAll(".opt");
+  buttons.forEach((b, idx) => {
+    b.disabled = true;
+    if(idx === item.correct) b.classList.add("correct");
+    else if(idx === i) b.classList.add("incorrect");
+  });
+  const fb = document.getElementById("feedback");
+  if(i === item.correct){
+    lockScore++;
+    fb.className = "feedback show good";
+    fb.textContent = "Door unlocked! " + item.explain;
+  } else {
+    fb.className = "feedback show bad";
+    fb.textContent = "Not quite. " + item.explain;
+  }
+  document.getElementById("nextBtn").classList.add("show");
+}
+
+function renderEnd(){
+  const pct = Math.round((lockScore / lockQuestions.length) * 100);
+  let msg = "You escaped! A little more grammar review and this'll be perfect.";
+  if(pct >= 80) msg = "You escaped with flying colors! Excellent review.";
+  else if(pct >= 60) msg = "You escaped! Nice work — review the tricky doors once more.";
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="lock-icon">🎉</div>
+      <h1>You escaped!</h1>
+      <p>Vocabulary: ${vocabPairs.length}/${vocabPairs.length} matched · Grammar: ${lockScore}/${lockQuestions.length} doors unlocked</p>
+      <p>${msg}</p>
+      <button class="bigBtn" id="restartBtn">PLAY AGAIN</button>
+    </div>
+  `;
+  document.getElementById("restartBtn").addEventListener("click", renderStart);
+}
+
+renderStart();
+</script>
+</body>
+</html>
