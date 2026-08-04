@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Quiz: Present Continuous vs Going To</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .app {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 640px;
+    width: 100%;
+    padding: 32px 34px 36px;
+    box-shadow: 0 20px 50px rgba(80, 60, 130, 0.25);
+  }
+  h1 {
+    text-align: center;
+    color: #5b3fa0;
+    margin: 0 0 4px;
+    font-size: 1.5em;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7a6a99;
+    margin: 0 0 20px;
+    font-size: 0.95em;
+  }
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e3d9f7;
+    transition: background 0.3s;
+  }
+  .dot.done { background: #7bd8a8; }
+  .dot.current { background: #b79dee; }
+  .score-row {
+    text-align: center;
+    font-weight: 600;
+    color: #5b3fa0;
+    margin-bottom: 18px;
+  }
+  .scenario {
+    background: #f5f1fd;
+    border-radius: 14px;
+    padding: 16px 18px;
+    color: #3d2e63;
+    font-size: 1.02em;
+    line-height: 1.4;
+    margin-bottom: 18px;
+  }
+  .scenario .tag {
+    display: block;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9a8bc4;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .option {
+    background: #fdf9ff;
+    border: 2px solid #e3d9f7;
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 0.98em;
+    color: #3d2e63;
+    transition: all 0.2s;
+  }
+  .option:hover { border-color: #b79dee; transform: translateY(-1px); }
+  .option.correct { background: #d7f7e6; border-color: #6ed4a0; color: #2f6e4f; }
+  .option.incorrect { background: #fde3e3; border-color: #f08a8a; color: #8a3b3b; }
+  .option.disabled { cursor: default; }
+  .feedback {
+    margin-top: 14px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.92em;
+    line-height: 1.4;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: #eafaf1; color: #2f6e4f; }
+  .feedback.incorrect-fb { background: #fdecec; color: #8a3b3b; }
+  .next-row {
+    text-align: center;
+    margin-top: 18px;
+  }
+  button.action {
+    background: #7c5cd6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 26px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button.action:hover { background: #6647bd; }
+  button.action:disabled { background: #cbbdea; cursor: not-allowed; }
+  .final-screen {
+    text-align: center;
+    padding: 20px 10px;
+  }
+  .final-screen h2 { color: #5b3fa0; margin-bottom: 8px; }
+  .final-score {
+    font-size: 2.4em;
+    font-weight: 800;
+    color: #4fae82;
+    margin: 10px 0;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Grammar Quiz</h1>
+  <p class="subtitle">Present Continuous vs Going To. Choose the sentence that fits each situation.</p>
+
+  <div class="progress-dots" id="dots"></div>
+  <div class="score-row" id="scoreRow">Question 1 of 8</div>
+
+  <div id="quizArea">
+    <div class="scenario">
+      <span class="tag">Situation</span>
+      <span id="scenarioText"></span>
+    </div>
+    <div class="options" id="optionsArea"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="next-row">
+      <button class="action" id="nextBtn" disabled>Next</button>
+    </div>
+  </div>
+
+  <div class="final-screen hidden" id="finalScreen">
+    <h2>Nice work!</h2>
+    <div class="final-score" id="finalScoreText"></div>
+    <p id="finalMessage"></p>
+    <button class="action" id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    scenario: "You already booked a doctor's appointment for Friday morning.",
+    options: [
+      { text: "I'm seeing the doctor on Friday morning.", correct: true },
+      { text: "I'm going to see the doctor sometime.", correct: false },
+    ],
+    explanation: "It's already arranged, with a specific day and time, so present continuous fits best.",
+  },
+  {
+    scenario: "You want to travel abroad someday, but you haven't planned anything yet.",
+    options: [
+      { text: "I'm traveling abroad next Tuesday.", correct: false },
+      { text: "I'm going to travel abroad someday.", correct: true },
+    ],
+    explanation: "There is no fixed date or arrangement yet, just a general intention, so going to fits best.",
+  },
+  {
+    scenario: "You already texted a friend and confirmed coffee for Saturday at 5.",
+    options: [
+      { text: "I'm meeting my friend for coffee on Saturday at 5.", correct: true },
+      { text: "I'm going to meet my friend for coffee sometime.", correct: false },
+    ],
+    explanation: "A specific day and time are already confirmed, so present continuous fits best.",
+  },
+  {
+    scenario: "You've decided you want to learn Italian, but you haven't started planning how.",
+    options: [
+      { text: "I'm learning Italian this week.", correct: false },
+      { text: "I'm going to learn Italian.", correct: true },
+    ],
+    explanation: "It's a decided intention with no concrete arrangement yet, so going to fits best.",
+  },
+  {
+    scenario: "Your dentist appointment is confirmed for Tuesday at 10.",
+    options: [
+      { text: "I'm going to the dentist on Tuesday at 10.", correct: true },
+      { text: "I'm going to go to the dentist sometime this month.", correct: false },
+    ],
+    explanation: "A specific, confirmed time makes present continuous the better fit here.",
+  },
+  {
+    scenario: "You feel like starting a new hobby, but nothing is planned yet.",
+    options: [
+      { text: "I'm starting yoga classes tomorrow at 6.", correct: false },
+      { text: "I'm going to start a new hobby.", correct: true },
+    ],
+    explanation: "It's just an intention for now, with nothing arranged, so going to fits best.",
+  },
+  {
+    scenario: "You already reserved a table for dinner tonight at 8.",
+    options: [
+      { text: "I'm having dinner with my family tonight at 8.", correct: true },
+      { text: "I'm going to have dinner with my family sometime.", correct: false },
+    ],
+    explanation: "The reservation is already made for a specific time, so present continuous fits best.",
+  },
+  {
+    scenario: "You plan to visit your parents soon, but haven't picked a date yet.",
+    options: [
+      { text: "I'm visiting my parents this weekend.", correct: false },
+      { text: "I'm going to visit my parents soon.", correct: true },
+    ],
+    explanation: "No specific date is set, just a general plan, so going to fits best.",
+  },
+];
+
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+
+function buildDots() {
+  const dotsEl = document.getElementById("dots");
+  dotsEl.innerHTML = "";
+  questions.forEach((q, i) => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  });
+  updateDots();
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll(".dot");
+  dots.forEach((dot, i) => {
+    dot.classList.remove("done", "current");
+    if (i < currentIndex) dot.classList.add("done");
+    else if (i === currentIndex) dot.classList.add("current");
+  });
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[currentIndex];
+  document.getElementById("scenarioText").textContent = q.scenario;
+  document.getElementById("scoreRow").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+  const optionsArea = document.getElementById("optionsArea");
+  optionsArea.innerHTML = "";
+  q.options.forEach(opt => {
+    const el = document.createElement("div");
+    el.className = "option";
+    el.textContent = opt.text;
+    el.addEventListener("click", () => selectOption(el, opt, q));
+    optionsArea.appendChild(el);
+  });
+  document.getElementById("feedback").classList.remove("show", "correct-fb", "incorrect-fb");
+  document.getElementById("nextBtn").disabled = true;
+  updateDots();
+}
+
+function selectOption(el, opt, q) {
+  if (answered) return;
+  answered = true;
+  const allOptions = document.querySelectorAll(".option");
+  allOptions.forEach(o => o.classList.add("disabled"));
+  if (opt.correct) {
+    el.classList.add("correct");
+    score++;
+  } else {
+    el.classList.add("incorrect");
+    allOptions.forEach(o => {
+      if (o.textContent === q.options.find(x => x.correct).text) o.classList.add("correct");
+    });
+  }
+  const fb = document.getElementById("feedback");
+  fb.textContent = q.explanation;
+  fb.classList.add("show", opt.correct ? "correct-fb" : "incorrect-fb");
+  document.getElementById("nextBtn").disabled = false;
+}
+
+document.getElementById("nextBtn").addEventListener("click", () => {
+  currentIndex++;
+  if (currentIndex >= questions.length) {
+    showFinal();
+  } else {
+    loadQuestion();
+  }
+});
+
+function showFinal() {
+  document.getElementById("quizArea").classList.add("hidden");
+  document.getElementById("dots").classList.add("hidden");
+  document.getElementById("scoreRow").classList.add("hidden");
+  document.getElementById("finalScreen").classList.remove("hidden");
+  document.getElementById("finalScoreText").textContent = `${score} / ${questions.length}`;
+  let msg = "Solid work noticing the difference.";
+  if (score === questions.length) msg = "Perfect score. You've really got this distinction down.";
+  else if (score <= 4) msg = "A good first pass. Let's talk through a few of these together.";
+  document.getElementById("finalMessage").textContent = msg;
+}
+
+document.getElementById("playAgainBtn").addEventListener("click", () => {
+  currentIndex = 0;
+  score = 0;
+  document.getElementById("quizArea").classList.remove("hidden");
+  document.getElementById("dots").classList.remove("hidden");
+  document.getElementById("scoreRow").classList.remove("hidden");
+  document.getElementById("finalScreen").classList.add("hidden");
+  buildDots();
+  loadQuestion();
+});
+
+buildDots();
+loadQuestion();
+</script>
+</body>
+</html>

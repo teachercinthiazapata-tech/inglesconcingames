@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Challenge: Everyday Plans and Appointments</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .app {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 980px;
+    width: 100%;
+    padding: 28px 32px 32px;
+    box-shadow: 0 20px 50px rgba(80, 60, 130, 0.25);
+    position: relative;
+  }
+  h1 {
+    text-align: center;
+    color: #5b3fa0;
+    margin: 0 0 4px;
+    font-size: 1.5em;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7a6a99;
+    margin: 0 0 18px;
+    font-size: 0.92em;
+  }
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #e3d9f7;
+    transition: background 0.3s;
+  }
+  .dot.done { background: #7bd8a8; }
+  .score-row {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #5b3fa0;
+    font-size: 0.95em;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.6fr;
+    gap: 16px;
+  }
+  .col h2 {
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9a8bc4;
+    text-align: center;
+    margin: 0 0 10px;
+  }
+  .card {
+    background: #f5f1fd;
+    border: 2px solid #e3d9f7;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 0.92em;
+    color: #3d2e63;
+    transition: all 0.2s;
+    line-height: 1.3;
+    min-height: 20px;
+  }
+  .card:hover { border-color: #b79dee; transform: translateY(-1px); }
+  .card.selected { background: #d9c8fb; border-color: #7c5cd6; }
+  .card.matched { background: #d7f7e6; border-color: #6ed4a0; color: #2f6e4f; cursor: default; opacity: 0.8; }
+  .card.wrong { animation: shake 0.35s; border-color: #f08a8a; background: #fde3e3; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .word-label { font-weight: 700; color: #5b3fa0; }
+  .ipa-label { font-style: italic; color: #6647bd; }
+  .final-screen {
+    text-align: center;
+    padding: 26px 10px;
+  }
+  .final-screen h2 { color: #5b3fa0; margin-bottom: 8px; }
+  .final-score {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: #4fae82;
+    margin: 10px 0;
+  }
+  button.action {
+    background: #7c5cd6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 26px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 14px;
+    transition: background 0.2s;
+  }
+  button.action:hover { background: #6647bd; }
+  .hidden { display: none; }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(60, 40, 90, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+  }
+  .popup {
+    background: #ffffff;
+    border-radius: 20px;
+    max-width: 460px;
+    width: 90%;
+    padding: 28px 26px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(60, 40, 90, 0.35);
+  }
+  .popup .tag {
+    display: inline-block;
+    background: #f0e6fb;
+    color: #6647bd;
+    font-weight: 700;
+    font-size: 0.78em;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 20px;
+    padding: 5px 14px;
+    margin-bottom: 12px;
+  }
+  .popup h3 {
+    color: #3d2e63;
+    margin: 0 0 12px;
+    font-size: 1.2em;
+  }
+  .popup p {
+    color: #5c4a80;
+    font-size: 1em;
+    line-height: 1.4;
+    margin: 0 0 18px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Vocabulary Challenge</h1>
+  <p class="subtitle">Everyday Plans and Appointments. Match each word to its IPA and its meaning.</p>
+
+  <div class="progress-dots" id="dots"></div>
+  <div class="score-row">
+    <span id="matchedCount">Matched: 0 / 8</span>
+    <span id="attemptsCount">Attempts: 0</span>
+  </div>
+
+  <div class="board" id="board">
+    <div class="col">
+      <h2>Word</h2>
+      <div id="wordsCol"></div>
+    </div>
+    <div class="col">
+      <h2>IPA</h2>
+      <div id="ipaCol"></div>
+    </div>
+    <div class="col">
+      <h2>Meaning</h2>
+      <div id="defsCol"></div>
+    </div>
+  </div>
+
+  <div class="final-screen hidden" id="finalScreen">
+    <h2>Great work!</h2>
+    <p>You matched all 8 words, their sounds, and their meanings.</p>
+    <div class="final-score" id="finalScoreText"></div>
+    <button class="action" id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="overlay">
+  <div class="popup">
+    <span class="tag">Speaking Challenge</span>
+    <h3 id="popupWord"></h3>
+    <p id="popupPrompt"></p>
+    <button class="action" id="popupCloseBtn">Got it, next word</button>
+  </div>
+</div>
+
+<script>
+const items = [
+  { word: "plan", ipa: "/plæn/", clue: "Something you have decided to do at a future time.",
+    challenge: "Present simple. Make a sentence about a plan you usually have on weekends." },
+  { word: "appointment", ipa: "/əˈpɔɪntmənt/", clue: "A fixed arrangement to meet someone at a set time.",
+    challenge: "Present perfect. Have you ever missed an appointment? Tell me about it." },
+  { word: "to reschedule", ipa: "/riˈskɛdʒuːl/", clue: "To change a plan to a different day or time.",
+    challenge: "Advice with should. A friend missed an important meeting. Give them advice starting with You should." },
+  { word: "to catch up", ipa: "/kætʃ ʌp/", clue: "To meet or talk with someone you have not seen in a while.",
+    challenge: "Present continuous. Make a sentence about catching up with someone soon." },
+  { word: "errand", ipa: "/ˈɛrənd/", clue: "A short trip to do a small task, like the bank or pharmacy.",
+    challenge: "Present simple. Make a sentence about an errand you usually do." },
+  { word: "free / busy", ipa: "/friː/ /ˈbɪzi/", clue: "Available, or occupied with things to do.",
+    challenge: "Going to or would like to. Make a sentence about being free or busy this week." },
+  { word: "to drop by", ipa: "/drɒp baɪ/", clue: "To visit someone briefly and casually.",
+    challenge: "Present continuous. Make a sentence about dropping by somewhere this week." },
+  { word: "to look forward to", ipa: "/lʊk ˈfɔːrwərd tuː/", clue: "To feel happy and excited about something coming up.",
+    challenge: "Look forward to plus ing. Make a sentence about something you are looking forward to." },
+];
+
+let selectedWord = null;
+let selectedIpa = null;
+let selectedDef = null;
+let matchedCount = 0;
+let attempts = 0;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildBoard() {
+  const wordsCol = document.getElementById("wordsCol");
+  const ipaCol = document.getElementById("ipaCol");
+  const defsCol = document.getElementById("defsCol");
+  const dotsEl = document.getElementById("dots");
+  wordsCol.innerHTML = "";
+  ipaCol.innerHTML = "";
+  defsCol.innerHTML = "";
+  dotsEl.innerHTML = "";
+
+  shuffle(items).forEach(it => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.dataset.word = it.word;
+    el.innerHTML = `<span class="word-label">${it.word}</span>`;
+    el.addEventListener("click", () => selectCard(el, it.word, "word"));
+    wordsCol.appendChild(el);
+  });
+
+  shuffle(items).forEach(it => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.dataset.word = it.word;
+    el.innerHTML = `<span class="ipa-label">${it.ipa}</span>`;
+    el.addEventListener("click", () => selectCard(el, it.word, "ipa"));
+    ipaCol.appendChild(el);
+  });
+
+  shuffle(items).forEach(it => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.dataset.word = it.word;
+    el.textContent = it.clue;
+    el.addEventListener("click", () => selectCard(el, it.word, "def"));
+    defsCol.appendChild(el);
+  });
+
+  for (let i = 0; i < items.length; i++) {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  }
+}
+
+function selectCard(el, word, type) {
+  if (el.classList.contains("matched")) return;
+  const colId = type === "word" ? "wordsCol" : type === "ipa" ? "ipaCol" : "defsCol";
+  document.querySelectorAll(`#${colId} .card`).forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  if (type === "word") selectedWord = { el, word };
+  if (type === "ipa") selectedIpa = { el, word };
+  if (type === "def") selectedDef = { el, word };
+  tryMatch();
+}
+
+function tryMatch() {
+  if (!selectedWord || !selectedIpa || !selectedDef) return;
+  attempts++;
+  document.getElementById("attemptsCount").textContent = `Attempts: ${attempts}`;
+
+  if (selectedWord.word === selectedIpa.word && selectedIpa.word === selectedDef.word) {
+    selectedWord.el.classList.remove("selected");
+    selectedIpa.el.classList.remove("selected");
+    selectedDef.el.classList.remove("selected");
+    selectedWord.el.classList.add("matched");
+    selectedIpa.el.classList.add("matched");
+    selectedDef.el.classList.add("matched");
+    matchedCount++;
+    document.getElementById("matchedCount").textContent = `Matched: ${matchedCount} / 8`;
+    const dots = document.querySelectorAll(".dot");
+    if (dots[matchedCount - 1]) dots[matchedCount - 1].classList.add("done");
+    const matchedWord = selectedWord.word;
+    selectedWord = null;
+    selectedIpa = null;
+    selectedDef = null;
+    setTimeout(() => showChallenge(matchedWord), 350);
+  } else {
+    const cards = [selectedWord, selectedIpa, selectedDef];
+    cards.forEach(c => c.el.classList.add("wrong"));
+    setTimeout(() => {
+      cards.forEach(c => c.el.classList.remove("selected", "wrong"));
+      selectedWord = null;
+      selectedIpa = null;
+      selectedDef = null;
+    }, 450);
+  }
+}
+
+function showChallenge(word) {
+  const item = items.find(it => it.word === word);
+  document.getElementById("popupWord").textContent = item.word;
+  document.getElementById("popupPrompt").textContent = item.challenge;
+  document.getElementById("overlay").classList.remove("hidden");
+}
+
+document.getElementById("popupCloseBtn").addEventListener("click", () => {
+  document.getElementById("overlay").classList.add("hidden");
+  if (matchedCount === items.length) {
+    setTimeout(showFinal, 200);
+  }
+});
+
+function showFinal() {
+  document.getElementById("board").classList.add("hidden");
+  document.querySelector(".score-row").classList.add("hidden");
+  document.getElementById("dots").classList.add("hidden");
+  document.getElementById("finalScreen").classList.remove("hidden");
+  document.getElementById("finalScoreText").textContent = `${attempts} attempts for 8 matches`;
+}
+
+document.getElementById("playAgainBtn").addEventListener("click", () => {
+  matchedCount = 0;
+  attempts = 0;
+  selectedWord = null;
+  selectedIpa = null;
+  selectedDef = null;
+  document.getElementById("matchedCount").textContent = "Matched: 0 / 8";
+  document.getElementById("attemptsCount").textContent = "Attempts: 0";
+  document.getElementById("board").classList.remove("hidden");
+  document.querySelector(".score-row").classList.remove("hidden");
+  document.getElementById("dots").classList.remove("hidden");
+  document.getElementById("finalScreen").classList.add("hidden");
+  buildBoard();
+});
+
+buildBoard();
+</script>
+</body>
+</html>
