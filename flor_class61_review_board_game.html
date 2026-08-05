@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Good Place: Vocabulary and Grammar Challenge Board</title>
+<style>
+  :root{
+    --navy:#1B2A4A; --peach:#FFE8D6; --mint:#D8F3DC; --coral:#FFD6D6;
+    --yellow:#FFF3B0; --blue:#BDE0FE; --purple:#EEE3F8; --purple-strong:#C79EEA;
+    --good:#5FAE62; --bad:#E2685F; --muted:#5B7386;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:26px 14px 44px; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(circle at top left,#1B2A4A 0,#243a63 55%,#12203d 100%);
+    color:var(--navy);
+  }
+  .wrap{width:min(760px,96vw);}
+  h1{font-size:1.25rem; margin:0 0 4px; text-align:center; color:#fff;}
+  .sub{text-align:center; color:#cfd7e8; font-size:.88rem; margin:0 0 18px;}
+  .score-row{display:flex; justify-content:center; gap:14px; margin-bottom:18px;}
+  .score-pill{
+    background:#fff; border-radius:999px; padding:8px 18px; font-weight:800; font-size:.9rem; color:var(--navy);
+  }
+  .board{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  @media(max-width:560px){ .board{grid-template-columns:repeat(2,1fr);} }
+  .cat-head{
+    background:#fff; border-radius:10px; padding:10px 6px; text-align:center; font-weight:800;
+    font-size:.78rem; color:var(--navy); line-height:1.25; display:flex; align-items:center; justify-content:center; min-height:56px;
+  }
+  .cell{
+    background:linear-gradient(160deg,#2c4372,#1f3153); border-radius:10px; padding:16px 8px; text-align:center;
+    font-weight:800; font-size:1.15rem; color:#FFE8D6; cursor:pointer; border:2px solid #3a5488; transition:.15s ease;
+  }
+  .cell:hover{transform:translateY(-2px); border-color:var(--purple-strong);}
+  .cell.done{background:#0f1a30; color:#4a5a7a; cursor:default; border-color:#233252;}
+  .cell.done:hover{transform:none;}
+  .card{
+    width:min(660px,94vw); background:#fff; border-radius:26px; padding:26px 24px; margin-top:22px;
+    box-shadow:0 20px 44px rgba(0,0,0,.35); display:none;
+  }
+  .card.show{display:block;}
+  .stage-label{
+    display:inline-block; font-size:.72rem; font-weight:800; letter-spacing:.5px; text-transform:uppercase;
+    padding:5px 12px; border-radius:999px; margin-bottom:14px; background:var(--purple); color:#4B2170;
+  }
+  .points-tag{float:right; background:var(--yellow); color:#7a6a1a; font-weight:800; padding:5px 14px; border-radius:999px; font-size:.85rem;}
+  .question{font-size:1.1rem; font-weight:700; margin:14px 0 18px; line-height:1.4; clear:both;}
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    text-align:left; border:2px solid #F0E3D3; background:#FDF6EF; border-radius:16px;
+    padding:13px 16px; font-size:1rem; cursor:pointer; color:var(--navy); transition:.15s ease; font-family:inherit;
+  }
+  .opt:hover{border-color:var(--purple-strong); transform:translateY(-1px);}
+  .opt.correct{background:var(--mint); border-color:var(--good); color:#245c27; font-weight:700;}
+  .opt.incorrect{background:var(--coral); border-color:var(--bad); color:#7a2b26; font-weight:700;}
+  .opt[disabled]{cursor:default;}
+  .feedback{margin-top:16px; padding:14px 16px; border-radius:14px; font-size:.92rem; line-height:1.4; display:none;}
+  .feedback.show{display:block;}
+  .feedback.good{background:var(--mint); color:#245c27;}
+  .feedback.bad{background:var(--coral); color:#7a2b26;}
+  .nextBtn{
+    margin-top:18px; width:100%; border:none; border-radius:999px; padding:14px; font-size:1.05rem;
+    font-weight:700; background:var(--navy); color:#fff; cursor:pointer; display:none;
+  }
+  .nextBtn.show{display:block;}
+  .end-screen{text-align:center;}
+  .end-screen p{color:var(--muted); line-height:1.5;}
+  .bigBtn{
+    border:none; border-radius:999px; padding:15px 32px; font-size:1.05rem; font-weight:800;
+    background:linear-gradient(90deg,#C25FD6,#EE6FA6); color:#fff; cursor:pointer; margin-top:8px;
+  }
+  .score-circle{
+    width:150px; height:150px; border-radius:50%; margin:18px auto; display:flex; align-items:center;
+    justify-content:center; flex-direction:column; background:var(--purple); border:6px solid var(--purple-strong);
+  }
+  .score-circle .num{font-size:1.9rem; font-weight:800; color:#4B2170;}
+  .score-circle .lbl{font-size:.78rem; color:#4B2170; font-weight:600;}
+  footer{margin-top:20px; text-align:center; color:#9fabc7; font-size:.82rem;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>Vocabulary and Grammar Challenge Board</h1>
+  <p class="sub">Pick a category and a point value. Low points are easier, high points are more challenging. Answer all 12 to finish the board.</p>
+  <div class="score-row">
+    <div class="score-pill" id="scorePill">Score: 0</div>
+    <div class="score-pill" id="progressPill">0 of 12 answered</div>
+  </div>
+  <div class="board" id="board"></div>
+  <div class="card" id="card"></div>
+</div>
+<footer>The Good Place, vocabulary and grammar review</footer>
+
+<script>
+const categories = [
+  "Vocabulary: Episodes 6 and 7",
+  "Vocabulary: Episode 8",
+  "Grammar: Must and Conditional",
+  "Grammar: Perfect and Used to"
+];
+
+const questions = {
+  "0-10": { q:"Which word means to stop a machine or system from operating completely?", options:["to shut down","retirement","to blame someone"], correct:0, explain:"To shut down means to stop a machine, system, or business from working." },
+  "0-20": { q:"Which phrase means to do something wrong without facing any punishment for it?", options:["to wreak havoc","to get away with something","kill switch"], correct:1, explain:"To get away with something means to avoid consequences for doing something wrong." },
+  "0-30": { q:"Which phrase describes constant guilt that stays with someone, even after time has passed?", options:["to go nuts","to count on someone","to eat someone up inside"], correct:2, explain:"To eat someone up inside describes ongoing guilt or worry that doesn't go away." },
+
+  "1-10": { q:"Which word describes someone who tricks people, usually to get their money?", options:["grifter","dumbfounded","compelling"], correct:0, explain:"A grifter is a person who dishonestly tricks or cheats others, often for financial gain." },
+  "1-20": { q:"Which phrase means to explain away a mistake by blaming it on chance, instead of taking responsibility?", options:["to violate someone's trust","to chalk something up to","uncharted territory"], correct:1, explain:"To chalk something up to means to attribute something to a particular, often minor, cause." },
+  "1-30": { q:"Which phrase describes a completely new situation that nobody has ever faced before?", options:["a compelling reason","uncharted territory","to go viral"], correct:1, explain:"Uncharted territory describes a situation so new that there is no past experience to guide you." },
+
+  "2-10": { q:"Choose the correct option: You ___ wear safety goggles in the lab, it's the rule.", options:["must","mustn't","will"], correct:0, explain:"A strong, necessary obligation calls for must." },
+  "2-20": { q:"Choose the correct option: If she trains every day, she ___ ready for the race.", options:["is","will be","was"], correct:1, explain:"First conditional: if plus present simple, will plus base verb in the result clause." },
+  "2-30": { q:"Which sentence correctly combines must or mustn't with the first conditional?", options:["If you will lie, you mustn't feel guilty.","If you lie, you mustn't feel surprised when people stop trusting you.","If you lied, you must feeling guilty."], correct:1, explain:"Will never appears in the if clause, and mustn't is followed by the base verb, feel, not feeling." },
+
+  "3-10": { q:"Choose the correct option: ___ you ever tried sushi?", options:["Have","Did","Do"], correct:0, explain:"Have you ever is the standard present perfect form for asking about life experience." },
+  "3-20": { q:"Choose the correct option: When I was younger, I ___ collect stamps, but I don't anymore.", options:["use to","used to","am using to"], correct:1, explain:"Used to plus base verb describes a repeated past habit that is no longer true." },
+  "3-30": { q:"Which sentence is grammatically correct?", options:["Have you ever went camping?","She didn't used to like coffee, but now she loves it.","Did you ever forget your own phone number for a moment?"], correct:2, explain:"After have, we need the past participle, been, not went. Also, the negative form is didn't use to, without the extra d." }
+};
+
+let score = 0;
+let answeredCount = 0;
+const totalCells = 12;
+let currentKey = null;
+
+const board = document.getElementById("board");
+const card = document.getElementById("card");
+const scorePill = document.getElementById("scorePill");
+const progressPill = document.getElementById("progressPill");
+
+function pointsForRow(row){ return [10,20,30][row]; }
+
+function buildBoard(){
+  board.innerHTML = "";
+  categories.forEach(cat => {
+    const head = document.createElement("div");
+    head.className = "cat-head";
+    head.textContent = cat;
+    board.appendChild(head);
+  });
+  for(let row=0; row<3; row++){
+    for(let col=0; col<4; col++){
+      const key = col + "-" + pointsForRow(row);
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.textContent = pointsForRow(row);
+      cell.dataset.key = key;
+      cell.addEventListener("click", () => openQuestion(key, cell));
+      board.appendChild(cell);
+    }
+  }
+}
+
+function openQuestion(key, cellEl){
+  if(cellEl.classList.contains("done")) return;
+  currentKey = key;
+  const points = parseInt(key.split("-")[1], 10);
+  const item = questions[key];
+  card.className = "card show";
+  card.innerHTML = `
+    <span class="points-tag">${points} points</span>
+    <span class="stage-label">${categories[parseInt(key.split("-")[0],10)]}</span>
+    <p class="question">${item.q}</p>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="nextBtn" id="nextBtn">BACK TO BOARD</button>
+  `;
+  const optionsEl = document.getElementById("options");
+  item.options.forEach((opt,i) => {
+    const btn = document.createElement("button");
+    btn.className = "opt";
+    btn.textContent = opt;
+    btn.addEventListener("click", () => selectOption(i, cellEl, points));
+    optionsEl.appendChild(btn);
+  });
+  card.scrollIntoView({behavior:"smooth", block:"center"});
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    card.className = "card";
+    checkAllDone();
+  });
+}
+
+function selectOption(i, cellEl, points){
+  const item = questions[currentKey];
+  const buttons = document.querySelectorAll(".opt");
+  if(buttons[0].disabled) return;
+  buttons.forEach((b, idx) => {
+    b.disabled = true;
+    if(idx === item.correct) b.classList.add("correct");
+    else if(idx === i) b.classList.add("incorrect");
+  });
+  const fb = document.getElementById("feedback");
+  if(i === item.correct){
+    score += points;
+    fb.className = "feedback show good";
+    fb.textContent = "Correct! " + item.explain + " You earned " + points + " points.";
+  } else {
+    fb.className = "feedback show bad";
+    fb.textContent = "Not quite. " + item.explain;
+  }
+  cellEl.classList.add("done");
+  cellEl.textContent = "";
+  answeredCount++;
+  scorePill.textContent = "Score: " + score;
+  progressPill.textContent = answeredCount + " of " + totalCells + " answered";
+  document.getElementById("nextBtn").classList.add("show");
+}
+
+function checkAllDone(){
+  if(answeredCount === totalCells){
+    renderEnd();
+  }
+}
+
+function renderEnd(){
+  const pct = Math.round((score / 240) * 100);
+  let msg = "Nice work, a bit more review on the tricky ones and you'll have it all.";
+  if(pct >= 80) msg = "Excellent! You've really got this material down.";
+  else if(pct >= 60) msg = "Great job, just a little more practice on the harder points.";
+  card.className = "card show";
+  card.innerHTML = `
+    <div class="end-screen">
+      <h1 style="color:var(--navy)">Board complete!</h1>
+      <div class="score-circle">
+        <div class="num">${score}</div>
+        <div class="lbl">out of 240</div>
+      </div>
+      <p>${msg}</p>
+      <button class="bigBtn" id="restartBtn">PLAY AGAIN</button>
+    </div>
+  `;
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    score = 0; answeredCount = 0;
+    scorePill.textContent = "Score: 0";
+    progressPill.textContent = "0 of 12 answered";
+    card.className = "card";
+    buildBoard();
+  });
+}
+
+buildBoard();
+</script>
+</body>
+</html>
