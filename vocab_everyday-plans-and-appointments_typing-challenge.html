@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Typing Challenge: Everyday Plans and Appointments</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .app {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 600px;
+    width: 100%;
+    padding: 32px 34px 36px;
+    box-shadow: 0 20px 50px rgba(80, 60, 130, 0.25);
+  }
+  h1 {
+    text-align: center;
+    color: #5b3fa0;
+    margin: 0 0 4px;
+    font-size: 1.5em;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7a6a99;
+    margin: 0 0 20px;
+    font-size: 0.95em;
+  }
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e3d9f7;
+    transition: background 0.3s;
+  }
+  .dot.done { background: #7bd8a8; }
+  .dot.current { background: #b79dee; }
+  .status-row {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    margin-bottom: 18px;
+    font-weight: 600;
+    color: #5b3fa0;
+    font-size: 0.95em;
+  }
+  .clue {
+    background: #f5f1fd;
+    border-radius: 14px;
+    padding: 16px 18px;
+    color: #3d2e63;
+    font-size: 1em;
+    line-height: 1.45;
+    margin-bottom: 20px;
+  }
+  .clue .tag {
+    display: block;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9a8bc4;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .boxes {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 22px;
+  }
+  .letter-box {
+    width: 34px;
+    height: 40px;
+    border-bottom: 3px solid #b79dee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    font-weight: 700;
+    color: #3d2e63;
+    text-transform: lowercase;
+  }
+  .letter-box.gap {
+    border-bottom: none;
+    width: 20px;
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  input[type="text"] {
+    flex: 1;
+    border: 2px solid #e3d9f7;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 1em;
+    color: #3d2e63;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: #7c5cd6; }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  button.action {
+    background: #7c5cd6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 22px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button.action:hover { background: #6647bd; }
+  button.action:disabled { background: #cbbdea; cursor: not-allowed; }
+  button.secondary {
+    background: #f0e6fb;
+    color: #6647bd;
+  }
+  button.secondary:hover { background: #e3d3f7; }
+  .message {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 0.95em;
+    min-height: 22px;
+  }
+  .message.success { color: #2f9e5f; font-weight: 700; }
+  .message.retry { color: #b45a5a; }
+  .shake { animation: shake 0.35s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .final-screen {
+    text-align: center;
+    padding: 20px 10px;
+  }
+  .final-screen h2 { color: #5b3fa0; margin-bottom: 8px; }
+  .final-score {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: #4fae82;
+    margin: 10px 0;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Vocabulary Typing Challenge</h1>
+  <p class="subtitle">Everyday Plans and Appointments. Read the clue and type the word.</p>
+
+  <div class="progress-dots" id="dots"></div>
+  <div class="status-row">
+    <span id="wordCount">Word 1 of 8</span>
+    <span id="hintsCount">Hints used: 0</span>
+  </div>
+
+  <div id="gameArea">
+    <div class="clue">
+      <span class="tag">Clue</span>
+      <span id="clueText"></span>
+    </div>
+    <div class="boxes" id="boxes"></div>
+    <div class="input-row">
+      <input type="text" id="answerInput" placeholder="Type the word here" autocomplete="off">
+      <button class="action" id="checkBtn">Check</button>
+    </div>
+    <div class="btn-row">
+      <button class="action secondary" id="revealBtn">Reveal a letter</button>
+    </div>
+    <div class="message" id="message"></div>
+  </div>
+
+  <div class="final-screen hidden" id="finalScreen">
+    <h2>All done!</h2>
+    <p>You finished all 8 words.</p>
+    <div class="final-score" id="finalScoreText"></div>
+    <p id="finalMessage"></p>
+    <button class="action" id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<script>
+const words = [
+  { word: "plan", clue: "Something you have decided to do at a future time. Example: Do you have any ___ for the weekend?" },
+  { word: "appointment", clue: "A fixed arrangement to meet someone at a set time. Example: I have a dentist ___ on Tuesday." },
+  { word: "reschedule", clue: "To change a plan to a different day or time. Example: Can we ___ our coffee for Friday?" },
+  { word: "catch up", clue: "To meet or talk with someone you have not seen in a while. Example: I'm ___ with an old friend." },
+  { word: "errand", clue: "A short trip to do a small task, like the bank or pharmacy. Example: I'm running ___ this morning." },
+  { word: "busy", clue: "Occupied with things to do, the opposite of free. Example: Sorry, I'm ___ this weekend." },
+  { word: "drop by", clue: "To visit someone briefly and casually. Example: I'm ___ my parents' house on Sunday." },
+  { word: "look forward to", clue: "To feel happy and excited about something coming up. Example: I'm ___ the weekend." },
+];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let order = [];
+let currentIndex = 0;
+let revealedCount = 0;
+let totalHints = 0;
+
+function letterPositions(word) {
+  const positions = [];
+  for (let i = 0; i < word.length; i++) {
+    if (word[i] !== " ") positions.push(i);
+  }
+  return positions;
+}
+
+function buildDots() {
+  const dotsEl = document.getElementById("dots");
+  dotsEl.innerHTML = "";
+  words.forEach(() => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  });
+  updateDots();
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll(".dot");
+  dots.forEach((dot, i) => {
+    dot.classList.remove("done", "current");
+    if (i < currentIndex) dot.classList.add("done");
+    else if (i === currentIndex) dot.classList.add("current");
+  });
+}
+
+function loadWord() {
+  revealedCount = 0;
+  const item = order[currentIndex];
+  document.getElementById("clueText").textContent = item.clue;
+  document.getElementById("wordCount").textContent = `Word ${currentIndex + 1} of ${words.length}`;
+  document.getElementById("hintsCount").textContent = `Hints used: 0`;
+  document.getElementById("answerInput").value = "";
+  document.getElementById("message").textContent = "";
+  document.getElementById("message").className = "message";
+  document.getElementById("revealBtn").disabled = false;
+  renderBoxes();
+  updateDots();
+  document.getElementById("answerInput").focus();
+}
+
+function renderBoxes() {
+  const item = order[currentIndex];
+  const boxesEl = document.getElementById("boxes");
+  boxesEl.innerHTML = "";
+  const positions = letterPositions(item.word);
+  let letterIndex = 0;
+  for (let i = 0; i < item.word.length; i++) {
+    const box = document.createElement("div");
+    if (item.word[i] === " ") {
+      box.className = "letter-box gap";
+    } else {
+      box.className = "letter-box";
+      if (letterIndex < revealedCount) {
+        box.textContent = item.word[i];
+      } else {
+        box.textContent = "_";
+      }
+      letterIndex++;
+    }
+    boxesEl.appendChild(box);
+  }
+  const maxHints = positions.length - 1;
+  document.getElementById("revealBtn").disabled = revealedCount >= maxHints;
+}
+
+document.getElementById("revealBtn").addEventListener("click", () => {
+  const item = order[currentIndex];
+  const positions = letterPositions(item.word);
+  const maxHints = positions.length - 1;
+  if (revealedCount < maxHints) {
+    revealedCount++;
+    totalHints++;
+    document.getElementById("hintsCount").textContent = `Hints used: ${revealedCount}`;
+    renderBoxes();
+  }
+});
+
+function checkAnswer() {
+  const item = order[currentIndex];
+  const input = document.getElementById("answerInput");
+  const guess = input.value.trim().toLowerCase();
+  const messageEl = document.getElementById("message");
+  if (guess === item.word) {
+    messageEl.textContent = revealedCount === 0
+      ? "Perfect! You got it with no hints."
+      : `Nice! You got it with ${revealedCount} hint${revealedCount === 1 ? "" : "s"}.`;
+    messageEl.className = "message success";
+    document.getElementById("revealBtn").disabled = true;
+    setTimeout(() => {
+      currentIndex++;
+      if (currentIndex >= order.length) {
+        showFinal();
+      } else {
+        loadWord();
+      }
+    }, 1400);
+  } else {
+    messageEl.textContent = "Not quite, try again.";
+    messageEl.className = "message retry";
+    input.classList.add("shake");
+    setTimeout(() => input.classList.remove("shake"), 350);
+    input.value = "";
+    input.focus();
+  }
+}
+
+document.getElementById("checkBtn").addEventListener("click", checkAnswer);
+document.getElementById("answerInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") checkAnswer();
+});
+
+function showFinal() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("dots").classList.add("hidden");
+  document.querySelector(".status-row").classList.add("hidden");
+  document.getElementById("finalScreen").classList.remove("hidden");
+  document.getElementById("finalScoreText").textContent = `${totalHints} total hints used`;
+  let msg = "Good effort, keep practicing these words.";
+  if (totalHints <= 3) msg = "Excellent, your spelling is really solid.";
+  document.getElementById("finalMessage").textContent = msg;
+}
+
+document.getElementById("playAgainBtn").addEventListener("click", () => {
+  currentIndex = 0;
+  totalHints = 0;
+  order = shuffle(words);
+  document.getElementById("gameArea").classList.remove("hidden");
+  document.getElementById("dots").classList.remove("hidden");
+  document.querySelector(".status-row").classList.remove("hidden");
+  document.getElementById("finalScreen").classList.add("hidden");
+  buildDots();
+  loadWord();
+});
+
+order = shuffle(words);
+buildDots();
+loadWord();
+</script>
+</body>
+</html>
