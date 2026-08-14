@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Good Place Interests Challenge</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(180deg, #FFF8E7 0%, #FDEFC9 100%);
+    color: #2C3E50;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #FFFFFF;
+    max-width: 640px;
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(44, 62, 80, 0.15);
+    padding: 36px 32px;
+  }
+  header { text-align: center; margin-bottom: 20px; }
+  h1 { font-size: 24px; color: #2C3E50; }
+  .subtitle {
+    color: #E8A33D;
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+  .series-tag {
+    color: #6B6A63;
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 6px;
+  }
+  .progress-wrap { margin: 22px 0 8px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #6B6A63;
+    margin-bottom: 6px;
+  }
+  .progress-bar-bg {
+    background: #F0EBD8;
+    border-radius: 999px;
+    height: 14px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: linear-gradient(90deg, #E8A33D, #F4C463);
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    transition: width 0.5s ease;
+  }
+  #question-counter {
+    text-align: center;
+    font-size: 13px;
+    color: #6B6A63;
+    margin-bottom: 18px;
+  }
+  .scenario {
+    background: #FDF6E3;
+    border: 1px solid #F0E4BE;
+    border-radius: 14px;
+    padding: 18px 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .cue {
+    text-align: center;
+    font-size: 13px;
+    color: #B4771B;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .blank-display {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin: 18px 0;
+    min-height: 34px;
+  }
+  .word-group {
+    display: flex;
+    gap: 3px;
+  }
+  .letter-box {
+    display: inline-block;
+    min-width: 16px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #2C3E50;
+    border-bottom: 3px solid #C9C4AC;
+    padding: 0 2px;
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  #answer-input {
+    flex: 1;
+    padding: 13px 14px;
+    border: 2px solid #E1E1DF;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #2C3E50;
+  }
+  #answer-input:focus {
+    outline: none;
+    border-color: #E8A33D;
+  }
+  .action-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .check-btn, .clue-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .check-btn {
+    background: #2C3E50;
+    color: #FFF8E7;
+  }
+  .check-btn:hover { background: #1D2B38; }
+  .clue-btn {
+    background: #FDF0D5;
+    color: #B4771B;
+    border: 2px solid #F0E4BE;
+  }
+  .clue-btn:hover { background: #FBE8C4; }
+  .clue-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .feedback {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb {
+    background: #E4F5E9;
+    color: #276738;
+    border: 1px solid #BEE3C8;
+  }
+  .feedback.incorrect-fb {
+    background: #FBE9E7;
+    color: #A6362A;
+    border: 1px solid #F3C6C0;
+  }
+  .next-btn, .start-btn, .replay-btn {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #2C3E50;
+    color: #FFF8E7;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .next-btn:hover, .start-btn:hover, .replay-btn:hover { background: #1D2B38; }
+  .intro, .final { text-align: center; }
+  .intro p, .final p {
+    color: #6B6A63;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 14px 0 4px;
+  }
+  .final-score {
+    font-size: 42px;
+    font-weight: 700;
+    color: #E8A33D;
+    margin: 10px 0;
+  }
+  .final-message {
+    font-size: 16px;
+    color: #2C3E50;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .hidden { display: none; }
+  .word-chip {
+    display: inline-block;
+    background: #FDF0D5;
+    color: #B4771B;
+    border-radius: 8px;
+    padding: 2px 8px;
+    font-size: 13px;
+    margin: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <header>
+    <h1>Good Place Interests Challenge</h1>
+    <div class="subtitle">BE INTO + -ING vs ADORE + -ING</div>
+    <div class="series-tag">Based on the TV series "The Good Place"</div>
+  </header>
+
+  <div id="intro" class="intro">
+    <p>Complete each sentence about a character's interests. Use the structure shown in brackets and the correct -ing form. Stuck? Tap Clue to reveal one letter at a time.</p>
+    <p>
+      <span class="word-chip">be into + -ing = be interested in something</span>
+      <span class="word-chip">adore + -ing = to love doing something</span>
+    </p>
+    <button class="start-btn" onclick="startGame()">Start the Challenge</button>
+  </div>
+
+  <div id="game" class="hidden">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Grammar Points</span>
+        <span id="score-label">0 / 10</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+    </div>
+    <div id="question-counter"></div>
+    <div class="scenario" id="scenario-text"></div>
+    <div class="cue" id="cue-text"></div>
+    <div class="blank-display" id="blank-display"></div>
+    <div class="input-row">
+      <input type="text" id="answer-input" placeholder="Type your answer" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="action-row">
+      <button class="check-btn" onclick="checkAnswer()">Check</button>
+      <button class="clue-btn" id="clue-btn" onclick="revealLetter()">Clue</button>
+    </div>
+    <div class="feedback" id="feedback-box"></div>
+    <button class="next-btn hidden" id="next-btn" onclick="nextQuestion()">Next</button>
+  </div>
+
+  <div id="final" class="final hidden">
+    <div class="final-message" id="final-message"></div>
+    <div class="final-score" id="final-score-display"></div>
+    <p id="final-text"></p>
+    <button class="replay-btn" onclick="restartGame()">Play Again</button>
+  </div>
+
+</div>
+
+<script>
+  const questions = [
+    {
+      scenario: "Eleanor ______ chocolate cookies.",
+      cue: "adore / bake",
+      answer: "adores baking",
+      accepted: ["adores baking"]
+    },
+    {
+      scenario: "Chidi and Eleanor ______ at parties.",
+      cue: "be into / dance",
+      answer: "are into dancing",
+      accepted: ["are into dancing"]
+    },
+    {
+      scenario: "Tahani ______ fancy events.",
+      cue: "be into / plan",
+      answer: "is into planning",
+      accepted: ["is into planning"]
+    },
+    {
+      scenario: "I ______ in the ocean.",
+      cue: "adore / swim",
+      answer: "adore swimming",
+      accepted: ["adore swimming"]
+    },
+    {
+      scenario: "Michael ______ new inventions.",
+      cue: "be into / make",
+      answer: "is into making",
+      accepted: ["is into making"]
+    },
+    {
+      scenario: "We ______ to new places.",
+      cue: "adore / travel",
+      answer: "adore travelling",
+      accepted: ["adore travelling", "adore traveling"]
+    },
+    {
+      scenario: "You ______ short stories.",
+      cue: "be into / write",
+      answer: "are into writing",
+      accepted: ["are into writing"]
+    },
+    {
+      scenario: "They ______ mystery novels.",
+      cue: "adore / read",
+      answer: "adore reading",
+      accepted: ["adore reading"]
+    },
+    {
+      scenario: "Jason ______ hip hop.",
+      cue: "be into / dance",
+      answer: "is into dancing",
+      accepted: ["is into dancing"]
+    },
+    {
+      scenario: "Janet ______ everyone in the neighborhood.",
+      cue: "adore / help",
+      answer: "adores helping",
+      accepted: ["adores helping"]
+    }
+  ];
+
+  let currentQuestion = 0;
+  let score = 0;
+  let revealedCount = 0;
+  let answered = false;
+
+  function startGame() {
+    document.getElementById('intro').classList.add('hidden');
+    document.getElementById('game').classList.remove('hidden');
+    currentQuestion = 0;
+    score = 0;
+    loadQuestion();
+  }
+
+  function getLetterPositions(answer) {
+    const positions = [];
+    for (let i = 0; i < answer.length; i++) {
+      if (/[a-zA-Z]/.test(answer[i])) positions.push(i);
+    }
+    return positions;
+  }
+
+  function renderBlanks() {
+    const q = questions[currentQuestion];
+    const answer = q.answer;
+    const letterPositions = getLetterPositions(answer);
+    const words = answer.split(' ');
+    const container = document.getElementById('blank-display');
+    container.innerHTML = '';
+
+    let globalCharIndex = 0;
+    words.forEach(word => {
+      const wordGroup = document.createElement('div');
+      wordGroup.className = 'word-group';
+      for (let i = 0; i < word.length; i++) {
+        const char = word[i];
+        const box = document.createElement('span');
+        box.className = 'letter-box';
+        if (/[a-zA-Z]/.test(char)) {
+          const posIndexInLetters = letterPositions.indexOf(globalCharIndex);
+          if (posIndexInLetters < revealedCount) {
+            box.textContent = char.toUpperCase();
+          } else {
+            box.textContent = '_';
+          }
+        } else {
+          box.textContent = char;
+        }
+        wordGroup.appendChild(box);
+        globalCharIndex++;
+      }
+      container.appendChild(wordGroup);
+      globalCharIndex++;
+    });
+  }
+
+  function revealLetter() {
+    const q = questions[currentQuestion];
+    const totalLetters = getLetterPositions(q.answer).length;
+    if (revealedCount < totalLetters) {
+      revealedCount++;
+      renderBlanks();
+    }
+    if (revealedCount >= totalLetters) {
+      document.getElementById('clue-btn').disabled = true;
+    }
+  }
+
+  function loadQuestion() {
+    answered = false;
+    revealedCount = 0;
+    const q = questions[currentQuestion];
+    document.getElementById('question-counter').textContent = `Part ${currentQuestion + 1} of ${questions.length}`;
+    document.getElementById('scenario-text').textContent = q.scenario;
+    document.getElementById('cue-text').textContent = `(${q.cue})`;
+    document.getElementById('score-label').textContent = `${score} / ${questions.length}`;
+    document.getElementById('progress-fill').style.width = `${(score / questions.length) * 100}%`;
+
+    renderBlanks();
+
+    const input = document.getElementById('answer-input');
+    input.value = '';
+    input.disabled = false;
+    input.focus();
+
+    document.getElementById('clue-btn').disabled = false;
+
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.className = 'feedback';
+    feedbackBox.textContent = '';
+    document.getElementById('next-btn').classList.add('hidden');
+  }
+
+  function normalize(str) {
+    return str.toLowerCase().trim().replace(/\s+/g, ' ');
+  }
+
+  function checkAnswer() {
+    if (answered) return;
+    const q = questions[currentQuestion];
+    const input = document.getElementById('answer-input');
+    const typed = normalize(input.value);
+    const isCorrect = q.accepted.some(a => normalize(a) === typed);
+
+    const feedbackBox = document.getElementById('feedback-box');
+
+    if (isCorrect) {
+      answered = true;
+      score++;
+      revealedCount = getLetterPositions(q.answer).length;
+      renderBlanks();
+      input.disabled = true;
+      document.getElementById('clue-btn').disabled = true;
+      feedbackBox.className = 'feedback show correct-fb';
+      feedbackBox.textContent = 'Correct. Great work.';
+      document.getElementById('score-label').textContent = `${score} / ${questions.length}`;
+      document.getElementById('progress-fill').style.width = `${(score / questions.length) * 100}%`;
+      document.getElementById('next-btn').classList.remove('hidden');
+    } else {
+      feedbackBox.className = 'feedback show incorrect-fb';
+      feedbackBox.textContent = 'Not quite. Try again, or tap Clue for a hint.';
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const gameVisible = !document.getElementById('game').classList.contains('hidden');
+      const nextVisible = !document.getElementById('next-btn').classList.contains('hidden');
+      if (gameVisible && !answered) {
+        checkAnswer();
+      } else if (gameVisible && nextVisible) {
+        nextQuestion();
+      }
+    }
+  });
+
+  function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      loadQuestion();
+    } else {
+      showFinal();
+    }
+  }
+
+  function showFinal() {
+    document.getElementById('game').classList.add('hidden');
+    document.getElementById('final').classList.remove('hidden');
+    document.getElementById('final-score-display').textContent = `${score} / ${questions.length}`;
+
+    let message, text;
+    if (score === questions.length) {
+      message = "Perfect. You've mastered be into and adore.";
+      text = "Excellent work. You know exactly how to use both structures correctly.";
+    } else if (score >= questions.length - 3) {
+      message = "Almost there, just a few small mix-ups.";
+      text = "Solid work. Review the ones you missed and try again.";
+    } else {
+      message = "Time to review be into and adore a bit more.";
+      text = "That's completely fine. Practice makes it stick. Try the challenge again.";
+    }
+    document.getElementById('final-message').textContent = message;
+    document.getElementById('final-text').textContent = text;
+  }
+
+  function restartGame() {
+    document.getElementById('final').classList.add('hidden');
+    document.getElementById('intro').classList.remove('hidden');
+  }
+</script>
+
+</body>
+</html>
