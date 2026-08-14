@@ -17,6 +17,7 @@
       --speaking: #5aa9a8;
       --pronunciation: #d96c75;
       --mixed: #f2b84b;
+      --good-place: #4a6fa5;
     }
 
     * { box-sizing: border-box; }
@@ -195,6 +196,18 @@
       line-height: 1.4;
     }
 
+    .tag-pill {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      color: white;
+      background: var(--good-place);
+      width: fit-content;
+    }
+
     .category {
       margin-top: auto;
       padding-top: 18px;
@@ -258,137 +271,138 @@
         <button class="filter-btn" data-filter="speaking">Speaking</button>
         <button class="filter-btn" data-filter="pronunciation">Pronunciation</button>
         <button class="filter-btn" data-filter="mixed">Mixed Skills</button>
+        <button class="filter-btn" data-filter="good-place">🌈 The Good Place</button>
       </div>
     </section>
 
     <section class="games-grid" id="gamesGrid">
-      <a href="slot-machine.html" class="game-card grammar" data-category="grammar" data-title="grammar slot machine present past a2">
+      <a href="slot-machine.html" class="game-card grammar" data-category="grammar" data-tags="grammar" data-title="grammar slot machine present past a2">
         <div class="card-top"><span class="icon">🎰</span><span class="level">A2</span></div>
         <h2 class="game-title">Grammar Slot Machine</h2>
         <p class="game-desc">Practise present and past forms with a quick interactive challenge.</p>
         <div class="category">Grammar</div>
       </a>
 
-      <a href="ed-ending-pronunciation-A2-B1.html" class="game-card pronunciation" data-category="pronunciation" data-title="ed pronunciation endings a2 b1">
+      <a href="ed-ending-pronunciation-A2-B1.html" class="game-card pronunciation" data-category="pronunciation" data-tags="pronunciation" data-title="ed pronunciation endings a2 b1">
         <div class="card-top"><span class="icon">🔊</span><span class="level">A2–B1</span></div>
         <h2 class="game-title">-ED Pronunciation</h2>
         <p class="game-desc">Practise regular past endings: /t/, /d/ and /ɪd/.</p>
         <div class="category">Pronunciation</div>
       </a>
 
-      <a href="cruise-rules-challenge-modals-A2-B1.html" class="game-card grammar" data-category="grammar" data-title="cruise rules challenge modals a2 b1">
+      <a href="cruise-rules-challenge-modals-A2-B1.html" class="game-card grammar" data-category="grammar" data-tags="grammar" data-title="cruise rules challenge modals a2 b1">
         <div class="card-top"><span class="icon">🚢</span><span class="level">A2–B1</span></div>
         <h2 class="game-title">Cruise Rules Challenge</h2>
         <p class="game-desc">Use modals to talk about rules, obligation and permission.</p>
         <div class="category">Grammar</div>
       </a>
 
-      <a href="collocations-make-or-do-A2-B1.html" class="game-card vocabulary" data-category="vocabulary" data-title="make or do collocations a2 b1 vocabulary">
+      <a href="collocations-make-or-do-A2-B1.html" class="game-card vocabulary" data-category="vocabulary" data-tags="vocabulary" data-title="make or do collocations a2 b1 vocabulary">
         <div class="card-top"><span class="icon">💜</span><span class="level">A2–B1</span></div>
         <h2 class="game-title">Make or Do Challenge</h2>
         <p class="game-desc">Review common collocations with make and do.</p>
         <div class="category">Vocabulary</div>
       </a>
 
-      <a href="weekend-plans-invitations-a2.html" class="game-card speaking" data-category="speaking" data-title="weekend plans invitations a2 b1 speaking">
+      <a href="weekend-plans-invitations-a2.html" class="game-card speaking" data-category="speaking" data-tags="speaking" data-title="weekend plans invitations a2 b1 speaking">
         <div class="card-top"><span class="icon">🌸</span><span class="level">A2–B1</span></div>
         <h2 class="game-title">Weekend Plans & Invitations</h2>
         <p class="game-desc">Practise invitations, plans and friendly responses.</p>
         <div class="category">Speaking</div>
       </a>
 
-      <a href="social_plans_memory_game_A2.html" class="game-card vocabulary" data-category="vocabulary" data-title="social plans memory game a2 b1 vocabulary speaking">
+      <a href="social_plans_memory_game_A2.html" class="game-card vocabulary" data-category="vocabulary" data-tags="vocabulary" data-title="social plans memory game a2 b1 vocabulary speaking">
         <div class="card-top"><span class="icon">💬</span><span class="level">A2–B1</span></div>
         <h2 class="game-title">Social Plans Memory Game</h2>
         <p class="game-desc">Match useful expressions for social plans and invitations.</p>
         <div class="category">Vocabulary</div>
       </a>
 
-      <a href="socializing_vocabulary_matching_game_B1.html" class="game-card vocabulary" data-category="vocabulary" data-title="socializing abroad vocabulary matching game b1 break the ice small talk fit in">
+      <a href="socializing_vocabulary_matching_game_B1.html" class="game-card vocabulary" data-category="vocabulary" data-tags="vocabulary" data-title="socializing abroad vocabulary matching game b1 break the ice small talk fit in">
         <div class="card-top"><span class="icon">🤝</span><span class="level">B1</span></div>
         <h2 class="game-title">Socializing Abroad</h2>
         <p class="game-desc">Match expressions for making friends and connecting in a new culture.</p>
         <div class="category">Vocabulary</div>
       </a>
 
-      <a href="build_the_plan_be_going_to_A2-B1.html" class="game-card grammar" data-category="grammar" data-title="build the plan be going to a2 b1 grammar">
+      <a href="build_the_plan_be_going_to_A2-B1.html" class="game-card grammar" data-category="grammar" data-tags="grammar" data-title="build the plan be going to a2 b1 grammar">
         <div class="card-top"><span class="icon">🧩</span><span class="level">A2–B1</span></div>
         <h2 class="game-title">Build the Plan</h2>
         <p class="game-desc">Practise be going to for plans and future intentions.</p>
         <div class="category">Grammar</div>
       </a>
 
-      <a href="choose_the_correct_plan_A2-B1.html" class="game-card grammar" data-category="grammar" data-title="choose the correct plan a2 b1 grammar">
+      <a href="choose_the_correct_plan_A2-B1.html" class="game-card grammar" data-category="grammar" data-tags="grammar" data-title="choose the correct plan a2 b1 grammar">
         <div class="card-top"><span class="icon">📘</span><span class="level">A2–B1</span></div>
         <h2 class="game-title">Choose the Correct Plan</h2>
         <p class="game-desc">Choose the best future-plan structure in context.</p>
         <div class="category">Grammar</div>
       </a>
 
-      <a href="Debt Advocacy Briefing Tool.html" class="game-card speaking" data-category="speaking" data-title="debt advocacy briefing tool public health global justice speaking b1">
+      <a href="Debt Advocacy Briefing Tool.html" class="game-card speaking" data-category="speaking" data-tags="speaking" data-title="debt advocacy briefing tool public health global justice speaking b1">
         <div class="card-top"><span class="icon">🌍</span><span class="level">B1</span></div>
         <h2 class="game-title">Debt Advocacy Briefing Tool</h2>
         <p class="game-desc">Generate briefing cards about debt reform, public health and global justice.</p>
         <div class="category">Speaking</div>
       </a>
 
-      <a href="Cruise Crew Wheel.html" class="game-card speaking" data-category="speaking" data-title="cruise crew wheel scenarios speaking">
+      <a href="Cruise Crew Wheel.html" class="game-card speaking" data-category="speaking" data-tags="speaking" data-title="cruise crew wheel scenarios speaking">
         <div class="card-top"><span class="icon">🚢</span><span class="level">A2–B1</span></div>
         <h2 class="game-title">Cruise Crew Wheel</h2>
         <p class="game-desc">Practise real cruise ship scenarios and quick reactions.</p>
         <div class="category">Speaking</div>
       </a>
 
-      <a href="What would you say_cruise scenarios_B1.html" class="game-card speaking" data-category="speaking" data-title="what would you say cruise scenarios b1 speaking">
+      <a href="What would you say_cruise scenarios_B1.html" class="game-card speaking" data-category="speaking" data-tags="speaking" data-title="what would you say cruise scenarios b1 speaking">
         <div class="card-top"><span class="icon">🎭</span><span class="level">B1</span></div>
         <h2 class="game-title">What Would You Say?</h2>
         <p class="game-desc">React naturally to real cruise ship situations.</p>
         <div class="category">Speaking</div>
       </a>
 
-      <a href="oh-no-what-should-i-do-B1.html" class="game-card grammar" data-category="grammar" data-title="oh no what should i do advice should shouldn't b1">
+      <a href="oh-no-what-should-i-do-B1.html" class="game-card grammar" data-category="grammar" data-tags="grammar" data-title="oh no what should i do advice should shouldn't b1">
         <div class="card-top"><span class="icon">🎡</span><span class="level">B1</span></div>
         <h2 class="game-title">Oh No... What Should I Do?</h2>
         <p class="game-desc">Practise giving advice with should and shouldn’t.</p>
         <div class="category">Grammar</div>
       </a>
 
-      <a href="professional-speaking-spinner-B1.html" class="game-card speaking" data-category="speaking" data-title="professional challenge spinner workplace english interview speaking b1">
+      <a href="professional-speaking-spinner-B1.html" class="game-card speaking" data-category="speaking" data-tags="speaking" data-title="professional challenge spinner workplace english interview speaking b1">
         <div class="card-top"><span class="icon">💼</span><span class="level">B1</span></div>
         <h2 class="game-title">Professional Challenge Spinner</h2>
         <p class="game-desc">Practise workplace English and interview-style speaking.</p>
         <div class="category">Speaking</div>
       </a>
 
-      <a href="legal-compliance-speaking-wheel-B1.html" class="game-card speaking" data-category="speaking" data-title="legal compliance speaking wheel b1">
+      <a href="legal-compliance-speaking-wheel-B1.html" class="game-card speaking" data-category="speaking" data-tags="speaking" data-title="legal compliance speaking wheel b1">
         <div class="card-top"><span class="icon">⚖️</span><span class="level">B1</span></div>
         <h2 class="game-title">Legal Compliance Speaking Wheel</h2>
         <p class="game-desc">Practise legal and compliance-related speaking prompts.</p>
         <div class="category">Speaking</div>
       </a>
 
-      <a href="make-and-do-challenge-board-a2.html" class="game-card vocabulary" data-category="vocabulary" data-title="make do cards challenge board a2 vocabulary">
+      <a href="make-and-do-challenge-board-a2.html" class="game-card vocabulary" data-category="vocabulary" data-tags="vocabulary" data-title="make do cards challenge board a2 vocabulary">
         <div class="card-top"><span class="icon">🃏</span><span class="level">A2</span></div>
         <h2 class="game-title">Make & Do Cards</h2>
         <p class="game-desc">Review high-frequency make and do combinations.</p>
         <div class="category">Vocabulary</div>
       </a>
 
-      <a href="health-advocacy-briefing-tool-B1.html" class="game-card speaking" data-category="speaking" data-title="health advocacy briefing tool b1 public health speaking">
+      <a href="health-advocacy-briefing-tool-B1.html" class="game-card speaking" data-category="speaking" data-tags="speaking" data-title="health advocacy briefing tool b1 public health speaking">
         <div class="card-top"><span class="icon">❤️</span><span class="level">B1</span></div>
         <h2 class="game-title">Health Advocacy Briefing Tool</h2>
         <p class="game-desc">Practise public health advocacy language and briefing skills.</p>
         <div class="category">Speaking</div>
       </a>
 
-      <a href="places-activities-matching-game_a2.html" class="game-card vocabulary" data-category="vocabulary" data-title="places activities review game a2 vocabulary matching">
+      <a href="places-activities-matching-game_a2.html" class="game-card vocabulary" data-category="vocabulary" data-tags="vocabulary" data-title="places activities review game a2 vocabulary matching">
         <div class="card-top"><span class="icon">🎯</span><span class="level">A2</span></div>
         <h2 class="game-title">Places & Activities Review</h2>
         <p class="game-desc">Match places with common activities and everyday contexts.</p>
         <div class="category">Vocabulary</div>
       </a>
 
-      <a href="helpful-advice-memory-game-b1.html" class="game-card vocabulary" data-category="vocabulary" data-title="helpful advice memory game b1 vocabulary should advice">
+      <a href="helpful-advice-memory-game-b1.html" class="game-card vocabulary" data-category="vocabulary" data-tags="vocabulary" data-title="helpful advice memory game b1 vocabulary should advice">
         <div class="card-top"><span class="icon">🧠</span><span class="level">B1</span></div>
         <h2 class="game-title">Helpful Advice Memory Game</h2>
         <p class="game-desc">Review expressions for giving helpful advice in everyday situations.</p>
@@ -398,6 +412,7 @@
       <a href="everyday-english-review-memory-game.html"
    class="game-card mixed"
    data-category="mixed"
+   data-tags="mixed"
    data-title="everyday english review memory game advice future plans travel communication first conditional should make do asking for clarification a2 b1">
 
   <div class="card-top">
@@ -418,6 +433,7 @@
       <a href="everyday-english-review-challenge-test.html"
    class="game-card mixed"
    data-category="mixed"
+   data-tags="mixed good-place"
    data-title="english practice test a2 b1 review grammar vocabulary reading the good place would like adverbs of frequency should">
 
   <div class="card-top">
@@ -434,20 +450,15 @@
     and should/shouldn't.
   </p>
 
+  <span class="tag-pill">🌈 Good Place</span>
   <div class="category">Mixed Skills</div>
 
-</a>
-
-      <a href="class-57-58-review-challenge-a2.html" class="game-card mixed" data-category="mixed" data-title="class 57 58 review challenge good place must mustnt first conditional vocabulary b1">
-  <div class="card-top"><span class="icon">🔁</span><span class="level">B1</span></div>
-  <h2 class="game-title">Class 57 & 58 Review Challenge</h2>
-  <p class="game-desc">Review The Good Place vocabulary plus must/mustn't and first conditional.</p>
-  <div class="category">Mixed Skills</div>
 </a>
 
       <a href="everyday-english-review-challenge.html"
    class="game-card mixed"
    data-category="mixed"
+   data-tags="mixed"
    data-title="everyday english review challenge grammar vocabulary quiz review first conditional should shouldnt make do be going to asking for clarification travel communication advice a2 b1">
 
   <div class="card-top">
@@ -467,36 +478,36 @@
 
 </a>
 
-      <a href="Asking-for-Clarification-matching-game.html" class="game-card mixed" data-category="mixed" data-title="asking for clarification matching game expression ipa meaning a2 b1">
+      <a href="Asking-for-Clarification-matching-game.html" class="game-card mixed" data-category="mixed" data-tags="mixed" data-title="asking for clarification matching game expression ipa meaning a2 b1">
         <div class="card-top"><span class="icon">❓</span><span class="level">A2–B1</span></div>
         <h2 class="game-title">Asking for Clarification</h2>
         <p class="game-desc">Match useful questions with IPA and meaning.</p>
         <div class="category">Mixed Skills</div>
       </a>
 
-      <a href="vocab_legal-conference-verbs_matching.html" class="game-card vocabulary" data-category="vocabulary" data-title="legal advocacy vocabulary matching game ipa meaning conference verbs coordinate advocate submit document dismiss disregard b2 c1">
+      <a href="vocab_legal-conference-verbs_matching.html" class="game-card vocabulary" data-category="vocabulary" data-tags="vocabulary" data-title="legal advocacy vocabulary matching game ipa meaning conference verbs coordinate advocate submit document dismiss disregard b2 c1">
         <div class="card-top"><span class="icon">📄</span><span class="level">B2–C1</span></div>
         <h2 class="game-title">Legal & Advocacy Verbs</h2>
         <p class="game-desc">Match legal and advocacy verbs with their IPA and meaning.</p>
         <div class="category">Vocabulary</div>
       </a>
 
-      <a href="review_socializing-abroad-and-present-perfect_quiz.html" class="game-card mixed" data-category="mixed" data-title="socializing abroad present perfect review quiz ever never vocabulary grammar mixed a2 b1">
-  <div class="card-top"><span class="icon">🔁</span><span class="level">A2–B1</span></div>
-  <h2 class="game-title">Socializing Abroad & Present Perfect Review</h2>
-  <p class="game-desc">Review socializing expressions and Present Perfect (ever/never) with a two-round quiz game.</p>
-  <div class="category">Mixed Skills</div>
-</a>
-
-      <a href="vocab_legal-conference-verbs_matching.html" class="game-card vocabulary" data-category="vocabulary" data-title="legal advocacy vocabulary matching game ipa meaning conference verbs coordinate advocate submit document dismiss disregard b2 c1">
-        <div class="card-top"><span class="icon">📄</span><span class="level">B2–C1</span></div>
-        <h2 class="game-title">Legal & Advocacy Verbs</h2>
-        <p class="game-desc">Match legal and advocacy verbs with their IPA and meaning.</p>
+      <a href="vocab_good-place-episode-2_challenge.html" class="game-card vocabulary" data-category="vocabulary" data-tags="vocabulary good-place" data-title="good place vocabulary episode 2 moral compass challenge talk it out give someone a chance cheer someone up let someone down pass on common good settle down">
+        <div class="card-top"><span class="icon">🧭</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Good Place Vocabulary Challenge</h2>
+        <p class="game-desc">Read real-life scenarios and choose the right expression. Reviews moral-choice vocabulary from The Good Place, Episode 2.</p>
+        <span class="tag-pill">🌈 Good Place</span>
         <div class="category">Vocabulary</div>
       </a>
-      
-    </section>
-      
+
+      <a href="vocab_good-place-episode-3_party-quest.html" class="game-card vocabulary" data-category="vocabulary" data-tags="vocabulary good-place" data-title="good place vocabulary episode 3 housewarming party quest talk it out cheer up delightful housewarming return the favour try out repay two-faced shall we raise rise">
+        <div class="card-top"><span class="icon">🎉</span><span class="level">A2–B1</span></div>
+        <h2 class="game-title">Housewarming Party Quest</h2>
+        <p class="game-desc">Type the missing word to help Eleanor plan her housewarming party. Reviews The Good Place, Episode 3 vocabulary plus raise vs. rise.</p>
+        <span class="tag-pill">🌈 Good Place</span>
+        <div class="category">Vocabulary</div>
+      </a>
+
     </section>
 
     <div class="empty-state" id="emptyState">No games found. Try another word or filter 💜</div>
@@ -520,9 +531,9 @@
 
       cards.forEach(card => {
         const title = card.dataset.title.toLowerCase();
-        const category = card.dataset.category;
+        const tags = (card.dataset.tags || card.dataset.category).split(' ');
         const matchesSearch = title.includes(query);
-        const matchesFilter = activeFilter === 'all' || category === activeFilter;
+        const matchesFilter = activeFilter === 'all' || tags.includes(activeFilter);
         const shouldShow = matchesSearch && matchesFilter;
 
         card.style.display = shouldShow ? 'flex' : 'none';
