@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Quiz: Present Simple vs Present Continuous</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .app {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 640px;
+    width: 100%;
+    padding: 32px 34px 36px;
+    box-shadow: 0 20px 50px rgba(80, 60, 130, 0.25);
+  }
+  h1 {
+    text-align: center;
+    color: #5b3fa0;
+    margin: 0 0 4px;
+    font-size: 1.5em;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7a6a99;
+    margin: 0 0 20px;
+    font-size: 0.95em;
+  }
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e3d9f7;
+    transition: background 0.3s;
+  }
+  .dot.done { background: #7bd8a8; }
+  .dot.current { background: #b79dee; }
+  .score-row {
+    text-align: center;
+    font-weight: 600;
+    color: #5b3fa0;
+    margin-bottom: 16px;
+  }
+  .scenario {
+    background: #f5f1fd;
+    border-radius: 14px;
+    padding: 16px 18px;
+    color: #3d2e63;
+    font-size: 1.02em;
+    line-height: 1.4;
+    margin-bottom: 14px;
+  }
+  .scenario .tag {
+    display: block;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9a8bc4;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .guide-questions {
+    background: #fff6ea;
+    border: 1.5px dashed #e3c98a;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+  }
+  .guide-questions .tag {
+    display: block;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #b8923f;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .guide-questions p {
+    margin: 4px 0;
+    color: #6b5433;
+    font-size: 0.94em;
+    font-style: italic;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .option {
+    background: #fdf9ff;
+    border: 2px solid #e3d9f7;
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 0.98em;
+    color: #3d2e63;
+    transition: all 0.2s;
+  }
+  .option:hover { border-color: #b79dee; transform: translateY(-1px); }
+  .option.correct { background: #d7f7e6; border-color: #6ed4a0; color: #2f6e4f; }
+  .option.incorrect { background: #fde3e3; border-color: #f08a8a; color: #8a3b3b; }
+  .option.disabled { cursor: default; }
+  .feedback {
+    margin-top: 14px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.92em;
+    line-height: 1.4;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: #eafaf1; color: #2f6e4f; }
+  .feedback.incorrect-fb { background: #fdecec; color: #8a3b3b; }
+  .next-row {
+    text-align: center;
+    margin-top: 18px;
+  }
+  button.action {
+    background: #7c5cd6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 26px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button.action:hover { background: #6647bd; }
+  button.action:disabled { background: #cbbdea; cursor: not-allowed; }
+  .final-screen {
+    text-align: center;
+    padding: 20px 10px;
+  }
+  .final-screen h2 { color: #5b3fa0; margin-bottom: 8px; }
+  .final-score {
+    font-size: 2.4em;
+    font-weight: 800;
+    color: #4fae82;
+    margin: 10px 0;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Grammar Quiz</h1>
+  <p class="subtitle">Present Simple vs Present Continuous. Use the guide questions to help you choose.</p>
+
+  <div class="progress-dots" id="dots"></div>
+  <div class="score-row" id="scoreRow">Question 1 of 8</div>
+
+  <div id="quizArea">
+    <div class="scenario">
+      <span class="tag">Situation</span>
+      <span id="scenarioText"></span>
+    </div>
+    <div class="guide-questions">
+      <span class="tag">Ask yourself</span>
+      <p>Is this a habitual or routine action?</p>
+      <p>Is this action happening right now?</p>
+    </div>
+    <div class="options" id="optionsArea"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="next-row">
+      <button class="action" id="nextBtn" disabled>Next</button>
+    </div>
+  </div>
+
+  <div class="final-screen hidden" id="finalScreen">
+    <h2>Nice work!</h2>
+    <div class="final-score" id="finalScoreText"></div>
+    <p id="finalMessage"></p>
+    <button class="action" id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    scenario: "Right now, she has a book open and her eyes are moving across the page.",
+    options: [
+      { text: "She reads a book every night.", correct: false },
+      { text: "She's reading a book right now.", correct: true },
+    ],
+    explanation: "It's happening at this exact moment, so present continuous fits best.",
+  },
+  {
+    scenario: "Every morning, without fail, she has coffee before starting work.",
+    options: [
+      { text: "She has coffee every morning.", correct: true },
+      { text: "She's having coffee right now.", correct: false },
+    ],
+    explanation: "It's a routine that repeats every day, so present simple fits best.",
+  },
+  {
+    scenario: "Listen, someone is playing the piano in the next room right now.",
+    options: [
+      { text: "Someone plays the piano.", correct: false },
+      { text: "Someone is playing the piano right now.", correct: true },
+    ],
+    explanation: "It's happening at this exact moment, so present continuous fits best.",
+  },
+  {
+    scenario: "She goes to the gym three times a week, every week.",
+    options: [
+      { text: "She goes to the gym three times a week.", correct: true },
+      { text: "She's going to the gym right now.", correct: false },
+    ],
+    explanation: "It's a habitual action that repeats regularly, so present simple fits best.",
+  },
+  {
+    scenario: "Look outside, the rain is falling heavily right now.",
+    options: [
+      { text: "It rains a lot in April.", correct: false },
+      { text: "It's raining right now.", correct: true },
+    ],
+    explanation: "It's happening at this exact moment, so present continuous fits best.",
+  },
+  {
+    scenario: "As a rule, she always double checks her emails before sending them.",
+    options: [
+      { text: "She always double checks her emails.", correct: true },
+      { text: "She's double checking her emails right now.", correct: false },
+    ],
+    explanation: "It's a habitual action, something she always does, so present simple fits best.",
+  },
+  {
+    scenario: "Right now, the kids are playing in the garden, you can hear them laughing.",
+    options: [
+      { text: "The kids play in the garden.", correct: false },
+      { text: "The kids are playing in the garden right now.", correct: true },
+    ],
+    explanation: "It's happening at this exact moment, so present continuous fits best.",
+  },
+  {
+    scenario: "Typically, she works from home on Fridays, that's her usual schedule.",
+    options: [
+      { text: "She works from home on Fridays.", correct: true },
+      { text: "She's working from home right now.", correct: false },
+    ],
+    explanation: "It's a routine tied to a regular schedule, so present simple fits best.",
+  },
+];
+
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+
+function buildDots() {
+  const dotsEl = document.getElementById("dots");
+  dotsEl.innerHTML = "";
+  questions.forEach(() => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  });
+  updateDots();
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll(".dot");
+  dots.forEach((dot, i) => {
+    dot.classList.remove("done", "current");
+    if (i < currentIndex) dot.classList.add("done");
+    else if (i === currentIndex) dot.classList.add("current");
+  });
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[currentIndex];
+  document.getElementById("scenarioText").textContent = q.scenario;
+  document.getElementById("scoreRow").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+  const optionsArea = document.getElementById("optionsArea");
+  optionsArea.innerHTML = "";
+  q.options.forEach(opt => {
+    const el = document.createElement("div");
+    el.className = "option";
+    el.textContent = opt.text;
+    el.addEventListener("click", () => selectOption(el, opt, q));
+    optionsArea.appendChild(el);
+  });
+  document.getElementById("feedback").classList.remove("show", "correct-fb", "incorrect-fb");
+  document.getElementById("nextBtn").disabled = true;
+  updateDots();
+}
+
+function selectOption(el, opt, q) {
+  if (answered) return;
+  answered = true;
+  const allOptions = document.querySelectorAll(".option");
+  allOptions.forEach(o => o.classList.add("disabled"));
+  if (opt.correct) {
+    el.classList.add("correct");
+    score++;
+  } else {
+    el.classList.add("incorrect");
+    allOptions.forEach(o => {
+      if (o.textContent === q.options.find(x => x.correct).text) o.classList.add("correct");
+    });
+  }
+  const fb = document.getElementById("feedback");
+  fb.textContent = q.explanation;
+  fb.classList.add("show", opt.correct ? "correct-fb" : "incorrect-fb");
+  document.getElementById("nextBtn").disabled = false;
+}
+
+document.getElementById("nextBtn").addEventListener("click", () => {
+  currentIndex++;
+  if (currentIndex >= questions.length) {
+    showFinal();
+  } else {
+    loadQuestion();
+  }
+});
+
+function showFinal() {
+  document.getElementById("quizArea").classList.add("hidden");
+  document.getElementById("dots").classList.add("hidden");
+  document.getElementById("scoreRow").classList.add("hidden");
+  document.getElementById("finalScreen").classList.remove("hidden");
+  document.getElementById("finalScoreText").textContent = `${score} / ${questions.length}`;
+  let msg = "Solid work noticing the difference.";
+  if (score === questions.length) msg = "Perfect score. You've really got this distinction down.";
+  else if (score <= 4) msg = "A good first pass. Let's talk through a few of these together.";
+  document.getElementById("finalMessage").textContent = msg;
+}
+
+document.getElementById("playAgainBtn").addEventListener("click", () => {
+  currentIndex = 0;
+  score = 0;
+  document.getElementById("quizArea").classList.remove("hidden");
+  document.getElementById("dots").classList.remove("hidden");
+  document.getElementById("scoreRow").classList.remove("hidden");
+  document.getElementById("finalScreen").classList.add("hidden");
+  buildDots();
+  loadQuestion();
+});
+
+buildDots();
+loadQuestion();
+</script>
+</body>
+</html>
