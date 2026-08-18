@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Builder: Word Order in Statements</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .app {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 660px;
+    width: 100%;
+    padding: 32px 34px 36px;
+    box-shadow: 0 20px 50px rgba(80, 60, 130, 0.25);
+  }
+  h1 {
+    text-align: center;
+    color: #5b3fa0;
+    margin: 0 0 4px;
+    font-size: 1.5em;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7a6a99;
+    margin: 0 0 16px;
+    font-size: 0.95em;
+  }
+  .legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78em;
+    color: #6b5f88;
+    font-weight: 600;
+  }
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+  }
+  .sw-subject { background: #cbb8ee; }
+  .sw-verb { background: #a8e6c3; }
+  .sw-place { background: #f5d98a; }
+  .sw-time { background: #a8c8f0; }
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e3d9f7;
+    transition: background 0.3s;
+  }
+  .dot.done { background: #7bd8a8; }
+  .dot.current { background: #b79dee; }
+  .status-row {
+    text-align: center;
+    font-weight: 600;
+    color: #5b3fa0;
+    margin-bottom: 16px;
+    font-size: 0.95em;
+  }
+  .build-strip {
+    min-height: 64px;
+    border: 2.5px dashed #cbb8ee;
+    border-radius: 16px;
+    background: #fbf9ff;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .build-strip .placeholder {
+    color: #b6a8d9;
+    font-size: 0.9em;
+    font-style: italic;
+  }
+  .tile {
+    background: #7c5cd6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+  }
+  .tile:hover { transform: translateY(-2px); }
+  .tile.placed {
+    background: #eee6fb;
+    color: #5b3fa0;
+    cursor: pointer;
+  }
+  .tile.role-subject { background: #cbb8ee; color: #3d2e63; }
+  .tile.role-verb { background: #a8e6c3; color: #245c3c; }
+  .tile.role-place { background: #f5d98a; color: #6b5017; }
+  .tile.role-time { background: #a8c8f0; color: #244a6e; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 18px;
+    min-height: 48px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  button.action {
+    background: #7c5cd6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button.action:hover { background: #6647bd; }
+  button.action:disabled { background: #cbbdea; cursor: not-allowed; }
+  button.secondary {
+    background: #f0e6fb;
+    color: #6647bd;
+  }
+  button.secondary:hover { background: #e3d3f7; }
+  .message {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.92em;
+    min-height: 22px;
+    line-height: 1.4;
+  }
+  .message.success { color: #2f9e5f; font-weight: 700; }
+  .message.retry { color: #b45a5a; }
+  .shake { animation: shake 0.35s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .final-screen {
+    text-align: center;
+    padding: 20px 10px;
+  }
+  .final-screen h2 { color: #5b3fa0; margin-bottom: 8px; }
+  .final-score {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: #4fae82;
+    margin: 10px 0;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Word Order Builder</h1>
+  <p class="subtitle">Tap the pieces to build each sentence in the normal order: subject, verb, place, time.</p>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch sw-subject"></span>Subject</span>
+    <span class="legend-item"><span class="legend-swatch sw-verb"></span>Verb (+ object)</span>
+    <span class="legend-item"><span class="legend-swatch sw-place"></span>Place</span>
+    <span class="legend-item"><span class="legend-swatch sw-time"></span>Time</span>
+  </div>
+
+  <div class="progress-dots" id="dots"></div>
+  <div class="status-row" id="statusRow">Sentence 1 of 8</div>
+
+  <div id="gameArea">
+    <div class="build-strip" id="buildStrip">
+      <span class="placeholder" id="placeholderText">Tap a piece below to start building</span>
+    </div>
+    <div class="bank" id="bank"></div>
+    <div class="btn-row">
+      <button class="action" id="checkBtn" disabled>Check</button>
+      <button class="action secondary" id="clearBtn">Clear</button>
+    </div>
+    <div class="message" id="message"></div>
+  </div>
+
+  <div class="final-screen hidden" id="finalScreen">
+    <h2>All done!</h2>
+    <p>You built all 8 sentences.</p>
+    <div class="final-score" id="finalScoreText"></div>
+    <p id="finalMessage"></p>
+    <button class="action" id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<script>
+const sentences = [
+  { subject: "The lawyers", verb: "meet with clients", place: "in the conference room", time: "every Tuesday" },
+  { subject: "I", verb: "check my emails", place: "at my desk", time: "first thing in the morning" },
+  { subject: "The judge", verb: "reads the documents", place: "in her office", time: "before the hearing" },
+  { subject: "We", verb: "will meet our clients", place: "outside the courtroom", time: "at nine o'clock" },
+  { subject: "She", verb: "prepares her notes", place: "at home", time: "the night before" },
+  { subject: "My colleagues", verb: "are working on the case", place: "in the office", time: "this week" },
+  { subject: "The meeting", verb: "will take place", place: "downtown", time: "on Monday" },
+  { subject: "I", verb: "finished the report", place: "at the office", time: "yesterday afternoon" },
+];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function toChunks(item) {
+  return [
+    { text: item.subject, role: "subject" },
+    { text: item.verb, role: "verb" },
+    { text: item.place, role: "place" },
+    { text: item.time, role: "time" },
+  ];
+}
+
+let order = [];
+let currentIndex = 0;
+let attempts = 0;
+let totalAttempts = 0;
+let placedOrder = [];
+let bankOrder = [];
+
+function buildDots() {
+  const dotsEl = document.getElementById("dots");
+  dotsEl.innerHTML = "";
+  sentences.forEach(() => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  });
+  updateDots();
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll(".dot");
+  dots.forEach((dot, i) => {
+    dot.classList.remove("done", "current");
+    if (i < currentIndex) dot.classList.add("done");
+    else if (i === currentIndex) dot.classList.add("current");
+  });
+}
+
+function loadSentence() {
+  attempts = 0;
+  document.getElementById("statusRow").textContent = `Sentence ${currentIndex + 1} of ${sentences.length}`;
+  document.getElementById("message").textContent = "";
+  document.getElementById("message").className = "message";
+  placedOrder = [];
+  bankOrder = shuffle(toChunks(order[currentIndex]));
+  renderBuildStrip(false);
+  renderBank();
+  updateDots();
+}
+
+function renderBuildStrip(revealRoles) {
+  const strip = document.getElementById("buildStrip");
+  strip.innerHTML = "";
+  if (placedOrder.length === 0) {
+    const ph = document.createElement("span");
+    ph.className = "placeholder";
+    ph.textContent = "Tap a piece below to start building";
+    strip.appendChild(ph);
+  } else {
+    placedOrder.forEach((chunk, idx) => {
+      const tile = document.createElement("button");
+      tile.className = "tile placed" + (revealRoles ? " role-" + chunk.role : "");
+      tile.textContent = chunk.text;
+      tile.addEventListener("click", () => { if (!revealRoles) removeChunk(idx); });
+      strip.appendChild(tile);
+    });
+  }
+  const total = toChunks(order[currentIndex]).length;
+  document.getElementById("checkBtn").disabled = placedOrder.length !== total;
+}
+
+function renderBank() {
+  const bankEl = document.getElementById("bank");
+  bankEl.innerHTML = "";
+  bankOrder.forEach((chunk, idx) => {
+    const tile = document.createElement("button");
+    tile.className = "tile";
+    tile.textContent = chunk.text;
+    tile.addEventListener("click", () => placeChunk(idx));
+    bankEl.appendChild(tile);
+  });
+}
+
+function placeChunk(idx) {
+  const chunk = bankOrder[idx];
+  placedOrder.push(chunk);
+  bankOrder.splice(idx, 1);
+  renderBuildStrip(false);
+  renderBank();
+}
+
+function removeChunk(idx) {
+  const chunk = placedOrder[idx];
+  bankOrder.push(chunk);
+  placedOrder.splice(idx, 1);
+  renderBuildStrip(false);
+  renderBank();
+}
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  placedOrder = [];
+  bankOrder = shuffle(toChunks(order[currentIndex]));
+  renderBuildStrip(false);
+  renderBank();
+  document.getElementById("message").textContent = "";
+  document.getElementById("message").className = "message";
+});
+
+document.getElementById("checkBtn").addEventListener("click", () => {
+  const correctChunks = toChunks(order[currentIndex]);
+  const isCorrect = placedOrder.every((chunk, i) => chunk.text === correctChunks[i].text);
+  const messageEl = document.getElementById("message");
+  totalAttempts++;
+  if (isCorrect) {
+    attempts++;
+    renderBuildStrip(true);
+    messageEl.textContent = "Correct order: subject, verb, place, time.";
+    messageEl.className = "message success";
+    document.getElementById("checkBtn").disabled = true;
+    setTimeout(() => {
+      currentIndex++;
+      if (currentIndex >= order.length) {
+        showFinal();
+      } else {
+        loadSentence();
+      }
+    }, 1600);
+  } else {
+    messageEl.textContent = "Not quite the right order, try again.";
+    messageEl.className = "message retry";
+    document.getElementById("buildStrip").classList.add("shake");
+    setTimeout(() => document.getElementById("buildStrip").classList.remove("shake"), 350);
+  }
+});
+
+function showFinal() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("dots").classList.add("hidden");
+  document.getElementById("statusRow").classList.add("hidden");
+  document.getElementById("finalScreen").classList.remove("hidden");
+  document.getElementById("finalScoreText").textContent = `${totalAttempts} total tries for 8 sentences`;
+  let msg = "Good work, keep practicing this word order.";
+  if (totalAttempts <= 10) msg = "Excellent, you have a strong feel for sentence order.";
+  document.getElementById("finalMessage").textContent = msg;
+}
+
+document.getElementById("playAgainBtn").addEventListener("click", () => {
+  currentIndex = 0;
+  totalAttempts = 0;
+  order = shuffle(sentences);
+  document.getElementById("gameArea").classList.remove("hidden");
+  document.getElementById("dots").classList.remove("hidden");
+  document.getElementById("statusRow").classList.remove("hidden");
+  document.getElementById("finalScreen").classList.add("hidden");
+  buildDots();
+  loadSentence();
+});
+
+order = shuffle(sentences);
+buildDots();
+loadSentence();
+</script>
+</body>
+</html>
