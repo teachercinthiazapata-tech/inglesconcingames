@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Rooftop Party, Socializing Abroad Story Game</title>
+<style>
+  :root{
+    --sky1:#3d3568; --sky2:#a2568c; --sky3:#e8836b;
+    --gold:#f2b84b; --cream:#FFFBF4; --navy:#1F3864; --muted:#5a5a75;
+    --good:#3aa76d; --bad:#d1504a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI', Arial, sans-serif;
+    background:linear-gradient(180deg,var(--sky1),var(--sky2) 55%,var(--sky3));
+    min-height:100vh; padding:24px; color:var(--navy);
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  h1{text-align:center;font-size:1.5rem;margin-bottom:2px;color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.25);}
+  p.sub{text-align:center;margin-top:0;color:#f0e6f7;}
+  .lights{ text-align:center; font-size:1.3rem; letter-spacing:10px; margin-bottom:6px; opacity:.9;}
+  .meter-box{
+    background:rgba(255,255,255,.18); border-radius:14px; padding:12px 16px; margin:14px 0 20px;
+    backdrop-filter: blur(4px);
+  }
+  .meter-label{ display:flex; justify-content:space-between; font-size:.85rem; color:#fff; margin-bottom:6px; font-weight:bold;}
+  .meter-track{ background:rgba(255,255,255,.25); border-radius:999px; height:14px; overflow:hidden;}
+  .meter-fill{ background:linear-gradient(90deg,var(--gold),#ffd97d); height:100%; width:0%; transition:width .5s ease; border-radius:999px;}
+  .card{
+    background:var(--cream); border-radius:20px; padding:26px 26px; box-shadow:0 12px 32px rgba(0,0,0,.28);
+    min-height:300px; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .scene-label{font-size:.78rem; text-transform:uppercase; letter-spacing:1px; color:var(--sky3); font-weight:bold; margin-bottom:8px;}
+  .narration{font-size:1.05rem; margin:0 0 18px; line-height:1.55;}
+  .narration b{color:var(--sky2);}
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    background:white; border:2px solid #e6e0ea; border-radius:12px; padding:13px 16px; cursor:pointer;
+    font-size:.98rem; transition:all .15s; line-height:1.4;
+  }
+  .opt:hover{border-color:var(--sky2);}
+  .opt.correct{background:#dff2e7; border-color:var(--good);}
+  .opt.wrong{background:#fbdada; border-color:var(--bad);}
+  .feedback{margin-top:14px; font-size:.92rem; font-weight:bold; min-height:1.4em; line-height:1.4;}
+  .feedback.good{color:var(--good);}
+  .feedback.bad{color:var(--bad);}
+  .nav{display:flex; justify-content:flex-end; margin-top:16px;}
+  button.next{
+    background:var(--sky1); color:white; border:none; padding:11px 24px; border-radius:10px;
+    cursor:pointer; font-size:.95rem; opacity:.4; pointer-events:none; transition:opacity .2s;
+  }
+  button.next.ready{opacity:1; pointer-events:auto;}
+  button.next:hover.ready{background:var(--sky2);}
+  .final{ text-align:center; }
+  .final h2{color:var(--sky1); margin-bottom:4px;}
+  .final .badge{font-size:2.4rem; margin:10px 0;}
+  .final p.note{font-size:.95rem; color:var(--muted); max-width:480px; margin:10px auto 0; line-height:1.5;}
+  button.reset{
+    background:var(--sky1); color:white; border:none; padding:11px 24px; border-radius:10px;
+    cursor:pointer; font-size:.95rem; margin-top:16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="lights">&#x1F387; &#x1F387; &#x1F387; &#x1F387; &#x1F387;</div>
+  <h1>The Rooftop Party</h1>
+  <p class="sub">A Socializing Abroad story game, choose what you'd really do</p>
+  <div class="meter-box">
+    <div class="meter-label"><span>Confidence Meter</span><span id="meterText">0 / 8</span></div>
+    <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+  </div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+const beats = [
+  {
+    scene: "Scene 1 of 8",
+    text: "You arrive at a rooftop party in Berlin. You don't know anyone yet, and there's an awkward silence near the snack table. What do you do?",
+    options: [
+      { text: "Break the ice by joking about how good the snacks look.", correct: true, feedback: "Nice, you broke the ice! Someone laughs and turns to talk to you." },
+      { text: "Stand quietly and check your phone.", correct: false, feedback: "That avoids the moment instead of breaking the ice. Try again. What would actually start a conversation?" },
+      { text: "Leave and come back later.", correct: false, feedback: "That skips the chance to break the ice. Try again!" }
+    ]
+  },
+  {
+    scene: "Scene 2 of 8",
+    text: "Lena, the person you just met, asks how you know the host. This is a good moment to...",
+    options: [
+      { text: "Make small talk about the view and how you both know the host.", correct: true, feedback: "You made small talk easily, light, friendly, no pressure." },
+      { text: "Explain your entire life story in detail.", correct: false, feedback: "That's a lot for a first chat! Small talk means keeping it light at first. Try again." },
+      { text: "Say nothing and look at the view.", correct: false, feedback: "Silence won't keep the conversation going. Try again!" }
+    ]
+  },
+  {
+    scene: "Scene 3 of 8",
+    text: "Talking to Lena, you both mention you love hiking and the same TV show. You two...",
+    options: [
+      { text: "Have things in common, you talk about it for ten minutes.", correct: true, feedback: "Exactly, finding what you have in common is what keeps a conversation alive." },
+      { text: "Have nothing to talk about.", correct: false, feedback: "That's the opposite of what just happened! Try again." },
+      { text: "Disagree about everything.", correct: false, feedback: "Not quite, you actually found something you both enjoy. Try again." }
+    ]
+  },
+  {
+    scene: "Scene 4 of 8",
+    text: "Lena introduces you to her friend Max, who seems a bit quiet at first. After a while talking about football, you...",
+    options: [
+      { text: "Get along with him really well.", correct: true, feedback: "You get along with Max now, he even invites you to a match next week." },
+      { text: "Ignore him completely.", correct: false, feedback: "That's not what happened, you two ended up talking easily. Try again." },
+      { text: "Argue with him about politics.", correct: false, feedback: "No conflict here, just a good, easy conversation. Try again." }
+    ]
+  },
+  {
+    scene: "Scene 5 of 8",
+    text: "Earlier in the evening, before things got easier, you admitted to Lena that sometimes at German parties you...",
+    options: [
+      { text: "Feel like an outsider because of the language.", correct: true, feedback: "That's honest, and Lena says she's felt that way too, even in her own city." },
+      { text: "Feel 100% confident every single time.", correct: false, feedback: "That's not quite the honest moment you shared. Try again." },
+      { text: "Feel bored at every party.", correct: false, feedback: "Not quite the feeling you described. Try again." }
+    ]
+  },
+  {
+    scene: "Scene 6 of 8",
+    text: "But tonight, mixing English with a little German, laughing at the same jokes as everyone else, you finally start to...",
+    options: [
+      { text: "Fit in with the group.", correct: true, feedback: "You fit in, and it happened faster than you expected." },
+      { text: "Stand out awkwardly.", correct: false, feedback: "That's not the feeling tonight. Try again." },
+      { text: "Feel invisible.", correct: false, feedback: "Actually the opposite is happening tonight. Try again." }
+    ]
+  },
+  {
+    scene: "Scene 7 of 8",
+    text: "It's getting late. You've met people from Germany, Spain, and Korea tonight, and heard about their very different lives. This kind of night helps you...",
+    options: [
+      { text: "Broaden your horizons.", correct: true, feedback: "Exactly, new people, new perspectives, new horizons." },
+      { text: "Waste your evening.", correct: false, feedback: "Not at all, this was a valuable night. Try again." },
+      { text: "Forget your English.", correct: false, feedback: "Actually your English got a great workout tonight. Try again." }
+    ]
+  },
+  {
+    scene: "Scene 8 of 8",
+    text: "As the party winds down, you and Lena swap numbers. You ask her to...",
+    options: [
+      { text: "Keep in touch, and maybe meet again next week.", correct: true, feedback: "Perfect way to end the night, a new friend, and a plan to keep in touch." },
+      { text: "Never talk again.", correct: false, feedback: "That's not the ending you want here! Try again." },
+      { text: "Avoid saying goodbye.", correct: false, feedback: "A warm goodbye fits this moment better. Try again." }
+    ]
+  }
+];
+
+let idx = 0;
+let score = 0;
+
+function renderMeter(){
+  const pct = Math.round((score / beats.length) * 100);
+  document.getElementById('meterFill').style.width = pct + '%';
+  document.getElementById('meterText').textContent = score + ' / ' + beats.length;
+}
+
+function renderCard(){
+  renderMeter();
+  const card = document.getElementById('card');
+  card.innerHTML = '';
+
+  if(idx < beats.length){
+    const beat = beats[idx];
+    const label = document.createElement('div');
+    label.className = 'scene-label';
+    label.textContent = beat.scene;
+    const narr = document.createElement('div');
+    narr.className = 'narration';
+    narr.textContent = beat.text;
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    const nav = document.createElement('div');
+    nav.className = 'nav';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'next';
+    nextBtn.textContent = idx === beats.length - 1 ? 'Finish the Party' : 'Next Scene';
+    nextBtn.onclick = () => { idx++; renderCard(); };
+    nav.appendChild(nextBtn);
+
+    beat.options.forEach((opt) => {
+      const btn = document.createElement('div');
+      btn.className = 'opt';
+      btn.textContent = opt.text;
+      btn.onclick = () => {
+        if(card.dataset.solved) return;
+        if(opt.correct){
+          card.dataset.solved = 'true';
+          btn.classList.add('correct');
+          fb.textContent = opt.feedback;
+          fb.className = 'feedback good';
+          score++;
+          renderMeter();
+          nextBtn.classList.add('ready');
+        } else {
+          btn.classList.add('wrong');
+          fb.textContent = opt.feedback;
+          fb.className = 'feedback bad';
+        }
+      };
+      opts.appendChild(btn);
+    });
+
+    card.dataset.solved = '';
+    card.appendChild(label);
+    card.appendChild(narr);
+    card.appendChild(opts);
+    card.appendChild(fb);
+    card.appendChild(nav);
+
+  } else {
+    const div = document.createElement('div');
+    div.className = 'final';
+    const badge = document.createElement('div');
+    badge.className = 'badge';
+    badge.textContent = '\u{1F389}';
+    const h2 = document.createElement('h2');
+    h2.textContent = 'You made it through the whole party!';
+    const scoreEl = document.createElement('div');
+    scoreEl.style.fontSize = '1.6rem';
+    scoreEl.style.fontWeight = 'bold';
+    scoreEl.style.color = '#e8836b';
+    scoreEl.textContent = 'Confidence Meter: ' + score + ' / ' + beats.length;
+    const note = document.createElement('p');
+    note.className = 'note';
+    note.textContent = "You didn't need to understand every word to keep the night going, you broke the ice, found things in common, and kept a real conversation alive from start to finish. That's the whole point.";
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'reset';
+    resetBtn.textContent = 'Go to another party';
+    resetBtn.onclick = () => { idx=0; score=0; renderCard(); };
+    div.appendChild(badge);
+    div.appendChild(h2);
+    div.appendChild(scoreEl);
+    div.appendChild(note);
+    div.appendChild(resetBtn);
+    card.appendChild(div);
+  }
+}
+
+renderCard();
+</script>
+</body>
+</html>
