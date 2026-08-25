@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Dynamic Review: Focus and Productivity</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #FFE8D6 0%, #D6F5EA 100%);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  .wrap {
+    max-width: 560px;
+    width: 100%;
+  }
+  h1 {
+    text-align: center;
+    color: #1E3A5F;
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #E07A5F;
+    font-weight: 600;
+    margin-bottom: 18px;
+    font-size: 14px;
+  }
+  .card {
+    background: #FFFFFF;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 6px 18px rgba(30, 58, 95, 0.12);
+  }
+  .progress {
+    text-align: center;
+    color: #6B8F87;
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .word-display {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 700;
+    color: #1E3A5F;
+    background: #FFF3E9;
+    border-radius: 14px;
+    padding: 18px 10px;
+    margin-bottom: 18px;
+  }
+  .section-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #E07A5F;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 14px 0 8px;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .opt-btn {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 2px solid #D6E8E4;
+    background: #FAFFFE;
+    color: #1E3A5F;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .opt-btn:hover { border-color: #6B8F87; }
+  .opt-btn.correct {
+    background: #C9EFD4;
+    border-color: #4CAF6F;
+    color: #1E3A5F;
+  }
+  .opt-btn.wrong {
+    background: #FBDADA;
+    border-color: #E06B6B;
+  }
+  .opt-btn:disabled { cursor: default; }
+  .score {
+    text-align: center;
+    margin-top: 16px;
+    color: #1E3A5F;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .next-btn {
+    display: block;
+    margin: 18px auto 0;
+    padding: 12px 28px;
+    background: #1E3A5F;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .next-btn:disabled {
+    background: #B7C4D1;
+    cursor: not-allowed;
+  }
+  .overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(30, 58, 95, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 10;
+  }
+  .overlay.hidden { display: none !important; }
+  .popup {
+    background: #fff;
+    border-radius: 18px;
+    padding: 26px;
+    max-width: 420px;
+    text-align: center;
+  }
+  .popup h2 {
+    color: #E07A5F;
+    margin-top: 0;
+    font-size: 18px;
+  }
+  .popup p {
+    color: #1E3A5F;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .popup .hint {
+    background: #FFF3E9;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    color: #6B8F87;
+    margin-top: 10px;
+  }
+  .popup button {
+    margin-top: 18px;
+    padding: 10px 26px;
+    background: #E07A5F;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .final.hidden { display: none !important; }
+  .final {
+    text-align: center;
+  }
+  .final .big {
+    font-size: 40px;
+    margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vocabulary Dynamic Review</h1>
+  <div class="subtitle">Focus and Productivity, Class 7</div>
+
+  <div class="card" id="gameCard">
+    <div class="progress" id="progress">Word 1 of 8</div>
+    <div class="word-display" id="wordDisplay">focus</div>
+
+    <div class="section-label">Step 1, choose the correct pronunciation (IPA)</div>
+    <div class="options" id="ipaOptions"></div>
+
+    <div class="section-label">Step 2, choose the correct meaning</div>
+    <div class="options" id="meaningOptions"></div>
+
+    <div class="score" id="scoreLine">Score: 0 / 8</div>
+    <button class="next-btn" id="nextBtn" disabled>Next Word</button>
+  </div>
+
+  <div class="card final hidden" id="finalCard">
+    <div class="final">
+      <div class="big">🎉</div>
+      <h2 id="finalScore" style="color:#1E3A5F;">You matched 8 out of 8!</h2>
+      <p style="color:#6B8F87;">Great review. Let's move on to today's grammar challenge.</p>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="speakOverlay">
+  <div class="popup">
+    <h2>Speaking Challenge</h2>
+    <p id="speakPrompt"></p>
+    <div class="hint">Try to use the pattern: Subject + Verb (+ Object) + Place + Time</div>
+    <button id="speakContinue">Got it, continue</button>
+  </div>
+</div>
+
+<script>
+const words = [
+  {
+    word: "focus",
+    ipa: "/ˈfəʊkəs/",
+    meaning: "to give your full attention to one thing",
+    speak: "Make a sentence about where and when you focus best."
+  },
+  {
+    word: "distraction",
+    ipa: "/dɪˈstrækʃn/",
+    meaning: "something that takes your attention away from what you're doing",
+    speak: "Make a sentence about your biggest distraction, where and when it happens."
+  },
+  {
+    word: "get things done",
+    ipa: "/ɡet θɪŋz dʌn/",
+    meaning: "to actually complete your tasks, not just plan them",
+    speak: "Make a sentence about how you get things done, where and when."
+  },
+  {
+    word: "procrastinate",
+    ipa: "/prəˈkræstɪneɪt/",
+    meaning: "to delay doing something you should be doing",
+    speak: "Make a sentence about when you usually procrastinate."
+  },
+  {
+    word: "deadline",
+    ipa: "/ˈdedlaɪn/",
+    meaning: "the date or time by which something must be finished",
+    speak: "Make a sentence about a deadline, where and when."
+  },
+  {
+    word: "concentrate",
+    ipa: "/ˈkɒnsntreɪt/",
+    meaning: "to give all your mental effort to one thing",
+    speak: "Make a sentence about where you concentrate best."
+  },
+  {
+    word: "task",
+    ipa: "/tɑːsk/",
+    meaning: "a piece of work that needs to be done",
+    speak: "Make a sentence about a task, where and when you do it."
+  },
+  {
+    word: "avoid",
+    ipa: "/əˈvɔɪd/",
+    meaning: "to stay away from something, or not do something",
+    speak: "Make a sentence about something you avoid, where or when."
+  }
+];
+
+let order = [...Array(words.length).keys()];
+shuffle(order);
+let current = 0;
+let score = 0;
+let ipaDone = false;
+let meaningDone = false;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function buildOptions(correctValue, allValues) {
+  const pool = allValues.filter(v => v !== correctValue);
+  shuffle(pool);
+  const opts = [correctValue, ...pool.slice(0, 3)];
+  shuffle(opts);
+  return opts;
+}
+
+function render() {
+  ipaDone = false;
+  meaningDone = false;
+  document.getElementById("nextBtn").disabled = true;
+  const idx = order[current];
+  const item = words[idx];
+  document.getElementById("progress").textContent = `Word ${current + 1} of ${words.length}`;
+  document.getElementById("wordDisplay").textContent = item.word;
+
+  const allIpa = words.map(w => w.ipa);
+  const allMeaning = words.map(w => w.meaning);
+
+  const ipaOpts = buildOptions(item.ipa, allIpa);
+  const meaningOpts = buildOptions(item.meaning, allMeaning);
+
+  const ipaBox = document.getElementById("ipaOptions");
+  ipaBox.innerHTML = "";
+  ipaOpts.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "opt-btn";
+    btn.textContent = opt;
+    btn.onclick = () => handleChoice(btn, opt, item.ipa, "ipa");
+    ipaBox.appendChild(btn);
+  });
+
+  const meaningBox = document.getElementById("meaningOptions");
+  meaningBox.innerHTML = "";
+  meaningOpts.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "opt-btn";
+    btn.textContent = opt;
+    btn.onclick = () => handleChoice(btn, opt, item.meaning, "meaning");
+    meaningBox.appendChild(btn);
+  });
+
+  document.getElementById("scoreLine").textContent = `Score: ${score} / ${words.length}`;
+}
+
+function handleChoice(btn, chosen, correct, type) {
+  const group = type === "ipa" ? document.getElementById("ipaOptions") : document.getElementById("meaningOptions");
+  const buttons = group.querySelectorAll("button");
+
+  if (chosen === correct) {
+    buttons.forEach(b => b.disabled = true);
+    btn.classList.add("correct");
+    if (type === "ipa") ipaDone = true;
+    if (type === "meaning") meaningDone = true;
+    checkRoundComplete();
+  } else {
+    btn.classList.add("wrong");
+    setTimeout(() => btn.classList.remove("wrong"), 500);
+  }
+}
+
+function checkRoundComplete() {
+  if (ipaDone && meaningDone) {
+    score++;
+    document.getElementById("scoreLine").textContent = `Score: ${score} / ${words.length}`;
+    const idx = order[current];
+    document.getElementById("speakPrompt").textContent = words[idx].speak;
+    document.getElementById("speakOverlay").classList.remove("hidden");
+  }
+}
+
+document.getElementById("speakContinue").onclick = () => {
+  document.getElementById("speakOverlay").classList.add("hidden");
+  document.getElementById("nextBtn").disabled = false;
+};
+
+document.getElementById("nextBtn").onclick = () => {
+  current++;
+  if (current >= order.length) {
+    document.getElementById("gameCard").classList.add("hidden");
+    document.getElementById("finalCard").classList.remove("hidden");
+    document.getElementById("finalScore").textContent = `You matched ${score} out of ${words.length}!`;
+  } else {
+    render();
+  }
+};
+
+render();
+</script>
+</body>
+</html>

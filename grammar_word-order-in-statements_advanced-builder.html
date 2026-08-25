@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Challenge: Word Order, Level Up</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #FFE8D6 0%, #D6F5EA 100%);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  .wrap { max-width: 600px; width: 100%; }
+  h1 {
+    text-align: center;
+    color: #1E3A5F;
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #E07A5F;
+    font-weight: 600;
+    margin-bottom: 18px;
+    font-size: 14px;
+  }
+  .card {
+    background: #FFFFFF;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 6px 18px rgba(30, 58, 95, 0.12);
+  }
+  .progress {
+    text-align: center;
+    color: #6B8F87;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+  .challenge-tag {
+    text-align: center;
+    display: inline-block;
+    background: #FFE8D6;
+    color: #C1502E;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin: 0 auto 14px;
+  }
+  .tag-row { text-align: center; }
+  .answer-zone {
+    min-height: 70px;
+    border: 2px dashed #B7C4D1;
+    border-radius: 14px;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+    background: #FAFCFB;
+  }
+  .tile-slot {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #EAF2F0;
+    color: #1E3A5F;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .tile-slot.role-subject { background: #C9E4FF; }
+  .tile-slot.role-verb { background: #FFD9B3; }
+  .tile-slot.role-object { background: #E4D6FF; }
+  .tile-slot.role-connector { background: #FFF0A3; }
+  .tile-slot.role-place { background: #C9EFD4; }
+  .tile-slot.role-time { background: #FBD0DA; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .tile-btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 2px solid #D6E8E4;
+    background: #FAFFFE;
+    color: #1E3A5F;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .tile-btn:hover { border-color: #6B8F87; }
+  .btn-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 11px 22px;
+    border-radius: 30px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-check { background: #1E3A5F; color: #fff; }
+  .btn-clear { background: #EAF2F0; color: #1E3A5F; }
+  .btn-next { background: #E07A5F; color: #fff; }
+  .btn-next:disabled { background: #E9C6BA; cursor: not-allowed; }
+  .feedback {
+    text-align: center;
+    margin-top: 14px;
+    font-weight: 600;
+    font-size: 14px;
+    min-height: 20px;
+  }
+  .feedback.ok { color: #2F8F5B; }
+  .feedback.no { color: #C1502E; }
+  .legend {
+    margin-top: 16px;
+    font-size: 12px;
+    color: #6B8F87;
+    text-align: center;
+    line-height: 1.8;
+  }
+  .legend span {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    margin: 0 3px;
+  }
+  .final.hidden { display: none !important; }
+  .final { text-align: center; }
+  .final .big { font-size: 40px; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Grammar Challenge: Word Order, Level Up</h1>
+  <div class="subtitle">Beyond the basics: negatives, frequency, and connectors</div>
+
+  <div class="card" id="gameCard">
+    <div class="progress" id="progress">Sentence 1 of 6</div>
+    <div class="tag-row"><span class="challenge-tag" id="challengeTag">Negative statement</span></div>
+
+    <div class="answer-zone" id="answerZone"></div>
+
+    <div class="bank" id="bank"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-clear" id="clearBtn">Clear</button>
+      <button class="btn btn-check" id="checkBtn">Check</button>
+      <button class="btn btn-next" id="nextBtn" disabled>Next Sentence</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="legend">
+      <span style="background:#C9E4FF;">subject</span>
+      <span style="background:#FFD9B3;">verb</span>
+      <span style="background:#E4D6FF;">object</span>
+      <span style="background:#FFF0A3;">connector</span>
+      <span style="background:#C9EFD4;">place / manner</span>
+      <span style="background:#FBD0DA;">time</span>
+    </div>
+  </div>
+
+  <div class="card final hidden" id="finalCard">
+    <div class="final">
+      <div class="big">🏆</div>
+      <h2 style="color:#1E3A5F;">Challenge complete!</h2>
+      <p style="color:#6B8F87;">Six harder sentences, built from scratch. Ready for the new vocabulary and the podcast.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Each sentence: tiles array (role + text, in scrambled bank order), correctOrder = array of tile ids in correct sequence.
+// One sentence includes a deliberate distractor tile that does NOT belong in the answer.
+const sentences = [
+  {
+    tag: "Negative statement",
+    tiles: [
+      { id: "a", role: "subject", text: "My assistant" },
+      { id: "b", role: "verb", text: "does not answer emails" },
+      { id: "c", role: "time", text: "after six o'clock" }
+    ],
+    correct: ["a", "b", "c"]
+  },
+  {
+    tag: "Adverb of frequency placement",
+    tiles: [
+      { id: "a", role: "subject", text: "I" },
+      { id: "b", role: "verb", text: "usually" },
+      { id: "c", role: "verb", text: "concentrate best" },
+      { id: "d", role: "time", text: "in the early morning" }
+    ],
+    correct: ["a", "b", "c", "d"],
+    note: "Frequency adverbs like usually go right after the subject, before the verb."
+  },
+  {
+    tag: "Two clauses with because",
+    tiles: [
+      { id: "a", role: "subject", text: "She missed the deadline" },
+      { id: "b", role: "connector", text: "because" },
+      { id: "c", role: "verb", text: "she procrastinated" },
+      { id: "d", role: "object", text: "on the report" }
+    ],
+    correct: ["a", "b", "c", "d"]
+  },
+  {
+    tag: "Two clauses with so",
+    tiles: [
+      { id: "a", role: "subject", text: "The task felt overwhelming" },
+      { id: "b", role: "connector", text: "so" },
+      { id: "c", role: "verb", text: "he broke it" },
+      { id: "d", role: "place", text: "into smaller steps" }
+    ],
+    correct: ["a", "b", "c", "d"]
+  },
+  {
+    tag: "Spot the extra piece",
+    tiles: [
+      { id: "a", role: "subject", text: "My colleague" },
+      { id: "b", role: "verb", text: "never avoids" },
+      { id: "c", role: "object", text: "difficult clients" },
+      { id: "d", role: "place", text: "at the office" },
+      { id: "x", role: "distractor", text: "yesterday" }
+    ],
+    correct: ["a", "b", "c", "d"],
+    note: "One piece does not belong in this sentence. Leave it in the bank."
+  },
+  {
+    tag: "Full pattern with manner",
+    tiles: [
+      { id: "a", role: "subject", text: "Our team finished the report" },
+      { id: "b", role: "place", text: "carefully" },
+      { id: "c", role: "place", text: "in the office" },
+      { id: "d", role: "time", text: "before the deadline" }
+    ],
+    correct: ["a", "b", "c", "d"]
+  }
+];
+
+let current = 0;
+let answer = [];
+let bankTiles = [];
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function render() {
+  answer = [];
+  const s = sentences[current];
+  document.getElementById("progress").textContent = `Sentence ${current + 1} of ${sentences.length}`;
+  document.getElementById("challengeTag").textContent = s.tag;
+  document.getElementById("nextBtn").disabled = true;
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("feedback").className = "feedback";
+
+  bankTiles = [...s.tiles];
+  shuffle(bankTiles);
+  renderBank();
+  renderAnswer();
+}
+
+function renderBank() {
+  const bank = document.getElementById("bank");
+  bank.innerHTML = "";
+  bankTiles.forEach(t => {
+    if (answer.includes(t.id)) return;
+    const btn = document.createElement("button");
+    btn.className = "tile-btn";
+    btn.textContent = t.text;
+    btn.onclick = () => {
+      answer.push(t.id);
+      renderBank();
+      renderAnswer();
+    };
+    bank.appendChild(btn);
+  });
+}
+
+function renderAnswer() {
+  const zone = document.getElementById("answerZone");
+  zone.innerHTML = "";
+  const s = sentences[current];
+  answer.forEach(id => {
+    const t = s.tiles.find(tt => tt.id === id);
+    const span = document.createElement("span");
+    span.className = "tile-slot role-" + t.role;
+    span.textContent = t.text;
+    span.onclick = () => {
+      answer = answer.filter(a => a !== id);
+      renderBank();
+      renderAnswer();
+    };
+    zone.appendChild(span);
+  });
+}
+
+document.getElementById("clearBtn").onclick = () => {
+  answer = [];
+  renderBank();
+  renderAnswer();
+};
+
+document.getElementById("checkBtn").onclick = () => {
+  const s = sentences[current];
+  const fb = document.getElementById("feedback");
+  const isCorrect = answer.length === s.correct.length && answer.every((id, i) => id === s.correct[i]);
+  if (isCorrect) {
+    fb.textContent = s.note ? "Correct! " + s.note : "Correct! Well built.";
+    fb.className = "feedback ok";
+    document.getElementById("nextBtn").disabled = false;
+  } else {
+    fb.textContent = "Not quite yet, try again. Tap a tile in your sentence to remove it.";
+    fb.className = "feedback no";
+  }
+};
+
+document.getElementById("nextBtn").onclick = () => {
+  current++;
+  if (current >= sentences.length) {
+    document.getElementById("gameCard").classList.add("hidden");
+    document.getElementById("finalCard").classList.remove("hidden");
+  } else {
+    render();
+  }
+};
+
+render();
+</script>
+</body>
+</html>
