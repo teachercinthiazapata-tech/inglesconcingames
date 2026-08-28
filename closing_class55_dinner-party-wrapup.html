@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Out of the Blue: Class 55 Wrap-Up</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(180deg, #FFF8E7 0%, #FDEFC9 100%);
+    color: #2C3E50;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #FFFFFF;
+    max-width: 640px;
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(44, 62, 80, 0.15);
+    padding: 36px 32px;
+  }
+  header { text-align: center; margin-bottom: 20px; }
+  h1 { font-size: 24px; color: #2C3E50; }
+  .subtitle {
+    color: #E8A33D;
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+  .series-tag {
+    color: #6B6A63;
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 6px;
+  }
+  .progress-wrap { margin: 22px 0 8px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #6B6A63;
+    margin-bottom: 6px;
+  }
+  .progress-bar-bg {
+    background: #F0EBD8;
+    border-radius: 999px;
+    height: 14px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: linear-gradient(90deg, #E8A33D, #F4C463);
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    transition: width 0.5s ease;
+  }
+  #question-counter {
+    text-align: center;
+    font-size: 13px;
+    color: #6B6A63;
+    margin-bottom: 10px;
+  }
+  .instruction {
+    text-align: center;
+    font-size: 12px;
+    color: #B4771B;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .scenario {
+    background: #FDF6E3;
+    border: 1px solid #F0E4BE;
+    border-radius: 14px;
+    padding: 18px 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .blank-display {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin: 18px 0;
+    min-height: 34px;
+  }
+  .word-group { display: flex; gap: 3px; }
+  .letter-box {
+    display: inline-block;
+    min-width: 16px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #2C3E50;
+    border-bottom: 3px solid #C9C4AC;
+    padding: 0 2px;
+  }
+  .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  #answer-input, #open-input {
+    flex: 1;
+    padding: 13px 14px;
+    border: 2px solid #E1E1DF;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #2C3E50;
+    font-family: inherit;
+  }
+  #open-input { width: 100%; min-height: 70px; resize: vertical; }
+  #answer-input:focus, #open-input:focus { outline: none; border-color: #E8A33D; }
+  .action-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .check-btn, .clue-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .check-btn { background: #2C3E50; color: #FFF8E7; }
+  .check-btn:hover { background: #1D2B38; }
+  .clue-btn {
+    background: #FDF0D5;
+    color: #B4771B;
+    border: 2px solid #F0E4BE;
+  }
+  .clue-btn:hover { background: #FBE8C4; }
+  .clue-btn:disabled { opacity: 0.5; cursor: default; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    text-align: left;
+    padding: 14px 16px;
+    border: 2px solid #E1E1DF;
+    background: #FFFFFF;
+    border-radius: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #2C3E50;
+  }
+  .option-btn:hover:not(:disabled) { border-color: #E8A33D; background: #FFFBF0; }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.correct { background: #E4F5E9; border-color: #4CAF50; color: #276738; font-weight: 600; }
+  .option-btn.incorrect { background: #FBE9E7; border-color: #E74C3C; color: #A6362A; font-weight: 600; }
+  .feedback {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: #E4F5E9; color: #276738; border: 1px solid #BEE3C8; }
+  .feedback.incorrect-fb { background: #FBE9E7; color: #A6362A; border: 1px solid #F3C6C0; }
+  .next-btn, .start-btn, .replay-btn {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #2C3E50;
+    color: #FFF8E7;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .next-btn:hover, .start-btn:hover, .replay-btn:hover { background: #1D2B38; }
+  .intro, .final { text-align: center; }
+  .intro p, .final p { color: #6B6A63; font-size: 15px; line-height: 1.6; margin: 14px 0 4px; }
+  .final-message { font-size: 17px; color: #2C3E50; font-weight: 600; margin-bottom: 10px; line-height: 1.5; }
+  .final-affirmation {
+    background: #FDF6E3;
+    border: 1px solid #F0E4BE;
+    border-radius: 14px;
+    padding: 16px 20px;
+    font-size: 15px;
+    color: #B4771B;
+    font-weight: 600;
+    margin: 16px 0;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <header>
+    <h1>Out of the Blue</h1>
+    <div class="subtitle">CLASS 55 CLOSING ACTIVITY</div>
+    <div class="series-tag">Based on the TV series "The Good Place"</div>
+  </header>
+
+  <div id="intro" class="intro">
+    <p>A quick wrap-up of today's class: Episode 5 vocabulary about conflict, emotions and social situations, plus should and shouldn't for advice. For each question, type your answer or choose the correct option. If you need help with a typed answer, tap Hint to reveal one letter at a time.</p>
+    <button class="start-btn" onclick="startGame()">Start</button>
+  </div>
+
+  <div id="game" class="hidden">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Progress</span>
+        <span id="score-label">0 / 6</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+    </div>
+    <div id="question-counter"></div>
+    <div class="instruction" id="instruction-text"></div>
+    <div class="scenario" id="scenario-text"></div>
+
+    <div id="type-area" class="hidden">
+      <div class="blank-display" id="blank-display"></div>
+      <div class="input-row">
+        <input type="text" id="answer-input" placeholder="Type your answer" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="action-row">
+        <button class="check-btn" onclick="checkTypedAnswer()">Check</button>
+        <button class="clue-btn" id="clue-btn" onclick="revealLetter()">Hint</button>
+      </div>
+    </div>
+
+    <div id="tf-area" class="hidden">
+      <div class="options">
+        <button class="option-btn" onclick="checkTrueFalse(true)">True</button>
+        <button class="option-btn" onclick="checkTrueFalse(false)">False</button>
+      </div>
+    </div>
+
+    <div id="open-area" class="hidden">
+      <textarea id="open-input" placeholder="Write your idea here"></textarea>
+      <button class="next-btn" onclick="submitOpen()">Continue</button>
+    </div>
+
+    <div class="feedback" id="feedback-box"></div>
+    <button class="next-btn hidden" id="next-btn" onclick="nextQuestion()">Next</button>
+  </div>
+
+  <div id="final" class="final hidden">
+    <div class="final-message" id="final-message"></div>
+    <div class="final-affirmation">"Every day, I show up for my English, and I'm proud of how consistent I am."</div>
+    <p id="final-text"></p>
+  </div>
+
+</div>
+
+<script>
+  const questions = [
+    {
+      type: "type",
+      instruction: "Type the missing words (three words)",
+      scenario: "I'm always ______ in the mornings, so I never have time for breakfast.",
+      answer: "in a rush",
+      accepted: ["in a rush"]
+    },
+    {
+      type: "type",
+      instruction: "Type the missing word (one word)",
+      scenario: "That was so ______! I can't believe I said that in front of everyone.",
+      answer: "embarrassing",
+      accepted: ["embarrassing"]
+    },
+    {
+      type: "tf",
+      instruction: "True or False",
+      scenario: "Squabble means to have a small argument about something unimportant.",
+      correct: true
+    },
+    {
+      type: "type",
+      instruction: "Type the missing words (four words)",
+      scenario: "The good news arrived completely ______, with no warning at all.",
+      answer: "out of the blue",
+      accepted: ["out of the blue"]
+    },
+    {
+      type: "tf",
+      instruction: "True or False",
+      scenario: "We use \"should\" to give strong orders, like laws.",
+      correct: false
+    },
+    {
+      type: "open",
+      instruction: "Finish the sentence with your own idea",
+      scenario: "If a friend is stressed and always in a rush, they should ______."
+    }
+  ];
+
+  let currentQuestion = 0;
+  let score = 0;
+  let revealedCount = 0;
+  let answered = false;
+
+  function startGame() {
+    document.getElementById('intro').classList.add('hidden');
+    document.getElementById('game').classList.remove('hidden');
+    currentQuestion = 0;
+    score = 0;
+    loadQuestion();
+  }
+
+  function getLetterPositions(answer) {
+    const positions = [];
+    for (let i = 0; i < answer.length; i++) {
+      if (/[a-zA-Z]/.test(answer[i])) positions.push(i);
+    }
+    return positions;
+  }
+
+  function renderBlanks() {
+    const q = questions[currentQuestion];
+    const answer = q.answer;
+    const letterPositions = getLetterPositions(answer);
+    const words = answer.split(' ');
+    const container = document.getElementById('blank-display');
+    container.innerHTML = '';
+
+    let globalCharIndex = 0;
+    words.forEach(word => {
+      const wordGroup = document.createElement('div');
+      wordGroup.className = 'word-group';
+      for (let i = 0; i < word.length; i++) {
+        const char = word[i];
+        const box = document.createElement('span');
+        box.className = 'letter-box';
+        if (/[a-zA-Z]/.test(char)) {
+          const posIndexInLetters = letterPositions.indexOf(globalCharIndex);
+          box.textContent = (posIndexInLetters < revealedCount) ? char.toUpperCase() : '_';
+        } else {
+          box.textContent = char;
+        }
+        wordGroup.appendChild(box);
+        globalCharIndex++;
+      }
+      container.appendChild(wordGroup);
+      globalCharIndex++;
+    });
+  }
+
+  function revealLetter() {
+    const q = questions[currentQuestion];
+    const totalLetters = getLetterPositions(q.answer).length;
+    if (revealedCount < totalLetters) {
+      revealedCount++;
+      renderBlanks();
+    }
+    if (revealedCount >= totalLetters) {
+      document.getElementById('clue-btn').disabled = true;
+    }
+  }
+
+  function normalize(str) {
+    return str.toLowerCase().trim().replace(/\s+/g, ' ');
+  }
+
+  function loadQuestion() {
+    answered = false;
+    revealedCount = 0;
+    const q = questions[currentQuestion];
+
+    document.getElementById('question-counter').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+    document.getElementById('instruction-text').textContent = q.instruction;
+    document.getElementById('scenario-text').textContent = q.scenario;
+    document.getElementById('score-label').textContent = `${score} / ${questions.length}`;
+    document.getElementById('progress-fill').style.width = `${(currentQuestion / questions.length) * 100}%`;
+
+    document.getElementById('type-area').classList.add('hidden');
+    document.getElementById('tf-area').classList.add('hidden');
+    document.getElementById('open-area').classList.add('hidden');
+
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.className = 'feedback';
+    feedbackBox.textContent = '';
+    document.getElementById('next-btn').classList.add('hidden');
+
+    if (q.type === "type") {
+      document.getElementById('type-area').classList.remove('hidden');
+      renderBlanks();
+      const input = document.getElementById('answer-input');
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+      document.getElementById('clue-btn').disabled = false;
+    } else if (q.type === "tf") {
+      document.getElementById('tf-area').classList.remove('hidden');
+      document.querySelectorAll('#tf-area .option-btn').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('correct', 'incorrect');
+      });
+    } else if (q.type === "open") {
+      document.getElementById('open-area').classList.remove('hidden');
+      document.getElementById('open-input').value = '';
+    }
+  }
+
+  function checkTypedAnswer() {
+    if (answered) return;
+    const q = questions[currentQuestion];
+    const input = document.getElementById('answer-input');
+    const typed = normalize(input.value);
+    const isCorrect = q.accepted.some(a => normalize(a) === typed);
+    const feedbackBox = document.getElementById('feedback-box');
+
+    if (isCorrect) {
+      answered = true;
+      score++;
+      revealedCount = getLetterPositions(q.answer).length;
+      renderBlanks();
+      input.disabled = true;
+      document.getElementById('clue-btn').disabled = true;
+      feedbackBox.className = 'feedback show correct-fb';
+      feedbackBox.textContent = 'Correct.';
+      document.getElementById('next-btn').classList.remove('hidden');
+    } else {
+      feedbackBox.className = 'feedback show incorrect-fb';
+      feedbackBox.textContent = 'Not quite. Try again, or tap Hint for help.';
+    }
+  }
+
+  function checkTrueFalse(choice) {
+    if (answered) return;
+    answered = true;
+    const q = questions[currentQuestion];
+    const isCorrect = choice === q.correct;
+    if (isCorrect) score++;
+
+    document.querySelectorAll('#tf-area .option-btn').forEach((btn, idx) => {
+      btn.disabled = true;
+      const btnValue = idx === 0;
+      if (btnValue === q.correct) btn.classList.add('correct');
+      if (btnValue === choice && choice !== q.correct) btn.classList.add('incorrect');
+    });
+
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.className = isCorrect ? 'feedback show correct-fb' : 'feedback show incorrect-fb';
+    feedbackBox.textContent = isCorrect ? 'Correct.' : `Not quite. The correct answer is ${q.correct ? 'True' : 'False'}.`;
+    document.getElementById('next-btn').classList.remove('hidden');
+  }
+
+  function submitOpen() {
+    answered = true;
+    score++;
+    document.getElementById('next-btn').classList.remove('hidden');
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.className = 'feedback show correct-fb';
+    feedbackBox.textContent = 'Nice thought. Keep it in mind for next class.';
+  }
+
+  function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      loadQuestion();
+    } else {
+      showFinal();
+    }
+  }
+
+  function showFinal() {
+    document.getElementById('game').classList.add('hidden');
+    document.getElementById('final').classList.remove('hidden');
+    document.getElementById('final-message').textContent = `Class 55 complete. You reviewed ${score} out of ${questions.length} points today.`;
+    document.getElementById('final-text').textContent = "See you next class, ready to continue watching Episode 6.";
+  }
+</script>
+
+</body>
+</html>
