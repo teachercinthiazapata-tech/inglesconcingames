@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Good Place Self-Check</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(180deg, #FFF8E7 0%, #FDEFC9 100%);
+    color: #2C3E50;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #FFFFFF;
+    max-width: 640px;
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(44, 62, 80, 0.15);
+    padding: 36px 32px;
+  }
+  header { text-align: center; margin-bottom: 20px; }
+  h1 { font-size: 24px; color: #2C3E50; }
+  .subtitle {
+    color: #E8A33D;
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+  .series-tag {
+    color: #6B6A63;
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 6px;
+  }
+  .progress-wrap { margin: 22px 0 8px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #6B6A63;
+    margin-bottom: 6px;
+  }
+  .progress-bar-bg {
+    background: #F0EBD8;
+    border-radius: 999px;
+    height: 14px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: linear-gradient(90deg, #E8A33D, #F4C463);
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    transition: width 0.5s ease;
+  }
+  .section-label {
+    text-align: center;
+    font-size: 13px;
+    color: #6B6A63;
+    margin-bottom: 4px;
+  }
+  #question-counter {
+    text-align: center;
+    font-size: 13px;
+    color: #6B6A63;
+    margin-bottom: 10px;
+  }
+  .instruction {
+    text-align: center;
+    font-size: 12px;
+    color: #B4771B;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .scenario {
+    background: #FDF6E3;
+    border: 1px solid #F0E4BE;
+    border-radius: 14px;
+    padding: 18px 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .blank-display {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin: 18px 0;
+    min-height: 34px;
+  }
+  .word-group { display: flex; gap: 3px; }
+  .letter-box {
+    display: inline-block;
+    min-width: 16px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #2C3E50;
+    border-bottom: 3px solid #C9C4AC;
+    padding: 0 2px;
+  }
+  .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  #answer-input, #name-input {
+    flex: 1;
+    padding: 13px 14px;
+    border: 2px solid #E1E1DF;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #2C3E50;
+    font-family: inherit;
+  }
+  #answer-input:focus, #name-input:focus { outline: none; border-color: #E8A33D; }
+  .action-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .check-btn, .clue-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .check-btn { background: #2C3E50; color: #FFF8E7; }
+  .check-btn:hover { background: #1D2B38; }
+  .clue-btn {
+    background: #FDF0D5;
+    color: #B4771B;
+    border: 2px solid #F0E4BE;
+  }
+  .clue-btn:hover { background: #FBE8C4; }
+  .clue-btn:disabled { opacity: 0.5; cursor: default; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    text-align: left;
+    padding: 14px 16px;
+    border: 2px solid #E1E1DF;
+    background: #FFFFFF;
+    border-radius: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #2C3E50;
+  }
+  .option-btn:hover:not(:disabled) { border-color: #E8A33D; background: #FFFBF0; }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.correct { background: #E4F5E9; border-color: #4CAF50; color: #276738; font-weight: 600; }
+  .option-btn.incorrect { background: #FBE9E7; border-color: #E74C3C; color: #A6362A; font-weight: 600; }
+  .feedback {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: #E4F5E9; color: #276738; border: 1px solid #BEE3C8; }
+  .feedback.incorrect-fb { background: #FBE9E7; color: #A6362A; border: 1px solid #F3C6C0; }
+  .next-btn, .start-btn, .send-btn {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #2C3E50;
+    color: #FFF8E7;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .next-btn:hover, .start-btn:hover, .send-btn:hover { background: #1D2B38; }
+  .send-btn { background: #E8A33D; }
+  .send-btn:hover { background: #C9852A; }
+  .intro, .final { text-align: center; }
+  .intro p, .final p { color: #6B6A63; font-size: 15px; line-height: 1.6; margin: 14px 0 4px; }
+  .final-score {
+    font-size: 42px;
+    font-weight: 700;
+    color: #E8A33D;
+    margin: 10px 0;
+  }
+  .final-message { font-size: 16px; color: #2C3E50; font-weight: 600; margin-bottom: 10px; }
+  .breakdown {
+    text-align: left;
+    background: #FDF6E3;
+    border: 1px solid #F0E4BE;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; }
+  .hidden { display: none; }
+  .note {
+    font-size: 12px;
+    color: #6B6A63;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <header>
+    <h1>The Good Place Self-Check</h1>
+    <div class="subtitle">EPISODES 1 TO 4 SELF-ASSESSMENT</div>
+    <div class="series-tag">Based on the TV series "The Good Place"</div>
+  </header>
+
+  <div id="intro" class="intro">
+    <p>A friendly check-in on everything from Episodes 1 to 4: vocabulary and grammar. There are three types of questions: type the answer, choose the correct option, or true and false. For typed answers, tap Hint if you need help revealing a letter.</p>
+    <div class="input-row">
+      <input type="text" id="name-input" placeholder="Type your name">
+    </div>
+    <button class="start-btn" onclick="startGame()">Start the Self-Check</button>
+  </div>
+
+  <div id="game" class="hidden">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Overall progress</span>
+        <span id="score-label">0 / 15</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+    </div>
+    <div class="section-label" id="section-label"></div>
+    <div id="question-counter"></div>
+    <div class="instruction" id="instruction-text"></div>
+    <div class="scenario" id="scenario-text"></div>
+
+    <div id="type-area" class="hidden">
+      <div class="blank-display" id="blank-display"></div>
+      <div class="input-row">
+        <input type="text" id="answer-input" placeholder="Type your answer" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="action-row">
+        <button class="check-btn" onclick="checkTypedAnswer()">Check</button>
+        <button class="clue-btn" id="clue-btn" onclick="revealLetter()">Hint</button>
+      </div>
+    </div>
+
+    <div id="mc-area" class="hidden">
+      <div class="options" id="mc-options"></div>
+    </div>
+
+    <div id="tf-area" class="hidden">
+      <div class="options">
+        <button class="option-btn" onclick="checkTrueFalse(true)">True</button>
+        <button class="option-btn" onclick="checkTrueFalse(false)">False</button>
+      </div>
+    </div>
+
+    <div class="feedback" id="feedback-box"></div>
+    <button class="next-btn hidden" id="next-btn" onclick="nextQuestion()">Next</button>
+  </div>
+
+  <div id="final" class="final hidden">
+    <div class="final-message" id="final-message"></div>
+    <div class="final-score" id="final-score-display"></div>
+    <div class="breakdown" id="breakdown"></div>
+    <button class="send-btn" onclick="sendResults()">Email My Results</button>
+    <p class="note">This will open your email app with your results already written in. Just press send.</p>
+  </div>
+
+</div>
+
+<script>
+  const TEACHER_EMAIL = "teachercinthiazapata@gmail.com";
+
+  const questions = [
+    { section: "Episode 1", type: "type", instruction: "Type the missing words (three words)",
+      scenario: "Michael told Eleanor to ______ and relax.",
+      answer: "grab a seat", accepted: ["grab a seat"] },
+    { section: "Episode 1", type: "mc", instruction: "Choose the correct answer",
+      scenario: "Which phrase means to say what really happened?",
+      options: ["lie low", "tell the truth", "feel remorse", "earn my place"], correct: 1 },
+    { section: "Episode 1", type: "tf", instruction: "True or False",
+      scenario: "We use should for strong obligations, like laws.", correct: false },
+    { section: "Episode 1", type: "type", instruction: "Type the missing word (one word)",
+      scenario: "She felt terrible about what she did. She started to feel ______.",
+      answer: "remorse", accepted: ["remorse"] },
+
+    { section: "Episode 2", type: "mc", instruction: "Choose the correct answer",
+      scenario: "Which expression means to decline an offer?",
+      options: ["pass on", "talk it out", "settle down", "give a chance"], correct: 0 },
+    { section: "Episode 2", type: "type", instruction: "Type the missing words (three words)",
+      scenario: "After the argument, they decided to ______ and solve the problem calmly.",
+      answer: "talk it out", accepted: ["talk it out"] },
+    { section: "Episode 2", type: "tf", instruction: "True or False",
+      scenario: "Common good means what is best for you personally.", correct: false },
+
+    { section: "Episode 3", type: "type", instruction: "Type the missing word (one word)",
+      scenario: "The temperature began to ______ as the party went on.",
+      answer: "rise", accepted: ["rise"] },
+    { section: "Episode 3", type: "mc", instruction: "Choose the correct sentence",
+      scenario: "Which sentence is correct?",
+      options: ["He raised early this morning.", "He rose early this morning.", "He raised himself early."], correct: 1 },
+    { section: "Episode 3", type: "type", instruction: "Type the missing word (one word)",
+      scenario: "She smiled at people's faces but said unkind things behind their backs. She was ______.",
+      answer: "two-faced", accepted: ["two-faced", "two faced"] },
+    { section: "Episode 3", type: "mc", instruction: "Choose the correct answer",
+      scenario: "Complete the sentence: I ______ swimming in the ocean.",
+      options: ["am into", "adore", "adores", "into"], correct: 1 },
+
+    { section: "Episode 4", type: "type", instruction: "Type the missing words (two words)",
+      scenario: "I just want ______ myself.",
+      answer: "to be", accepted: ["to be"] },
+    { section: "Episode 4", type: "mc", instruction: "Choose the correct answer",
+      scenario: "Which phrase means a big disappointment?",
+      options: ["the more the merrier", "a huge bummer", "bottom of the barrel", "get the word out"], correct: 1 },
+    { section: "Episode 4", type: "tf", instruction: "True or False",
+      scenario: "To + infinitive can express purpose.", correct: true },
+    { section: "Episode 4", type: "type", instruction: "Type the missing words (three words)",
+      scenario: "She tried ______ what was wrong with the plan.",
+      answer: "to figure out", accepted: ["to figure out"] }
+  ];
+
+  let currentQuestion = 0;
+  let score = 0;
+  let revealedCount = 0;
+  let answered = false;
+  let studentName = "";
+  const sectionScores = {};
+
+  function startGame() {
+    studentName = document.getElementById('name-input').value.trim() || "Ceci";
+    document.getElementById('intro').classList.add('hidden');
+    document.getElementById('game').classList.remove('hidden');
+    currentQuestion = 0;
+    score = 0;
+    Object.keys(sectionScores).forEach(key => delete sectionScores[key]);
+    questions.forEach(q => {
+      if (!sectionScores[q.section]) sectionScores[q.section] = { correct: 0, total: 0 };
+      sectionScores[q.section].total++;
+    });
+    loadQuestion();
+  }
+
+  function getLetterPositions(answer) {
+    const positions = [];
+    for (let i = 0; i < answer.length; i++) {
+      if (/[a-zA-Z]/.test(answer[i])) positions.push(i);
+    }
+    return positions;
+  }
+
+  function renderBlanks() {
+    const q = questions[currentQuestion];
+    const answer = q.answer;
+    const letterPositions = getLetterPositions(answer);
+    const words = answer.split(' ');
+    const container = document.getElementById('blank-display');
+    container.innerHTML = '';
+
+    let globalCharIndex = 0;
+    words.forEach(word => {
+      const wordGroup = document.createElement('div');
+      wordGroup.className = 'word-group';
+      for (let i = 0; i < word.length; i++) {
+        const char = word[i];
+        const box = document.createElement('span');
+        box.className = 'letter-box';
+        if (/[a-zA-Z]/.test(char)) {
+          const posIndexInLetters = letterPositions.indexOf(globalCharIndex);
+          box.textContent = (posIndexInLetters < revealedCount) ? char.toUpperCase() : '_';
+        } else {
+          box.textContent = char;
+        }
+        wordGroup.appendChild(box);
+        globalCharIndex++;
+      }
+      container.appendChild(wordGroup);
+      globalCharIndex++;
+    });
+  }
+
+  function revealLetter() {
+    const q = questions[currentQuestion];
+    const totalLetters = getLetterPositions(q.answer).length;
+    if (revealedCount < totalLetters) {
+      revealedCount++;
+      renderBlanks();
+    }
+    if (revealedCount >= totalLetters) {
+      document.getElementById('clue-btn').disabled = true;
+    }
+  }
+
+  function normalize(str) {
+    return str.toLowerCase().trim().replace(/\s+/g, ' ');
+  }
+
+  function loadQuestion() {
+    answered = false;
+    revealedCount = 0;
+    const q = questions[currentQuestion];
+
+    document.getElementById('section-label').textContent = q.section;
+    document.getElementById('question-counter').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+    document.getElementById('instruction-text').textContent = q.instruction;
+    document.getElementById('scenario-text').textContent = q.scenario;
+    document.getElementById('score-label').textContent = `${score} / ${questions.length}`;
+    document.getElementById('progress-fill').style.width = `${(currentQuestion / questions.length) * 100}%`;
+
+    document.getElementById('type-area').classList.add('hidden');
+    document.getElementById('mc-area').classList.add('hidden');
+    document.getElementById('tf-area').classList.add('hidden');
+
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.className = 'feedback';
+    feedbackBox.textContent = '';
+    document.getElementById('next-btn').classList.add('hidden');
+
+    if (q.type === "type") {
+      document.getElementById('type-area').classList.remove('hidden');
+      renderBlanks();
+      const input = document.getElementById('answer-input');
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+      document.getElementById('clue-btn').disabled = false;
+    } else if (q.type === "mc") {
+      document.getElementById('mc-area').classList.remove('hidden');
+      const mcOptions = document.getElementById('mc-options');
+      mcOptions.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.onclick = () => checkMultipleChoice(idx);
+        mcOptions.appendChild(btn);
+      });
+    } else if (q.type === "tf") {
+      document.getElementById('tf-area').classList.remove('hidden');
+      document.querySelectorAll('#tf-area .option-btn').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('correct', 'incorrect');
+      });
+    }
+  }
+
+  function registerResult(isCorrect) {
+    const q = questions[currentQuestion];
+    if (isCorrect) {
+      score++;
+      sectionScores[q.section].correct++;
+    }
+  }
+
+  function checkTypedAnswer() {
+    if (answered) return;
+    const q = questions[currentQuestion];
+    const input = document.getElementById('answer-input');
+    const typed = normalize(input.value);
+    const isCorrect = q.accepted.some(a => normalize(a) === typed);
+    const feedbackBox = document.getElementById('feedback-box');
+
+    if (isCorrect) {
+      answered = true;
+      registerResult(true);
+      revealedCount = getLetterPositions(q.answer).length;
+      renderBlanks();
+      input.disabled = true;
+      document.getElementById('clue-btn').disabled = true;
+      feedbackBox.className = 'feedback show correct-fb';
+      feedbackBox.textContent = 'Correct.';
+      document.getElementById('score-label').textContent = `${score} / ${questions.length}`;
+      document.getElementById('next-btn').classList.remove('hidden');
+    } else {
+      feedbackBox.className = 'feedback show incorrect-fb';
+      feedbackBox.textContent = 'Not quite. Try again, or tap Hint for help.';
+    }
+  }
+
+  function checkMultipleChoice(idx) {
+    if (answered) return;
+    answered = true;
+    const q = questions[currentQuestion];
+    const isCorrect = idx === q.correct;
+    registerResult(isCorrect);
+
+    document.querySelectorAll('#mc-options .option-btn').forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.correct) btn.classList.add('correct');
+      if (i === idx && idx !== q.correct) btn.classList.add('incorrect');
+    });
+
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.className = isCorrect ? 'feedback show correct-fb' : 'feedback show incorrect-fb';
+    feedbackBox.textContent = isCorrect ? 'Correct.' : `Not quite. The correct answer is "${q.options[q.correct]}".`;
+    document.getElementById('score-label').textContent = `${score} / ${questions.length}`;
+    document.getElementById('next-btn').classList.remove('hidden');
+  }
+
+  function checkTrueFalse(choice) {
+    if (answered) return;
+    answered = true;
+    const q = questions[currentQuestion];
+    const isCorrect = choice === q.correct;
+    registerResult(isCorrect);
+
+    document.querySelectorAll('#tf-area .option-btn').forEach((btn, idx) => {
+      btn.disabled = true;
+      const btnValue = idx === 0;
+      if (btnValue === q.correct) btn.classList.add('correct');
+      if (btnValue === choice && choice !== q.correct) btn.classList.add('incorrect');
+    });
+
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.className = isCorrect ? 'feedback show correct-fb' : 'feedback show incorrect-fb';
+    feedbackBox.textContent = isCorrect ? 'Correct.' : `Not quite. The correct answer is ${q.correct ? 'True' : 'False'}.`;
+    document.getElementById('score-label').textContent = `${score} / ${questions.length}`;
+    document.getElementById('next-btn').classList.remove('hidden');
+  }
+
+  function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      loadQuestion();
+    } else {
+      showFinal();
+    }
+  }
+
+  function showFinal() {
+    document.getElementById('game').classList.add('hidden');
+    document.getElementById('final').classList.remove('hidden');
+    document.getElementById('progress-fill').style.width = '100%';
+    document.getElementById('final-score-display').textContent = `${score} / ${questions.length}`;
+
+    let message;
+    if (score === questions.length) {
+      message = `Perfect score, ${studentName}. All four episodes reviewed.`;
+    } else if (score >= questions.length - 4) {
+      message = `Great work, ${studentName}. Just a few points to review.`;
+    } else {
+      message = `Good effort, ${studentName}. A good moment to review these episodes again.`;
+    }
+    document.getElementById('final-message').textContent = message;
+
+    const breakdown = document.getElementById('breakdown');
+    breakdown.innerHTML = '';
+    Object.keys(sectionScores).forEach(section => {
+      const row = document.createElement('div');
+      const s = sectionScores[section];
+      row.innerHTML = `<span>${section}</span><span>${s.correct} / ${s.total}</span>`;
+      breakdown.appendChild(row);
+    });
+  }
+
+  function sendResults() {
+    const date = new Date().toLocaleDateString();
+    let body = `Self-check results\n`;
+    body += `Student: ${studentName}\n`;
+    body += `Date: ${date}\n`;
+    body += `Total score: ${score} / ${questions.length}\n\n`;
+    body += `Breakdown by episode:\n`;
+    Object.keys(sectionScores).forEach(section => {
+      const s = sectionScores[section];
+      body += `${section}: ${s.correct} / ${s.total}\n`;
+    });
+
+    const subject = `Good Place Self-Check Results, ${studentName}`;
+    const mailtoLink = `mailto:${TEACHER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  }
+</script>
+
+</body>
+</html>
