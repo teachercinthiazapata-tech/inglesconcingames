@@ -274,8 +274,8 @@
     <div class="final-message" id="final-message"></div>
     <div class="final-score" id="final-score-display"></div>
     <div class="breakdown" id="breakdown"></div>
-    <button class="send-btn" onclick="sendResults()">Email My Results</button>
-    <p class="note">This will open your email app with your results already written in. Just press send.</p>
+    <button class="send-btn" id="send-btn" onclick="sendResults()">Email My Results</button>
+    <p class="note" id="send-status">This sends your results straight to your teacher. No email app needed.</p>
   </div>
 
 </div>
@@ -310,7 +310,7 @@
       answer: "rise", accepted: ["rise"] },
     { section: "Episode 3", type: "mc", instruction: "Choose the correct sentence",
       scenario: "Which sentence is correct?",
-      options: ["He raised early this morning.", "He rose early this morning.", "He raised himself early."], correct: 1 },
+      options: ["He raised early this morning.", "He rose early this morning.", "He rised early this morning."], correct: 1 },
     { section: "Episode 3", type: "type", instruction: "Type the missing word (one word)",
       scenario: "She smiled at people's faces but said unkind things behind their backs. She was ______.",
       answer: "two-faced", accepted: ["two-faced", "two faced"] },
@@ -565,10 +565,12 @@
     });
   }
 
-  function sendResults() {
+  async function sendResults() {
+    const sendBtn = document.getElementById('send-btn');
+    const statusEl = document.getElementById('send-status');
     const date = new Date().toLocaleDateString();
-    let body = `Self-check results\n`;
-    body += `Student: ${studentName}\n`;
+
+    let body = `Student: ${studentName}\n`;
     body += `Date: ${date}\n`;
     body += `Total score: ${score} / ${questions.length}\n\n`;
     body += `Breakdown by episode:\n`;
@@ -577,9 +579,35 @@
       body += `${section}: ${s.correct} / ${s.total}\n`;
     });
 
-    const subject = `Good Place Self-Check Results, ${studentName}`;
-    const mailtoLink = `mailto:${TEACHER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoLink;
+    const formData = new FormData();
+    formData.append('name', studentName);
+    formData.append('_subject', `Good Place Self-Check Results, ${studentName}`);
+    formData.append('message', body);
+    formData.append('_captcha', 'false');
+    formData.append('_template', 'box');
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Sending...';
+    statusEl.textContent = '';
+
+    try {
+      const response = await fetch(`https://formsubmit.co/ajax/${TEACHER_EMAIL}`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData
+      });
+
+      if (response.ok) {
+        sendBtn.textContent = 'Results Sent';
+        statusEl.textContent = 'Your results were sent to your teacher. Thank you!';
+      } else {
+        throw new Error('Request failed');
+      }
+    } catch (err) {
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Email My Results';
+      statusEl.textContent = 'Something went wrong sending your results. Please check your connection and try again.';
+    }
   }
 </script>
 
