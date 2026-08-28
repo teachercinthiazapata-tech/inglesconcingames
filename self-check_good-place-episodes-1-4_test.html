@@ -291,7 +291,7 @@
       scenario: "Which phrase means to say what really happened?",
       options: ["lie low", "tell the truth", "feel remorse", "earn my place"], correct: 1 },
     { section: "Episode 1", type: "tf", instruction: "True or False",
-      scenario: "We use should for strong obligations, like laws.", correct: false },
+      scenario: "We use \"should\" for strong obligations, like laws.", correct: false },
     { section: "Episode 1", type: "type", instruction: "Type the missing word (one word)",
       scenario: "She felt terrible about what she did. She started to feel ______.",
       answer: "remorse", accepted: ["remorse"] },
@@ -314,9 +314,9 @@
     { section: "Episode 3", type: "type", instruction: "Type the missing word (one word)",
       scenario: "She smiled at people's faces but said unkind things behind their backs. She was ______.",
       answer: "two-faced", accepted: ["two-faced", "two faced"] },
-    { section: "Episode 3", type: "mc", instruction: "Choose the correct answer",
-      scenario: "Complete the sentence: I ______ swimming in the ocean.",
-      options: ["am into", "adore", "adores", "into"], correct: 1 },
+    { section: "Episode 3", type: "mc", instruction: "Choose the correct sentence",
+      scenario: "Which sentence is correct?",
+      options: ["I adore swimming in the ocean.", "I adores swimming in the ocean.", "I adore swim in the ocean.", "I adore to swim in the ocean."], correct: 0 },
 
     { section: "Episode 4", type: "type", instruction: "Type the missing words (two words)",
       scenario: "I just want ______ myself.",
@@ -484,7 +484,8 @@
       document.getElementById('next-btn').classList.remove('hidden');
     } else {
       feedbackBox.className = 'feedback show incorrect-fb';
-      feedbackBox.textContent = 'Not quite. Try again, or tap Hint for help.';
+      feedbackBox.textContent = 'Not quite. You can try again, or tap Next to move on.';
+      document.getElementById('next-btn').classList.remove('hidden');
     }
   }
 
@@ -584,3 +585,4 @@
 
 </body>
 </html>
+
