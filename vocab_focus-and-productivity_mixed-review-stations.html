@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Review Stations: Focus and Productivity</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .app {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 640px;
+    width: 100%;
+    padding: 32px 34px 36px;
+    box-shadow: 0 20px 50px rgba(80, 60, 130, 0.25);
+  }
+  h1 {
+    text-align: center;
+    color: #5b3fa0;
+    margin: 0 0 4px;
+    font-size: 1.5em;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7a6a99;
+    margin: 0 0 18px;
+    font-size: 0.95em;
+  }
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 16px;
+  }
+  .dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #e3d9f7;
+    transition: background 0.3s;
+  }
+  .dot.done { background: #7bd8a8; }
+  .dot.current { background: #b79dee; }
+  .status-row {
+    text-align: center;
+    font-weight: 600;
+    color: #5b3fa0;
+    margin-bottom: 6px;
+    font-size: 0.95em;
+  }
+  .word-banner {
+    text-align: center;
+    font-size: 1.3em;
+    font-weight: 800;
+    color: #3d2e63;
+    margin-bottom: 16px;
+  }
+  .mode-tag {
+    display: block;
+    text-align: center;
+    font-size: 0.72em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9a8bc4;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .clue {
+    background: #f5f1fd;
+    border-radius: 14px;
+    padding: 16px 18px;
+    color: #3d2e63;
+    font-size: 0.98em;
+    line-height: 1.4;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .letters-display {
+    text-align: center;
+    font-size: 1.6em;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: #7c5cd6;
+    margin-bottom: 18px;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .option {
+    background: #fdf9ff;
+    border: 2px solid #e3d9f7;
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 0.98em;
+    color: #3d2e63;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .option:hover { border-color: #b79dee; transform: translateY(-1px); }
+  .option.correct { background: #d7f7e6; border-color: #6ed4a0; color: #2f6e4f; }
+  .option.incorrect { background: #fde3e3; border-color: #f08a8a; color: #8a3b3b; }
+  .option.disabled { cursor: default; }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  input[type="text"] {
+    flex: 1;
+    border: 2px solid #e3d9f7;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 1em;
+    color: #3d2e63;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: #7c5cd6; }
+  textarea {
+    width: 100%;
+    border: 2px solid #e3d9f7;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 1em;
+    color: #3d2e63;
+    outline: none;
+    resize: vertical;
+    min-height: 70px;
+    font-family: inherit;
+    margin-bottom: 12px;
+  }
+  textarea:focus { border-color: #7c5cd6; }
+  .build-strip {
+    min-height: 60px;
+    border: 2.5px dashed #cbb8ee;
+    border-radius: 16px;
+    background: #fbf9ff;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .build-strip .placeholder {
+    color: #b6a8d9;
+    font-size: 0.9em;
+    font-style: italic;
+  }
+  .tile {
+    background: #7c5cd6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+  }
+  .tile:hover { transform: translateY(-2px); }
+  .tile.placed { background: #eee6fb; color: #5b3fa0; }
+  .bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 14px;
+    min-height: 44px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  button.action {
+    background: #7c5cd6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button.action:hover { background: #6647bd; }
+  button.action:disabled { background: #cbbdea; cursor: not-allowed; }
+  button.secondary { background: #f0e6fb; color: #6647bd; }
+  button.secondary:hover { background: #e3d3f7; }
+  .message {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.92em;
+    min-height: 22px;
+    line-height: 1.4;
+  }
+  .message.success { color: #2f9e5f; font-weight: 700; }
+  .message.retry { color: #b45a5a; }
+  .model-answer {
+    background: #eafaf1;
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: #2f6e4f;
+    font-size: 0.92em;
+    line-height: 1.4;
+    margin-top: 12px;
+    display: none;
+  }
+  .model-answer.show { display: block; }
+  .model-answer .tag {
+    display: block;
+    font-size: 0.72em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .shake { animation: shake 0.35s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .final-screen { text-align: center; padding: 20px 10px; }
+  .final-screen h2 { color: #5b3fa0; margin-bottom: 8px; }
+  .final-score { font-size: 2.2em; font-weight: 800; color: #4fae82; margin: 10px 0; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Vocabulary Review Stations</h1>
+  <p class="subtitle">Focus and Productivity. A different challenge for every word.</p>
+
+  <div class="progress-dots" id="dots"></div>
+  <div class="status-row" id="statusRow">Word 1 of 10</div>
+
+  <div id="gameArea">
+    <div class="word-banner" id="wordBanner"></div>
+    <span class="mode-tag" id="modeTag"></span>
+    <div id="stationBody"></div>
+    <div class="message" id="message"></div>
+  </div>
+
+  <div class="final-screen hidden" id="finalScreen">
+    <h2>All done!</h2>
+    <p>You reviewed all 10 words.</p>
+    <div class="final-score" id="finalScoreText"></div>
+    <p id="finalMessage"></p>
+    <button class="action" id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<script>
+const stations = [
+  { word: "to focus", mechanic: "combo",
+    typeOptions: ["noun", "verb", "adjective", "phrase"], typeAnswer: "verb",
+    orderChunks: ["She", "focuses on her work", "at home", "every evening"] },
+  { word: "distraction", mechanic: "letters",
+    clue: "Something that takes your attention away from what you're doing.",
+    answer: "distraction" },
+  { word: "to get things done", mechanic: "ipa",
+    options: ["/ɡet θɪŋz dʌn/", "/ɡɪt θɪŋks dɒn/", "/ɡet θɪŋ dɔːn/", "/dʒet θɪŋz dʌn/"],
+    answer: "/ɡet θɪŋz dʌn/" },
+  { word: "to procrastinate", mechanic: "question",
+    question: "When do you usually procrastinate the most: mornings, afternoons, or nights?",
+    model: "I usually procrastinate the most in the afternoons, when I feel tired and start checking my phone instead of working." },
+  { word: "deadline", mechanic: "order",
+    orderChunks: ["We", "set a new deadline", "for the case", "yesterday"] },
+  { word: "to concentrate", mechanic: "type",
+    typeOptions: ["noun", "verb", "adjective", "phrase"], typeAnswer: "verb" },
+  { word: "task", mechanic: "letters",
+    clue: "A piece of work that needs to be done.",
+    answer: "task" },
+  { word: "to avoid", mechanic: "ipa",
+    options: ["/əˈvɔɪd/", "/əˈvɔːd/", "/ˈævɔɪd/", "/əˈvɔɪt/"],
+    answer: "/əˈvɔɪd/" },
+  { word: "motivation", mechanic: "choice",
+    question: "When do you feel most motivated?",
+    options: ["In the mornings", "In the afternoons", "At night"] },
+  { word: "perfectionism", mechanic: "type",
+    typeOptions: ["noun", "verb", "adjective", "phrase"], typeAnswer: "noun" },
+];
+
+const modeLabels = {
+  combo: "Match the type, then build the sentence",
+  letters: "Unscramble the letters",
+  ipa: "Match the IPA",
+  question: "Answer the question",
+  order: "Build the sentence",
+  type: "Match the word type",
+  choice: "Answer the question",
+};
+
+let currentIndex = 0;
+let comboPhase = "type";
+let placedOrder = [];
+let bankOrder = [];
+let stationScore = 0;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function scrambleWord(word) {
+  let letters;
+  do {
+    letters = shuffle(word.split(""));
+  } while (letters.join("") === word && word.length > 1);
+  return letters.join(" ").toUpperCase();
+}
+
+function buildDots() {
+  const dotsEl = document.getElementById("dots");
+  dotsEl.innerHTML = "";
+  stations.forEach(() => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  });
+  updateDots();
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll(".dot");
+  dots.forEach((dot, i) => {
+    dot.classList.remove("done", "current");
+    if (i < currentIndex) dot.classList.add("done");
+    else if (i === currentIndex) dot.classList.add("current");
+  });
+}
+
+function loadStation() {
+  const st = stations[currentIndex];
+  comboPhase = "type";
+  document.getElementById("statusRow").textContent = `Word ${currentIndex + 1} of ${stations.length}`;
+  document.getElementById("wordBanner").textContent = st.mechanic === "letters" ? "Mystery Word" : st.word;
+  document.getElementById("modeTag").textContent = modeLabels[st.mechanic];
+  document.getElementById("message").textContent = "";
+  document.getElementById("message").className = "message";
+  updateDots();
+  renderStation();
+}
+
+function renderStation() {
+  const st = stations[currentIndex];
+  const body = document.getElementById("stationBody");
+  body.innerHTML = "";
+
+  if (st.mechanic === "type" || (st.mechanic === "combo" && comboPhase === "type")) {
+    const optsWrap = document.createElement("div");
+    optsWrap.className = "options";
+    st.typeOptions.forEach(opt => {
+      const el = document.createElement("div");
+      el.className = "option";
+      el.textContent = opt;
+      el.addEventListener("click", () => selectTypeOption(el, opt));
+      optsWrap.appendChild(el);
+    });
+    body.appendChild(optsWrap);
+  } else if (st.mechanic === "letters") {
+    const clue = document.createElement("div");
+    clue.className = "clue";
+    clue.innerHTML = '<span style="display:block;font-size:0.75em;text-transform:uppercase;letter-spacing:0.06em;color:#9a8bc4;font-weight:700;margin-bottom:6px;">Clue</span>' + st.clue;
+    body.appendChild(clue);
+
+    const letters = document.createElement("div");
+    letters.className = "letters-display";
+    letters.textContent = scrambleWord(st.answer);
+    body.appendChild(letters);
+
+    const inputRow = document.createElement("div");
+    inputRow.className = "input-row";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = "lettersInput";
+    input.placeholder = "Type the word here";
+    input.autocomplete = "off";
+    const checkBtn = document.createElement("button");
+    checkBtn.className = "action";
+    checkBtn.textContent = "Check";
+    checkBtn.addEventListener("click", () => checkLetters(st.answer));
+    input.addEventListener("keydown", e => { if (e.key === "Enter") checkLetters(st.answer); });
+    inputRow.appendChild(input);
+    inputRow.appendChild(checkBtn);
+    body.appendChild(inputRow);
+  } else if (st.mechanic === "ipa") {
+    const optsWrap = document.createElement("div");
+    optsWrap.className = "options";
+    shuffle(st.options).forEach(opt => {
+      const el = document.createElement("div");
+      el.className = "option";
+      el.textContent = opt;
+      el.addEventListener("click", () => selectIpaOption(el, opt, st.answer));
+      optsWrap.appendChild(el);
+    });
+    body.appendChild(optsWrap);
+  } else if (st.mechanic === "question") {
+    const q = document.createElement("div");
+    q.className = "clue";
+    q.textContent = st.question;
+    body.appendChild(q);
+
+    const ta = document.createElement("textarea");
+    ta.id = "questionInput";
+    ta.placeholder = "Write your answer here, in a full sentence.";
+    body.appendChild(ta);
+
+    const btnRow = document.createElement("div");
+    btnRow.className = "btn-row";
+    const submitBtn = document.createElement("button");
+    submitBtn.className = "action";
+    submitBtn.textContent = "Submit";
+    let questionAnswered = false;
+    submitBtn.addEventListener("click", () => {
+      if (questionAnswered) return;
+      questionAnswered = true;
+      submitQuestion(st.model, submitBtn);
+    });
+    btnRow.appendChild(submitBtn);
+    body.appendChild(btnRow);
+
+    const model = document.createElement("div");
+    model.className = "model-answer";
+    model.id = "modelAnswer";
+    model.innerHTML = '<span class="tag">One possible answer</span>' + st.model;
+    body.appendChild(model);
+  } else if (st.mechanic === "order" || (st.mechanic === "combo" && comboPhase === "order")) {
+    placedOrder = [];
+    bankOrder = shuffle(st.orderChunks);
+    renderOrderUI(body);
+  } else if (st.mechanic === "choice") {
+    const q = document.createElement("div");
+    q.className = "clue";
+    q.textContent = st.question;
+    body.appendChild(q);
+
+    const optsWrap = document.createElement("div");
+    optsWrap.className = "options";
+    st.options.forEach(opt => {
+      const el = document.createElement("div");
+      el.className = "option";
+      el.textContent = opt;
+      el.addEventListener("click", () => selectChoiceOption(el, opt));
+      optsWrap.appendChild(el);
+    });
+    body.appendChild(optsWrap);
+  }
+}
+
+function selectTypeOption(el, opt) {
+  const st = stations[currentIndex];
+  const allOptions = document.querySelectorAll(".option");
+  allOptions.forEach(o => o.classList.add("disabled"));
+  const messageEl = document.getElementById("message");
+  if (opt === st.typeAnswer) {
+    el.classList.add("correct");
+    stationScore++;
+    messageEl.textContent = "Correct!";
+    messageEl.className = "message success";
+  } else {
+    el.classList.add("incorrect");
+    allOptions.forEach(o => { if (o.textContent === st.typeAnswer) o.classList.add("correct"); });
+    messageEl.textContent = 'Not quite, "' + st.word + '" is a ' + st.typeAnswer + '.';
+    messageEl.className = "message retry";
+  }
+  setTimeout(() => {
+    if (st.mechanic === "combo") {
+      comboPhase = "order";
+      document.getElementById("message").textContent = "";
+      document.getElementById("message").className = "message";
+      document.getElementById("modeTag").textContent = "Now build the sentence";
+      renderStation();
+    } else {
+      nextStation();
+    }
+  }, 1300);
+}
+
+function renderOrderUI(body) {
+  const strip = document.createElement("div");
+  strip.className = "build-strip";
+  strip.id = "buildStrip";
+  body.appendChild(strip);
+
+  const bank = document.createElement("div");
+  bank.className = "bank";
+  bank.id = "bank";
+  body.appendChild(bank);
+
+  const btnRow = document.createElement("div");
+  btnRow.className = "btn-row";
+  const checkBtn = document.createElement("button");
+  checkBtn.className = "action";
+  checkBtn.id = "orderCheckBtn";
+  checkBtn.textContent = "Check";
+  checkBtn.disabled = true;
+  checkBtn.addEventListener("click", checkOrder);
+  const clearBtn = document.createElement("button");
+  clearBtn.className = "action secondary";
+  clearBtn.textContent = "Clear";
+  clearBtn.addEventListener("click", clearOrder);
+  btnRow.appendChild(checkBtn);
+  btnRow.appendChild(clearBtn);
+  body.appendChild(btnRow);
+
+  renderBuildStrip();
+  renderBank();
+}
+
+function renderBuildStrip() {
+  const strip = document.getElementById("buildStrip");
+  strip.innerHTML = "";
+  if (placedOrder.length === 0) {
+    const ph = document.createElement("span");
+    ph.className = "placeholder";
+    ph.textContent = "Tap a piece below to start building";
+    strip.appendChild(ph);
+  } else {
+    placedOrder.forEach((chunk, idx) => {
+      const tile = document.createElement("button");
+      tile.className = "tile placed";
+      tile.textContent = chunk;
+      tile.addEventListener("click", () => removeChunk(idx));
+      strip.appendChild(tile);
+    });
+  }
+  const total = stations[currentIndex].orderChunks.length;
+  document.getElementById("orderCheckBtn").disabled = placedOrder.length !== total;
+}
+
+function renderBank() {
+  const bankEl = document.getElementById("bank");
+  bankEl.innerHTML = "";
+  bankOrder.forEach((chunk, idx) => {
+    const tile = document.createElement("button");
+    tile.className = "tile";
+    tile.textContent = chunk;
+    tile.addEventListener("click", () => placeChunk(idx));
+    bankEl.appendChild(tile);
+  });
+}
+
+function placeChunk(idx) {
+  placedOrder.push(bankOrder[idx]);
+  bankOrder.splice(idx, 1);
+  renderBuildStrip();
+  renderBank();
+}
+
+function removeChunk(idx) {
+  bankOrder.push(placedOrder[idx]);
+  placedOrder.splice(idx, 1);
+  renderBuildStrip();
+  renderBank();
+}
+
+function clearOrder() {
+  const st = stations[currentIndex];
+  placedOrder = [];
+  bankOrder = shuffle(st.orderChunks);
+  renderBuildStrip();
+  renderBank();
+  document.getElementById("message").textContent = "";
+  document.getElementById("message").className = "message";
+}
+
+function checkOrder() {
+  const st = stations[currentIndex];
+  const isCorrect = placedOrder.every((c, i) => c === st.orderChunks[i]);
+  const messageEl = document.getElementById("message");
+  if (isCorrect) {
+    stationScore++;
+    messageEl.textContent = "Correct order!";
+    messageEl.className = "message success";
+    document.getElementById("orderCheckBtn").disabled = true;
+    setTimeout(() => nextStation(), 1300);
+  } else {
+    messageEl.textContent = "Not quite the right order, try again.";
+    messageEl.className = "message retry";
+    document.getElementById("buildStrip").classList.add("shake");
+    setTimeout(() => document.getElementById("buildStrip").classList.remove("shake"), 350);
+  }
+}
+
+function checkLetters(answer) {
+  const input = document.getElementById("lettersInput");
+  const guess = input.value.trim().toLowerCase();
+  const messageEl = document.getElementById("message");
+  if (guess === answer) {
+    stationScore++;
+    messageEl.textContent = "Correct!";
+    messageEl.className = "message success";
+    setTimeout(() => nextStation(), 1200);
+  } else {
+    messageEl.textContent = "Not quite, try again.";
+    messageEl.className = "message retry";
+    input.classList.add("shake");
+    setTimeout(() => input.classList.remove("shake"), 350);
+  }
+}
+
+function selectIpaOption(el, opt, answer) {
+  const allOptions = document.querySelectorAll(".option");
+  allOptions.forEach(o => o.classList.add("disabled"));
+  const messageEl = document.getElementById("message");
+  if (opt === answer) {
+    el.classList.add("correct");
+    stationScore++;
+    messageEl.textContent = "Correct!";
+    messageEl.className = "message success";
+  } else {
+    el.classList.add("incorrect");
+    allOptions.forEach(o => { if (o.textContent === answer) o.classList.add("correct"); });
+    messageEl.textContent = "Not quite, the correct one is highlighted.";
+    messageEl.className = "message retry";
+  }
+  setTimeout(() => nextStation(), 1400);
+}
+
+function selectChoiceOption(el, opt) {
+  const allOptions = document.querySelectorAll(".option");
+  allOptions.forEach(o => o.classList.add("disabled"));
+  el.classList.add("correct");
+  stationScore++;
+  const messageEl = document.getElementById("message");
+  messageEl.textContent = "Nice, thanks for sharing!";
+  messageEl.className = "message success";
+  setTimeout(() => nextStation(), 1200);
+}
+
+function submitQuestion(model, btn) {
+  stationScore++;
+  document.getElementById("modelAnswer").classList.add("show");
+  document.getElementById("message").textContent = "Nice, take a look at one possible answer below.";
+  document.getElementById("message").className = "message success";
+  btn.disabled = true;
+  setTimeout(() => nextStation(), 2600);
+}
+
+function nextStation() {
+  currentIndex++;
+  if (currentIndex >= stations.length) {
+    showFinal();
+  } else {
+    loadStation();
+  }
+}
+
+function showFinal() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("dots").classList.add("hidden");
+  document.getElementById("finalScreen").classList.remove("hidden");
+  document.getElementById("finalScoreText").textContent = stationScore + " / " + stations.length;
+  let msg = "Great review, these words are really sticking.";
+  if (stationScore === stations.length) msg = "Perfect score, you know this vocabulary really well.";
+  document.getElementById("finalMessage").textContent = msg;
+}
+
+document.getElementById("playAgainBtn").addEventListener("click", () => {
+  currentIndex = 0;
+  stationScore = 0;
+  document.getElementById("gameArea").classList.remove("hidden");
+  document.getElementById("dots").classList.remove("hidden");
+  document.getElementById("finalScreen").classList.add("hidden");
+  buildDots();
+  loadStation();
+});
+
+buildDots();
+loadStation();
+</script>
+</body>
+</html>
