@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Good Place: Vocabulary Review Matching Game</title>
+<style>
+  :root{
+    --navy:#1B2A4A; --peach:#FFE8D6; --mint:#D8F3DC; --coral:#FFD6D6;
+    --yellow:#FFF3B0; --purple:#EEE3F8; --purple-strong:#C79EEA;
+    --good:#5FAE62; --bad:#E2685F; --muted:#5B7386;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:28px 16px 48px; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(circle at top left,#fff3e8 0,#FBEADA 45%,#f3d9c2 100%);
+    color:var(--navy);
+  }
+  .card{
+    width:min(720px,96vw); background:#fff; border-radius:26px; padding:28px 26px 26px;
+    box-shadow:0 16px 34px rgba(27,42,74,.16);
+  }
+  h1{font-size:1.3rem; margin:0 0 6px; text-align:center;}
+  .sub{text-align:center; color:var(--muted); font-size:.92rem; margin:0 0 18px; line-height:1.4;}
+  .progress-note{font-size:.85rem; color:var(--muted); text-align:center; margin-bottom:16px;}
+  .match-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  @media(max-width:560px){ .match-grid{grid-template-columns:1fr;} }
+  .col-title{font-size:.78rem; font-weight:800; text-transform:uppercase; color:var(--muted); margin-bottom:10px; letter-spacing:.4px;}
+  .match-card{
+    text-align:left; width:100%; border:2px solid #F0E3D3; background:#FDF6EF; border-radius:14px;
+    padding:12px 15px; font-size:.94rem; cursor:pointer; color:var(--navy); margin-bottom:10px;
+    font-family:inherit; transition:.15s ease;
+  }
+  .match-card:hover{border-color:var(--purple-strong); transform:translateY(-1px);}
+  .match-card.selected{border-color:var(--navy); background:var(--purple); font-weight:700;}
+  .match-card.correct{background:var(--mint); border-color:var(--good); color:#245c27; font-weight:700; cursor:default;}
+  .match-card.wrong-flash{background:var(--coral); border-color:var(--bad);}
+  .match-card[disabled]{cursor:default;}
+  .start-screen, .end-screen{text-align:center;}
+  .start-screen p, .end-screen p{color:var(--muted); line-height:1.5;}
+  .bigBtn{
+    border:none; border-radius:999px; padding:15px 32px; font-size:1.05rem; font-weight:800;
+    background:linear-gradient(90deg,#C25FD6,#EE6FA6); color:#fff; cursor:pointer; margin-top:8px;
+  }
+  footer{margin-top:18px; text-align:center; color:var(--muted); font-size:.85rem;}
+</style>
+</head>
+<body>
+
+<div class="card" id="card"></div>
+<footer>The Good Place, vocabulary review</footer>
+
+<script>
+const pairs = [
+  { word:"to get away with something", def:"To do something wrong without being caught or punished." },
+  { word:"to eat someone up inside", def:"To cause someone constant guilt or worry that doesn't go away." },
+  { word:"to count on someone", def:"To trust or rely on someone for help or support." },
+  { word:"to wreak havoc", def:"To cause a lot of damage, chaos, or disorder." },
+  { word:"dumbfounded", def:"Extremely confused or shocked, unable to react normally." },
+  { word:"to violate someone's trust", def:"To break someone's trust by being dishonest or disloyal." },
+  { word:"to chalk something up to", def:"To explain away a mistake by blaming it on a particular cause." },
+  { word:"uncharted territory", def:"A completely new situation that no one has faced before." },
+  { word:"a compelling reason", def:"A reason so strong and convincing that it is hard to argue against." },
+];
+
+let shuffledWords = [], shuffledDefs = [], matchedCount = 0;
+let selectedWordIdx = null, selectedDefIdx = null;
+
+const card = document.getElementById("card");
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function renderStart(){
+  card.innerHTML = `
+    <div class="start-screen">
+      <h1>Vocabulary Review Matching Game</h1>
+      <p>Match each word or phrase from The Good Place to its correct meaning. Click a word, then click its meaning.</p>
+      <button class="bigBtn" id="startBtn">START</button>
+    </div>
+  `;
+  document.getElementById("startBtn").addEventListener("click", startMatch);
+}
+
+function startMatch(){
+  shuffledWords = shuffle(pairs.map((p,i)=>({...p, idx:i})));
+  shuffledDefs = shuffle(pairs.map((p,i)=>({...p, idx:i})));
+  matchedCount = 0;
+  selectedWordIdx = null; selectedDefIdx = null;
+  renderMatch();
+}
+
+function renderMatch(){
+  card.innerHTML = `
+    <p class="progress-note">${matchedCount} of ${pairs.length} matched</p>
+    <div class="match-grid">
+      <div>
+        <div class="col-title">Words</div>
+        <div id="wordCol"></div>
+      </div>
+      <div>
+        <div class="col-title">Meanings</div>
+        <div id="defCol"></div>
+      </div>
+    </div>
+  `;
+  const wordCol = document.getElementById("wordCol");
+  const defCol = document.getElementById("defCol");
+  shuffledWords.forEach((item, i) => {
+    const btn = document.createElement("button");
+    btn.className = "match-card";
+    btn.textContent = item.word;
+    btn.dataset.idx = item.idx;
+    if(item.matched){ btn.classList.add("correct"); btn.disabled = true; }
+    btn.addEventListener("click", () => selectWord(i, btn));
+    wordCol.appendChild(btn);
+  });
+  shuffledDefs.forEach((item, i) => {
+    const btn = document.createElement("button");
+    btn.className = "match-card";
+    btn.textContent = item.def;
+    btn.dataset.idx = item.idx;
+    if(item.matched){ btn.classList.add("correct"); btn.disabled = true; }
+    btn.addEventListener("click", () => selectDef(i, btn));
+    defCol.appendChild(btn);
+  });
+}
+
+function selectWord(i, btn){
+  if(shuffledWords[i].matched) return;
+  document.querySelectorAll("#wordCol .match-card").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedWordIdx = i;
+  tryMatch();
+}
+function selectDef(i, btn){
+  if(shuffledDefs[i].matched) return;
+  document.querySelectorAll("#defCol .match-card").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedDefIdx = i;
+  tryMatch();
+}
+
+function tryMatch(){
+  if(selectedWordIdx === null || selectedDefIdx === null) return;
+  const w = shuffledWords[selectedWordIdx];
+  const d = shuffledDefs[selectedDefIdx];
+  const wordBtn = document.querySelectorAll("#wordCol .match-card")[selectedWordIdx];
+  const defBtn = document.querySelectorAll("#defCol .match-card")[selectedDefIdx];
+  if(w.idx === d.idx){
+    w.matched = true; d.matched = true;
+    matchedCount++;
+    selectedWordIdx = null; selectedDefIdx = null;
+    if(matchedCount === pairs.length){
+      setTimeout(renderEnd, 400);
+    } else {
+      renderMatch();
+    }
+  } else {
+    wordBtn.classList.add("wrong-flash");
+    defBtn.classList.add("wrong-flash");
+    setTimeout(() => {
+      wordBtn.classList.remove("selected","wrong-flash");
+      defBtn.classList.remove("selected","wrong-flash");
+      selectedWordIdx = null; selectedDefIdx = null;
+    }, 500);
+  }
+}
+
+function renderEnd(){
+  card.innerHTML = `
+    <div class="end-screen">
+      <h1>All matched!</h1>
+      <p>Great review. Every word and phrase is now correctly paired with its meaning.</p>
+      <button class="bigBtn" id="restartBtn">PLAY AGAIN</button>
+    </div>
+  `;
+  document.getElementById("restartBtn").addEventListener("click", renderStart);
+}
+
+renderStart();
+</script>
+</body>
+</html>
