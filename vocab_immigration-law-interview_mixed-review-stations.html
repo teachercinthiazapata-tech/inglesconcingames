@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immigration Law Interview Vocabulary Review</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 620px;
+    width: 100%;
+    padding: 36px 32px;
+    box-shadow: 0 12px 40px rgba(60, 40, 100, 0.18);
+  }
+  .progress {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #e2d9f5;
+    transition: background 0.3s;
+  }
+  .dot.active { background: #9b7bd8; }
+  .dot.done { background: #6fcf97; }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    color: #4a3b6b;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7a6f95;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .word-banner {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    color: #5b3fa0;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .mech-label {
+    text-align: center;
+    font-size: 13px;
+    color: #9b8fb8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+  .prompt {
+    text-align: center;
+    font-size: 16px;
+    color: #4a3b6b;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .tiles-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    min-height: 56px;
+    padding: 14px;
+    border: 2px dashed #d8cff0;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    background: #faf8ff;
+  }
+  .tile-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+  .tile {
+    background: #efe8fb;
+    color: #4a3b6b;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+  }
+  .tile:hover { background: #ddd0f7; transform: translateY(-2px); }
+  .tile.placed { background: #6fcf97; color: white; }
+  .letter-tile {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 0;
+  }
+  .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .option-btn {
+    background: #f5f2fc;
+    border: 2px solid #e2d9f5;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #4a3b6b;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .option-btn:hover { border-color: #b89ce8; background: #efe8fb; }
+  .option-btn.correct { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .option-btn.wrong { background: #fbe2e2; border-color: #e57373; color: #a13a3a; }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e2d9f5;
+    border-radius: 12px;
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e2d9f5;
+    border-radius: 12px;
+    font-size: 15px;
+    margin-bottom: 14px;
+    min-height: 70px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .btn {
+    display: block;
+    width: 100%;
+    background: #6fcf97;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #cfd8dd; cursor: not-allowed; }
+  .feedback {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 14px 0;
+    padding: 12px;
+    border-radius: 12px;
+  }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .feedback.info { background: #e6f0fb; color: #2c5a8f; }
+  .model-answer {
+    text-align: center;
+    font-size: 14px;
+    color: #6b5f8a;
+    font-style: italic;
+    margin-top: 8px;
+  }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .big-score {
+    font-size: 48px;
+    font-weight: 800;
+    color: #5b3fa0;
+    margin: 16px 0;
+  }
+  .type-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; }
+  .type-chip {
+    background: #f5f2fc;
+    border: 2px solid #e2d9f5;
+    border-radius: 20px;
+    padding: 9px 18px;
+    font-size: 14px;
+    color: #4a3b6b;
+    cursor: pointer;
+  }
+  .type-chip.selected { border-color: #9b7bd8; background: #ddd0f7; }
+  .section-divider { border: none; border-top: 1px solid #ece5fb; margin: 18px 0; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Getting Ready for the Interview</h1>
+  <div class="subtitle">Vocabulary Review, Immigration Law Interview Prep</div>
+  <div class="progress" id="progress"></div>
+
+  <div id="stationArea"></div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>Well done!</h1>
+    <div class="big-score" id="scoreText"></div>
+    <p id="scoreMsg" style="color:#6b5f8a; margin-bottom: 18px;"></p>
+    <button class="btn" onclick="restart()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const stations = [
+  {
+    word: "residency permit",
+    mechanic: "order",
+    prompt: "Tap the pieces in order to build the sentence.",
+    orderChunks: ["You need", "a residency permit", "to live legally", "in Argentina"]
+  },
+  {
+    word: "passive income",
+    mechanic: "choice",
+    prompt: "What is passive income?",
+    options: [
+      "Money earned from a salary or a job you actively work in",
+      "Money earned from assets like investments, property, or savings, without active work",
+      "Money borrowed from a bank"
+    ],
+    answer: "Money earned from assets like investments, property, or savings, without active work"
+  },
+  {
+    word: "proof of income",
+    mechanic: "type",
+    prompt: "What type of phrase is \"proof of income\"?",
+    typeOptions: ["noun phrase", "verb phrase", "adjective phrase", "adverb phrase"],
+    typeAnswer: "noun phrase",
+    info: "Proof of income is a document, like a bank statement, that shows how much money someone earns."
+  },
+  {
+    word: "background check",
+    mechanic: "ipa",
+    prompt: "Choose the correct pronunciation.",
+    options: ["/ˈbækɡraʊnd tʃek/", "/ˈbækraʊnd tʃek/", "/bækˈɡraʊnd tʃek/", "/ˈbækɡraʊnd tʃɪk/"],
+    answer: "/ˈbækɡraʊnd tʃek/"
+  },
+  {
+    word: "sworn translation",
+    mechanic: "order",
+    prompt: "Tap the pieces in order to build the sentence.",
+    orderChunks: ["You must provide", "a sworn translation", "of your documents", "for the application"]
+  },
+  {
+    word: "to apply for",
+    mechanic: "combo",
+    prompt: "First, choose the correct word type. Then, build the sentence.",
+    typeOptions: ["noun", "verb", "phrasal verb", "adjective"],
+    typeAnswer: "phrasal verb",
+    orderChunks: ["She is going to", "apply for", "a residency permit", "next week"]
+  },
+  {
+    word: "requirement",
+    mechanic: "letters",
+    prompt: "Unscramble the letters to find the mystery word.",
+    clue: "Something you must have or do in order to qualify for something else. (noun)",
+    answer: "requirement"
+  },
+  {
+    word: "applicant",
+    mechanic: "question",
+    prompt: "Answer using the word \"applicant.\"",
+    question: "In a visa interview, who is the person asking for the residency permit called?",
+    model: "The person asking for the residency permit is called the applicant."
+  }
+];
+
+let current = 0;
+let score = 0;
+let orderState = [];
+let typeSelected = null;
+let questionAnswered = false;
+
+function buildProgress() {
+  const el = document.getElementById("progress");
+  el.innerHTML = "";
+  stations.forEach((s, i) => {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === current ? " active" : i < current ? " done" : "");
+    el.appendChild(d);
+  });
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderStation() {
+  buildProgress();
+  const st = stations[current];
+  const area = document.getElementById("stationArea");
+  orderState = [];
+  typeSelected = null;
+  questionAnswered = false;
+
+  let html = "";
+  html += `<div class="word-banner">${st.mechanic === "letters" ? "Mystery Word" : st.word}</div>`;
+  html += `<div class="mech-label">Station ${current + 1} of ${stations.length}</div>`;
+  html += `<div class="prompt">${st.prompt}</div>`;
+
+  if (st.mechanic === "order") {
+    html += `<div class="tiles-area" id="tilesArea"></div>`;
+    html += `<div class="tile-bank" id="tileBank"></div>`;
+    html += `<button class="btn" id="checkBtn" disabled onclick="checkOrder()">Check</button>`;
+  } else if (st.mechanic === "choice") {
+    html += `<div class="options-list" id="optionsList"></div>`;
+  } else if (st.mechanic === "type") {
+    html += `<div class="type-row" id="typeRow"></div>`;
+  } else if (st.mechanic === "ipa") {
+    html += `<div class="options-list" id="optionsList"></div>`;
+  } else if (st.mechanic === "combo") {
+    html += `<div class="type-row" id="typeRow"></div>`;
+    html += `<hr class="section-divider">`;
+    html += `<div class="tiles-area" id="tilesArea"></div>`;
+    html += `<div class="tile-bank" id="tileBank"></div>`;
+    html += `<button class="btn" id="checkBtn" disabled onclick="checkCombo()">Check</button>`;
+  } else if (st.mechanic === "letters") {
+    html += `<p style="text-align:center; color:#6b5f8a; font-size:14px; margin-bottom:14px;">${st.clue}</p>`;
+    html += `<div class="tiles-area" id="tilesArea"></div>`;
+    html += `<div class="tile-bank" id="tileBank"></div>`;
+    html += `<button class="btn" id="checkBtn" disabled onclick="checkLetters()">Check</button>`;
+  } else if (st.mechanic === "question") {
+    html += `<p style="text-align:center; color:#4a3b6b; font-weight:600; margin-bottom:12px;">${st.question}</p>`;
+    html += `<textarea id="answerInput" placeholder="Type your answer here..."></textarea>`;
+    html += `<button class="btn" id="checkBtn" onclick="checkQuestion()">Submit</button>`;
+  }
+
+  html += `<div class="feedback hidden" id="feedback"></div>`;
+  area.innerHTML = html;
+
+  if (st.mechanic === "order") setupOrder(st);
+  if (st.mechanic === "choice") setupChoice(st);
+  if (st.mechanic === "type") setupType(st);
+  if (st.mechanic === "ipa") setupIpa(st);
+  if (st.mechanic === "combo") { setupComboType(st); setupComboOrder(st); }
+  if (st.mechanic === "letters") setupLetters(st);
+}
+
+function setupOrder(st) {
+  const bank = document.getElementById("tileBank");
+  const shuffled = shuffle(st.orderChunks);
+  shuffled.forEach(chunk => {
+    const b = document.createElement("button");
+    b.className = "tile";
+    b.textContent = chunk;
+    b.onclick = () => placeOrderTile(chunk, b);
+    bank.appendChild(b);
+  });
+}
+
+function placeOrderTile(chunk, btn) {
+  if (btn.classList.contains("placed")) return;
+  btn.classList.add("placed");
+  orderState.push(chunk);
+  const tilesArea = document.getElementById("tilesArea");
+  const span = document.createElement("span");
+  span.className = "tile placed";
+  span.textContent = chunk;
+  tilesArea.appendChild(span);
+  const st = stations[current];
+  document.getElementById("checkBtn").disabled = orderState.length !== st.orderChunks.length;
+}
+
+function checkOrder() {
+  const st = stations[current];
+  const correct = JSON.stringify(orderState) === JSON.stringify(st.orderChunks);
+  showFeedback(correct);
+}
+
+function setupChoice(st) {
+  const list = document.getElementById("optionsList");
+  shuffle(st.options).forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "option-btn";
+    b.textContent = opt;
+    b.onclick = () => selectChoice(opt, b, st.answer);
+    list.appendChild(b);
+  });
+}
+
+function selectChoice(opt, btn, answer) {
+  document.querySelectorAll(".option-btn").forEach(b => b.onclick = null);
+  const correct = opt === answer;
+  btn.classList.add(correct ? "correct" : "wrong");
+  if (!correct) {
+    document.querySelectorAll(".option-btn").forEach(b => {
+      if (b.textContent === answer) b.classList.add("correct");
+    });
+  }
+  showFeedback(correct);
+}
+
+function setupType(st) {
+  const row = document.getElementById("typeRow");
+  st.typeOptions.forEach(opt => {
+    const chip = document.createElement("button");
+    chip.className = "type-chip";
+    chip.textContent = opt;
+    chip.onclick = () => selectType(opt, chip, st.typeAnswer);
+    row.appendChild(chip);
+  });
+}
+
+function selectType(opt, chip, answer) {
+  document.querySelectorAll(".type-chip").forEach(c => c.onclick = null);
+  const correct = opt === answer;
+  chip.classList.add("selected");
+  showFeedback(correct);
+}
+
+function setupIpa(st) {
+  const list = document.getElementById("optionsList");
+  shuffle(st.options).forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "option-btn";
+    b.textContent = opt;
+    b.onclick = () => selectChoice(opt, b, st.answer);
+    list.appendChild(b);
+  });
+}
+
+function setupComboType(st) {
+  const row = document.getElementById("typeRow");
+  st.typeOptions.forEach(opt => {
+    const chip = document.createElement("button");
+    chip.className = "type-chip";
+    chip.textContent = opt;
+    chip.onclick = () => {
+      document.querySelectorAll(".type-chip").forEach(c => c.classList.remove("selected"));
+      chip.classList.add("selected");
+      typeSelected = opt;
+    };
+    row.appendChild(chip);
+  });
+}
+
+function setupComboOrder(st) {
+  const bank = document.getElementById("tileBank");
+  const shuffled = shuffle(st.orderChunks);
+  shuffled.forEach(chunk => {
+    const b = document.createElement("button");
+    b.className = "tile";
+    b.textContent = chunk;
+    b.onclick = () => {
+      if (b.classList.contains("placed")) return;
+      b.classList.add("placed");
+      orderState.push(chunk);
+      const tilesArea = document.getElementById("tilesArea");
+      const span = document.createElement("span");
+      span.className = "tile placed";
+      span.textContent = chunk;
+      tilesArea.appendChild(span);
+      document.getElementById("checkBtn").disabled = !(typeSelected && orderState.length === st.orderChunks.length);
+    };
+    bank.appendChild(b);
+  });
+}
+
+function checkCombo() {
+  const st = stations[current];
+  const typeCorrect = typeSelected === st.typeAnswer;
+  const orderCorrect = JSON.stringify(orderState) === JSON.stringify(st.orderChunks);
+  showFeedback(typeCorrect && orderCorrect);
+}
+
+function setupLetters(st) {
+  const letters = shuffle(st.answer.split(""));
+  const bank = document.getElementById("tileBank");
+  letters.forEach((ch, idx) => {
+    const b = document.createElement("button");
+    b.className = "tile letter-tile";
+    b.textContent = ch;
+    b.dataset.used = "false";
+    b.onclick = () => {
+      if (b.dataset.used === "true") return;
+      b.dataset.used = "true";
+      b.classList.add("placed");
+      orderState.push(ch);
+      const tilesArea = document.getElementById("tilesArea");
+      const span = document.createElement("span");
+      span.className = "tile letter-tile placed";
+      span.textContent = ch;
+      tilesArea.appendChild(span);
+      document.getElementById("checkBtn").disabled = orderState.length !== st.answer.length;
+    };
+    bank.appendChild(b);
+  });
+}
+
+function checkLetters() {
+  const st = stations[current];
+  const built = orderState.join("");
+  showFeedback(built.toLowerCase() === st.answer.toLowerCase());
+}
+
+function checkQuestion() {
+  if (questionAnswered) return;
+  questionAnswered = true;
+  const st = stations[current];
+  const input = document.getElementById("answerInput").value.trim();
+  const btn = document.getElementById("checkBtn");
+  btn.disabled = true;
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add("info");
+  fb.innerHTML = `Nice work! Here is a model answer.<div class="model-answer">"${st.model}"</div>`;
+  score++;
+  setTimeout(nextStation, 2600);
+  if (input.length === 0) {
+    // still counts as an attempt, low pressure, no wrong answer here
+  }
+}
+
+function showFeedback(correct) {
+  const st = stations[current];
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong", "info");
+  if (correct) {
+    fb.classList.add("correct");
+    fb.textContent = "Correct! Well done.";
+    score++;
+  } else {
+    fb.classList.add("wrong");
+    let extra = "";
+    if (st.mechanic === "order" || (st.mechanic === "combo")) extra = ` The correct order is: ${st.orderChunks.join(", ")}.`;
+    if (st.mechanic === "letters") extra = ` The word was: ${st.answer}.`;
+    if (st.mechanic === "choice") extra = ` The correct answer is: ${st.answer}.`;
+    if (st.mechanic === "ipa") extra = ` The correct pronunciation is: ${st.answer}.`;
+    if (st.mechanic === "type" || st.mechanic === "combo") extra += ` The correct type is: ${st.typeAnswer}.`;
+    fb.textContent = "Not quite." + extra;
+  }
+  if (st.info) {
+    fb.innerHTML += `<div class="model-answer">${st.info}</div>`;
+  }
+  setTimeout(nextStation, 2200);
+}
+
+function nextStation() {
+  current++;
+  if (current >= stations.length) {
+    showScore();
+  } else {
+    renderStation();
+  }
+}
+
+function showScore() {
+  document.getElementById("stationArea").classList.add("hidden");
+  document.getElementById("progress").classList.add("hidden");
+  const screen = document.getElementById("scoreScreen");
+  screen.classList.remove("hidden");
+  document.getElementById("scoreText").textContent = `${score} / ${stations.length}`;
+  let msg = "Great review! You are ready for the interview vocabulary.";
+  if (score < stations.length) msg = "Good practice! Review the words you missed before your next class.";
+  document.getElementById("scoreMsg").textContent = msg;
+}
+
+function restart() {
+  current = 0;
+  score = 0;
+  document.getElementById("stationArea").classList.remove("hidden");
+  document.getElementById("progress").classList.remove("hidden");
+  document.getElementById("scoreScreen").classList.add("hidden");
+  renderStation();
+}
+
+renderStation();
+</script>
+</body>
+</html>
