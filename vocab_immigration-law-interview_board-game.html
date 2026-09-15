@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Board Game</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 640px;
+    width: 100%;
+    padding: 32px 28px;
+    box-shadow: 0 12px 40px rgba(60, 40, 100, 0.18);
+  }
+  h1 { text-align: center; font-size: 22px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 16px; }
+  .status-line { text-align: center; color: #6b5f8a; font-size: 14px; margin-bottom: 14px; font-weight: 600; }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .cell {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4a3b6b;
+  }
+  .cell.challenge { background: #efe8fb; border: 2px solid #b89ce8; }
+  .cell.bonus { background: #fff6dd; border: 2px solid #f0c85b; color: #8a6d1f; }
+  .cell.effect { background: #fde3e3; border: 2px solid #e79a9a; color: #a13a3a; }
+  .cell.meta { background: #d4f4e2; border: 2px solid #6fcf97; color: #1e6b45; }
+  .cell-label { position: absolute; top: 3px; left: 5px; font-size: 10px; opacity: 0.8; }
+  .cell-tag { font-size: 16px; }
+  .token {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #5b3fa0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: none;
+  }
+
+  .die-area { text-align: center; margin-bottom: 10px; }
+  .die {
+    width: 74px;
+    height: 74px;
+    margin: 8px auto 14px;
+    background: #ffffff;
+    border: 3px solid #9b7bd8;
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 10px;
+    box-shadow: 0 6px 16px rgba(91, 63, 160, 0.25);
+  }
+  .pip { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .pip::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: #5b3fa0; display: none; }
+  .pip.on::after { display: block; }
+
+  .word-banner { text-align: center; font-size: 22px; font-weight: 700; color: #5b3fa0; margin-bottom: 6px; }
+  .mech-label { text-align: center; font-size: 13px; color: #9b8fb8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .prompt { text-align: center; font-size: 15px; color: #4a3b6b; margin-bottom: 16px; line-height: 1.5; }
+  .definition-box { background: #f5f2fc; border-radius: 14px; padding: 14px; text-align: center; color: #4a3b6b; font-style: italic; margin-bottom: 14px; }
+  .tiles-area { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 50px; padding: 12px; border: 2px dashed #d8cff0; border-radius: 14px; margin-bottom: 12px; background: #faf8ff; }
+  .tile-bank { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px; }
+  .tile { background: #efe8fb; color: #4a3b6b; border: none; border-radius: 12px; padding: 9px 14px; font-size: 14px; cursor: pointer; transition: transform 0.15s, background 0.15s; }
+  .tile:hover { background: #ddd0f7; transform: translateY(-2px); }
+  .tile.placed { background: #6fcf97; color: white; }
+  .options-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .option-btn { background: #f5f2fc; border: 2px solid #e2d9f5; border-radius: 12px; padding: 12px 14px; font-size: 14px; color: #4a3b6b; cursor: pointer; text-align: left; transition: all 0.15s; }
+  .option-btn:hover { border-color: #b89ce8; background: #efe8fb; }
+  .option-btn.correct { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .option-btn.wrong { background: #fbe2e2; border-color: #e57373; color: #a13a3a; }
+  input[type="text"] { width: 100%; padding: 11px 13px; border: 2px solid #e2d9f5; border-radius: 12px; font-size: 14px; margin-bottom: 10px; text-align: center; }
+  .btn { display: block; width: 100%; background: #6fcf97; color: white; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s; margin-bottom: 9px; }
+  .btn:last-child { margin-bottom: 0; }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #cfd8dd; cursor: not-allowed; }
+  .btn.secondary { background: #efe8fb; color: #5b3fa0; }
+  .btn.secondary:hover { background: #ddd0f7; }
+  .feedback { text-align: center; font-size: 14px; font-weight: 600; margin: 10px 0; padding: 11px; border-radius: 12px; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .feedback.info { background: #e6f0fb; color: #2c5a8f; }
+  .feedback.banner { background: #fff6dd; color: #8a6d1f; }
+  .model-answer { text-align: center; font-size: 14px; color: #2c5a8f; font-style: italic; margin-top: 4px; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .big-score { font-size: 40px; font-weight: 800; color: #5b3fa0; margin: 14px 0; }
+  .clue-display { text-align: center; font-size: 18px; letter-spacing: 4px; color: #5b3fa0; font-weight: 700; margin-bottom: 10px; min-height: 26px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Vocabulary Board Game</h1>
+  <div class="subtitle">Immigration Law Interview Prep</div>
+  <div class="status-line" id="statusLine">Ready to start! Roll the dice to move your token.</div>
+
+  <div class="board" id="board"></div>
+
+  <div id="rollScreen" class="die-area">
+    <div class="die" id="die">
+      <div class="pip" id="p1"></div><div class="pip" id="p2"></div><div class="pip" id="p3"></div>
+      <div class="pip" id="p4"></div><div class="pip" id="p5"></div><div class="pip" id="p6"></div>
+      <div class="pip" id="p7"></div><div class="pip" id="p8"></div><div class="pip" id="p9"></div>
+    </div>
+    <button class="btn" id="rollBtn" onclick="rollDice()">Roll the dice</button>
+  </div>
+
+  <div id="bannerArea" class="feedback banner hidden"></div>
+
+  <div id="challengeArea" class="hidden"></div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>You reached the finish!</h1>
+    <div class="big-score" id="finishCount">0 / 8</div>
+    <p style="color:#6b5f8a; margin-bottom: 6px;" id="finishWords"></p>
+    <p style="color:#6b5f8a; margin-bottom: 18px;">Great work moving across the board today.</p>
+    <button class="btn" onclick="restart()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const PIP_PATTERNS = {
+  1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9]
+};
+
+const challenges = [
+  { word: "residency permit", type: "order", prompt: "Tap the pieces in order to build the sentence.", orderChunks: ["The lawyer explained", "the residency permit", "process", "to her client"] },
+  { word: "passive income", type: "match", prompt: "Which definition matches passive income?", options: [
+      "Money you earn regularly without actively working for it",
+      "Money you earn from a full time job",
+      "Money you borrow and must pay back"
+    ], answer: "Money you earn regularly without actively working for it" },
+  { word: "proof of income", type: "sentence", grammar: "Present Perfect", prompt: "Build a sentence about proof of income using Present Perfect (have/has plus a past participle). Say it out loud.", model: "She has already submitted her proof of income." },
+  { word: "background check", type: "typeClue", definition: "An official search into someone's personal, legal, or criminal history.", answer: "background check" },
+  { word: "sworn translation", type: "sentence", grammar: "must", prompt: "Build a sentence about sworn translation using must. Say it out loud.", model: "You must provide a sworn translation of your birth certificate." },
+  { word: "to apply for", type: "sentence", grammar: "need to", prompt: "Build a sentence using to apply for and need to. Say it out loud.", model: "You need to apply for the residency permit before your visa expires." },
+  { word: "requirement", type: "spell", prompt: "Spell \"requirement\" out loud, letter by letter.", answer: "requirement" },
+  { word: "applicant", type: "sentence", grammar: "have to", prompt: "Build a sentence about an applicant using have to. Say it out loud.", model: "An applicant has to provide a background check." }
+];
+
+// 14 spaces. type: challenge (idx into challenges), effect (backToStart / back2 / back3 / skipTurn), bonus (again / advance2)
+const path = [
+  { type: "effect", effect: "backToStart" }, // 1
+  { type: "challenge", idx: 0 },              // 2
+  { type: "effect", effect: "back2" },        // 3
+  { type: "challenge", idx: 1 },              // 4
+  { type: "bonus", bonus: "again" },          // 5
+  { type: "challenge", idx: 2 },              // 6
+  { type: "effect", effect: "back3" },        // 7
+  { type: "challenge", idx: 3 },              // 8
+  { type: "bonus", bonus: "advance2" },       // 9
+  { type: "challenge", idx: 4 },              // 10
+  { type: "effect", effect: "skipTurn" },     // 11
+  { type: "challenge", idx: 5 },              // 12
+  { type: "challenge", idx: 6 },              // 13
+  { type: "challenge", idx: 7 }               // 14, meta
+];
+
+let currentPos = 0;
+let orderState = [];
+let letterHistory = [];
+let clueCount = 0;
+let visitedChallenges = new Set();
+let skipNext = false;
+
+function cellPos(n) {
+  if (n <= 5) return { row: 3, col: n };
+  if (n <= 10) return { row: 2, col: 5 - (n - 6) };
+  return { row: 1, col: n - 10 };
+}
+
+function buildBoard() {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  for (let n = 1; n <= 14; n++) {
+    const p = path[n - 1];
+    const pos = cellPos(n);
+    const cell = document.createElement("div");
+    cell.id = "cell-" + n;
+    cell.className = "cell " + (n === 14 ? "meta" : p.type);
+    cell.style.gridRow = pos.row;
+    cell.style.gridColumn = pos.col;
+    const label = document.createElement("div");
+    label.className = "cell-label";
+    label.textContent = n;
+    cell.appendChild(label);
+    const tag = document.createElement("div");
+    tag.className = "cell-tag";
+    if (n === 14) tag.textContent = "🏁";
+    else if (p.type === "challenge") tag.textContent = "📝";
+    else if (p.type === "bonus") tag.textContent = "⭐";
+    else if (p.type === "effect" && p.effect === "backToStart") tag.textContent = "🏠";
+    else if (p.type === "effect" && (p.effect === "back2" || p.effect === "back3")) tag.textContent = "⏪";
+    else if (p.type === "effect" && p.effect === "skipTurn") tag.textContent = "⏸";
+    else tag.textContent = "";
+    cell.appendChild(tag);
+    board.appendChild(cell);
+  }
+}
+
+function placeToken(n) {
+  const old = document.querySelector(".token");
+  if (old) old.remove();
+  const cell = document.getElementById("cell-" + n);
+  const token = document.createElement("div");
+  token.className = "token";
+  cell.appendChild(token);
+}
+
+function rollDice() {
+  const rollBtn = document.getElementById("rollBtn");
+  rollBtn.disabled = true;
+  if (skipNext) {
+    skipNext = false;
+    showBanner("You lost that turn! No move this time.");
+    document.getElementById("statusLine").textContent = "Space " + currentPos + " of 14.";
+    setTimeout(() => {
+      hideBanner();
+      rollBtn.disabled = false;
+    }, 1400);
+    return;
+  }
+  document.getElementById("statusLine").textContent = "Rolling...";
+  let ticks = 0;
+  const spin = setInterval(() => {
+    showFace(Math.floor(Math.random() * 6) + 1);
+    ticks++;
+    if (ticks > 8) {
+      clearInterval(spin);
+      const steps = Math.floor(Math.random() * 6) + 1;
+      showFace(steps);
+      setTimeout(() => {
+        const raw = currentPos + steps;
+        let target;
+        if (raw > 14) {
+          const overshoot = raw - 14;
+          target = 14 - overshoot;
+          document.getElementById("statusLine").textContent = "You rolled a " + steps + ", too far! Bounce back to space " + target + ".";
+        } else {
+          target = raw;
+          document.getElementById("statusLine").textContent = "You rolled a " + steps + "!";
+        }
+        hopTo(target);
+      }, 500);
+    }
+  }, 90);
+}
+
+function showFace(n) {
+  for (let i = 1; i <= 9; i++) document.getElementById("p" + i).classList.remove("on");
+  PIP_PATTERNS[n].forEach(p => document.getElementById("p" + p).classList.add("on"));
+}
+
+function hopTo(target) {
+  if (target === currentPos) { resolveLanding(target); return; }
+  if (target < currentPos) {
+    // Bounced back past the current space: snap directly to the landing space.
+    currentPos = target;
+    placeToken(target);
+    document.getElementById("statusLine").textContent = "Space " + target + " of 14";
+    setTimeout(() => resolveLanding(target), 320);
+    return;
+  }
+  const next = currentPos + 1;
+  currentPos = next;
+  placeToken(next);
+  document.getElementById("statusLine").textContent = "Space " + next + " of 14";
+  if (next >= target) {
+    setTimeout(() => resolveLanding(next), 320);
+  } else {
+    setTimeout(() => hopTo(target), 260);
+  }
+}
+
+function showBanner(msg) {
+  const b = document.getElementById("bannerArea");
+  b.textContent = msg;
+  b.classList.remove("hidden");
+}
+
+function hideBanner() {
+  document.getElementById("bannerArea").classList.add("hidden");
+}
+
+function resolveLanding(n) {
+  const cell = path[n - 1];
+  if (cell.type === "challenge") {
+    hideBanner();
+    renderChallenge(cell.idx, n === 14);
+  } else if (cell.type === "bonus" && cell.bonus === "again") {
+    showBanner("Bonus! Roll again.");
+    setTimeout(() => {
+      hideBanner();
+      returnToRoll();
+    }, 1400);
+  } else if (cell.type === "bonus" && cell.bonus === "advance2") {
+    showBanner("Bonus! Advance 2 spaces.");
+    setTimeout(() => {
+      hideBanner();
+      hopTo(Math.min(n + 2, 14));
+    }, 1400);
+  } else if (cell.type === "effect") {
+    if (cell.effect === "backToStart") {
+      showBanner("Oh no, back to the start!");
+      setTimeout(() => {
+        hideBanner();
+        currentPos = 0;
+        const old = document.querySelector(".token");
+        if (old) old.remove();
+        returnToRoll();
+        document.getElementById("statusLine").textContent = "Back to the start! Roll again.";
+      }, 1400);
+    } else if (cell.effect === "back2" || cell.effect === "back3") {
+      const steps = cell.effect === "back2" ? 2 : 3;
+      const newPos = Math.max(1, n - steps);
+      showBanner("Go back " + steps + " spaces!");
+      setTimeout(() => {
+        hideBanner();
+        currentPos = newPos;
+        placeToken(newPos);
+        document.getElementById("statusLine").textContent = "Space " + newPos + " of 14";
+        resolveLanding(newPos);
+      }, 1400);
+    } else if (cell.effect === "skipTurn") {
+      showBanner("Skip a turn! Stay here for one roll.");
+      setTimeout(() => {
+        hideBanner();
+        skipNext = true;
+        returnToRoll();
+      }, 1400);
+    }
+  }
+}
+
+function returnToRoll() {
+  document.getElementById("challengeArea").classList.add("hidden");
+  document.getElementById("rollScreen").classList.remove("hidden");
+  document.getElementById("rollBtn").disabled = false;
+  document.getElementById("statusLine").textContent = "Space " + currentPos + " of 14. Roll again!";
+}
+
+function afterChallengeResolved(n) {
+  if (n >= 14) showFinish(); else returnToRoll();
+}
+
+function renderChallenge(idx, isFinal) {
+  visitedChallenges.add(idx);
+  const ch = challenges[idx];
+  document.getElementById("rollScreen").classList.add("hidden");
+  const area = document.getElementById("challengeArea");
+  area.classList.remove("hidden");
+  orderState = [];
+  letterHistory = [];
+  clueCount = 0;
+
+  let html = "";
+  html += `<div class="word-banner">${ch.type === "typeClue" ? "Mystery Word" : ch.word}</div>`;
+  html += `<div class="mech-label">Space ${currentPos} challenge</div>`;
+
+  if (ch.type === "order") {
+    html += `<div class="prompt">${ch.prompt}</div>`;
+    html += `<div class="tiles-area" id="tilesArea"></div>`;
+    html += `<div class="tile-bank" id="tileBank"></div>`;
+    html += `<button class="btn secondary" id="undoBtn" disabled onclick="undoOrder()">Undo last piece</button>`;
+    html += `<button class="btn" id="checkBtn" disabled onclick="checkOrder(${isFinal})">Check</button>`;
+  } else if (ch.type === "match") {
+    html += `<div class="prompt">${ch.prompt}</div>`;
+    html += `<div class="options-list" id="optionsList"></div>`;
+  } else if (ch.type === "sentence") {
+    html += `<div class="prompt">${ch.prompt}</div>`;
+    html += `<button class="btn" id="modelBtn" onclick="showModel()">Show model answer</button>`;
+    html += `<button class="btn hidden" id="continueBtn" onclick="finishChallenge(${isFinal})">Continue</button>`;
+  } else if (ch.type === "spell") {
+    html += `<div class="prompt">${ch.prompt}</div>`;
+    html += `<button class="btn" id="modelBtn" onclick="showModel()">Show correct spelling</button>`;
+    html += `<button class="btn hidden" id="continueBtn" onclick="finishChallenge(${isFinal})">Continue</button>`;
+  } else if (ch.type === "typeClue") {
+    html += `<div class="definition-box">${ch.definition}</div>`;
+    html += `<div class="prompt">Type the word this definition describes.</div>`;
+    html += `<input type="text" id="typeInput" placeholder="Type here...">`;
+    html += `<div class="clue-display" id="clueDisplay"></div>`;
+    html += `<button class="btn secondary" onclick="showClue()">Clue, reveal one more letter</button>`;
+    html += `<button class="btn" id="checkBtn" onclick="checkTyped(${isFinal})">Check</button>`;
+  }
+
+  html += `<div class="feedback hidden" id="feedback"></div>`;
+  area.innerHTML = html;
+
+  if (ch.type === "order") setupOrder(ch);
+  if (ch.type === "match") setupMatch(ch, isFinal);
+}
+
+function setupOrder(ch) {
+  const bank = document.getElementById("tileBank");
+  shuffle(ch.orderChunks).forEach(chunk => {
+    const b = document.createElement("button");
+    b.className = "tile";
+    b.textContent = chunk;
+    b.onclick = () => {
+      if (b.classList.contains("placed")) return;
+      b.classList.add("placed");
+      orderState.push(chunk);
+      letterHistory.push(b);
+      const tilesArea = document.getElementById("tilesArea");
+      const span = document.createElement("span");
+      span.className = "tile placed";
+      span.textContent = chunk;
+      tilesArea.appendChild(span);
+      document.getElementById("checkBtn").disabled = orderState.length !== ch.orderChunks.length;
+      document.getElementById("undoBtn").disabled = orderState.length === 0;
+    };
+    bank.appendChild(b);
+  });
+}
+
+function undoOrder() {
+  if (letterHistory.length === 0) return;
+  const lastBtn = letterHistory.pop();
+  lastBtn.classList.remove("placed");
+  orderState.pop();
+  const tilesArea = document.getElementById("tilesArea");
+  if (tilesArea.lastElementChild) tilesArea.removeChild(tilesArea.lastElementChild);
+  const idx = getCurrentIdx();
+  const ch = challenges[idx];
+  document.getElementById("checkBtn").disabled = orderState.length !== ch.orderChunks.length;
+  document.getElementById("undoBtn").disabled = orderState.length === 0;
+}
+
+function getCurrentIdx() {
+  return path[currentPos - 1].idx;
+}
+
+function checkOrder(isFinal) {
+  const idx = getCurrentIdx();
+  const ch = challenges[idx];
+  const correct = JSON.stringify(orderState) === JSON.stringify(ch.orderChunks);
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  if (correct) {
+    fb.classList.add("correct");
+    fb.textContent = "Correct! Well done.";
+    setTimeout(() => afterChallengeResolved(isFinal ? 14 : currentPos), 1800);
+  } else {
+    fb.classList.add("wrong");
+    fb.textContent = "Not quite, use Undo last piece to fix it and try again.";
+  }
+}
+
+function setupMatch(ch, isFinal) {
+  const list = document.getElementById("optionsList");
+  shuffle(ch.options).forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "option-btn";
+    b.textContent = opt;
+    b.onclick = () => selectMatch(opt, b, ch.answer, isFinal);
+    list.appendChild(b);
+  });
+}
+
+function selectMatch(opt, btn, answer, isFinal) {
+  document.querySelectorAll(".option-btn").forEach(b => b.onclick = null);
+  const correct = opt === answer;
+  btn.classList.add(correct ? "correct" : "wrong");
+  if (!correct) {
+    document.querySelectorAll(".option-btn").forEach(b => {
+      if (b.textContent === answer) b.classList.add("correct");
+    });
+  }
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(correct ? "correct" : "wrong");
+  fb.textContent = correct ? "Correct! Well done." : "Not quite, the correct definition is highlighted above.";
+  setTimeout(() => afterChallengeResolved(isFinal ? 14 : currentPos), 2200);
+}
+
+function showModel() {
+  const idx = getCurrentIdx();
+  const ch = challenges[idx];
+  document.getElementById("modelBtn").classList.add("hidden");
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden");
+  fb.classList.add("info");
+  const label = ch.type === "spell" ? "Correct spelling" : "Model answer";
+  fb.innerHTML = `${label}: <div class="model-answer">"${ch.model || ch.answer}"</div>`;
+  document.getElementById("continueBtn").classList.remove("hidden");
+}
+
+function finishChallenge(isFinal) {
+  afterChallengeResolved(isFinal ? 14 : currentPos);
+}
+
+function showClue() {
+  const idx = getCurrentIdx();
+  const ch = challenges[idx];
+  clueCount = Math.min(clueCount + 1, ch.answer.length);
+  const revealed = ch.answer.split("").map((letter, i) => {
+    if (letter === " ") return "  ";
+    return i < clueCount ? letter.toUpperCase() : "_";
+  }).join(" ");
+  document.getElementById("clueDisplay").textContent = revealed;
+}
+
+function checkTyped(isFinal) {
+  const idx = getCurrentIdx();
+  const ch = challenges[idx];
+  const input = document.getElementById("typeInput").value.trim().toLowerCase();
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  if (input === ch.answer.toLowerCase()) {
+    fb.classList.add("correct");
+    fb.textContent = "Correct! Well done.";
+    setTimeout(() => afterChallengeResolved(isFinal ? 14 : currentPos), 1800);
+  } else {
+    fb.classList.add("wrong");
+    fb.textContent = "Not quite, try again or use the Clue button for help.";
+  }
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showFinish() {
+  document.getElementById("challengeArea").classList.add("hidden");
+  document.getElementById("rollScreen").classList.add("hidden");
+  document.getElementById("statusLine").textContent = "Finished!";
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  document.getElementById("finishCount").textContent = visitedChallenges.size + " / 8";
+  const words = Array.from(visitedChallenges).map(i => challenges[i].word).join(", ");
+  document.getElementById("finishWords").textContent = "Words practiced: " + words;
+}
+
+function restart() {
+  currentPos = 0;
+  visitedChallenges = new Set();
+  const old = document.querySelector(".token");
+  if (old) old.remove();
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("rollScreen").classList.remove("hidden");
+  document.getElementById("rollBtn").disabled = false;
+  document.getElementById("statusLine").textContent = "Ready to start! Roll the dice to move your token.";
+  showFace(1);
+}
+
+buildBoard();
+showFace(1);
+</script>
+</body>
+</html>
