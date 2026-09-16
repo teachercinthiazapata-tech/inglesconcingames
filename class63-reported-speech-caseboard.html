@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Clase 63 - Reported Speech Case Board</title>
+<style>
+  :root{
+    --navy:#1B2A4A;
+    --orange:#B5651D;
+    --gold:#8A5A00;
+    --green:#2E7D32;
+    --red:#C0392B;
+    --cream:#FBF7F0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:linear-gradient(135deg,#FBF7F0 0%,#F0E6D6 100%);
+    margin:0;
+    padding:20px;
+    color:#222;
+  }
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{color:var(--navy);text-align:center;margin-bottom:4px;font-size:26px;}
+  .subtitle{text-align:center;color:var(--gold);font-style:italic;margin-bottom:6px;}
+  .instructions{
+    text-align:center;
+    background:#fff;
+    border-left:5px solid var(--orange);
+    padding:12px 18px;
+    border-radius:8px;
+    margin-bottom:20px;
+    max-width:700px;
+    margin-left:auto;
+    margin-right:auto;
+    font-size:15px;
+  }
+  .stats{
+    text-align:center;
+    font-weight:bold;
+    color:var(--navy);
+    margin-bottom:18px;
+    font-size:18px;
+  }
+  .stats span{color:var(--orange);}
+  #board{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .case-card{
+    background:#fff;
+    border-radius:12px;
+    padding:16px 20px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    border-left:6px solid var(--navy);
+    transition:border-color 0.3s;
+  }
+  .case-card.solved-correct{border-left-color:var(--green);background:#f4fbf4;}
+  .case-card.solved-wrong-fixed{border-left-color:var(--orange);background:#fffaf0;}
+  .case-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  .case-number{
+    background:var(--navy);
+    color:#fff;
+    border-radius:50%;
+    width:28px;
+    height:28px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:14px;
+  }
+  .original-quote{
+    font-style:italic;
+    color:var(--gold);
+    font-size:16px;
+    margin-bottom:4px;
+  }
+  .speaker-tag{
+    font-size:13px;
+    color:#888;
+    margin-bottom:10px;
+  }
+  .options{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .option{
+    background:#f7f7f7;
+    border:2px solid #e0e0e0;
+    border-radius:8px;
+    padding:9px 14px;
+    cursor:pointer;
+    font-size:14.5px;
+    transition:all 0.2s;
+  }
+  .option:hover{border-color:var(--navy);background:#f0f4fa;}
+  .option.correct{
+    background:#e8f5e9;
+    border-color:var(--green);
+    color:#1b5e20;
+    font-weight:600;
+  }
+  .option.incorrect{
+    background:#fdecea;
+    border-color:var(--red);
+    color:var(--red);
+    text-decoration:line-through;
+  }
+  .option.disabled{
+    pointer-events:none;
+    opacity:0.85;
+  }
+  .feedback{
+    margin-top:10px;
+    font-size:13.5px;
+    color:var(--navy);
+    background:#f0f4fa;
+    padding:8px 12px;
+    border-radius:6px;
+    display:none;
+  }
+  #winScreen{
+    display:none;
+    text-align:center;
+    margin-top:24px;
+    background:#fff;
+    padding:26px;
+    border-radius:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.15);
+  }
+  #winScreen h2{color:var(--green);}
+  button{
+    background:var(--orange);
+    color:#fff;
+    border:none;
+    padding:10px 22px;
+    border-radius:8px;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:10px;
+  }
+  button:hover{background:var(--gold);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Reported Speech: Case Board</h1>
+  <div class="subtitle">The Good Place, Episode 9 &middot; Clase 63 &middot; inglés con cin</div>
+  <div class="instructions">Eight witnesses said something. For each quote, choose the correct reported speech version. Solve all 8 cases!</div>
+  <div class="stats">Cases solved: <span id="solvedCount">0</span> / 8</div>
+  <div id="board"></div>
+  <div id="winScreen">
+    <h2>Case closed! You solved all 8!</h2>
+    <p id="finalStats"></p>
+    <button onclick="initGame()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const cases = [
+  {
+    quote: '"I\'m good on my own."',
+    speaker: "Jason",
+    options: [
+      { text: "Jason said that he was good on his own.", correct: true },
+      { text: "Jason said that he is good on his own.", correct: false },
+      { text: "Jason said that he will be good on his own.", correct: false }
+    ],
+    explain: "Present simple (is/am) shifts one step back to past simple (was)."
+  },
+  {
+    quote: '"Our relationship was teacher-student, nothing more."',
+    speaker: "Chidi",
+    options: [
+      { text: "Chidi said that their relationship was teacher-student, nothing more.", correct: false },
+      { text: "Chidi said that their relationship had been teacher-student, nothing more.", correct: true },
+      { text: "Chidi said that their relationship is teacher-student, nothing more.", correct: false }
+    ],
+    explain: "Past simple (was) shifts one step back to past perfect (had been)."
+  },
+  {
+    quote: '"I believe Eleanor belongs in the Good Place."',
+    speaker: "Michael",
+    options: [
+      { text: "Michael said that he believes Eleanor belongs in the Good Place.", correct: false },
+      { text: "Michael said that he had believed Eleanor had belonged in the Good Place.", correct: false },
+      { text: "Michael said that he believed Eleanor belonged in the Good Place.", correct: true }
+    ],
+    explain: "Both present simple verbs (believe, belongs) shift one step back: believed, belonged."
+  },
+  {
+    quote: '"I will help you find her."',
+    speaker: "Tahani",
+    options: [
+      { text: "Tahani said that she would help find her.", correct: true },
+      { text: "Tahani said that she will help find her.", correct: false },
+      { text: "Tahani said that she would helped find her.", correct: false }
+    ],
+    explain: "Will shifts back to would in reported speech."
+  },
+  {
+    quote: '"I can\'t come to the party tonight."',
+    speaker: "Chidi",
+    options: [
+      { text: "Chidi said that he can't come to the party that night.", correct: false },
+      { text: "Chidi said that he couldn't come to the party that night.", correct: true },
+      { text: "Chidi said that he couldn't came to the party that night.", correct: false }
+    ],
+    explain: "Can't shifts back to couldn't, and \"tonight\" becomes \"that night\" (time expressions shift too)."
+  },
+  {
+    quote: '"I saw the real Eleanor yesterday."',
+    speaker: "Michael",
+    options: [
+      { text: "Michael said that he had seen the real Eleanor the day before.", correct: true },
+      { text: "Michael said that he saw the real Eleanor yesterday.", correct: false },
+      { text: "Michael said that he has seen the real Eleanor the day before.", correct: false }
+    ],
+    explain: "Past simple (saw) shifts to past perfect (had seen); \"yesterday\" becomes \"the day before.\""
+  },
+  {
+    quote: '"You need to stand up for yourself."',
+    speaker: "Tahani",
+    options: [
+      { text: "Tahani told Michael that he needs to stand up for himself.", correct: false },
+      { text: "Tahani told Michael that he needed to stand up for himself.", correct: true },
+      { text: "Tahani told Michael that he needs to stand up for herself.", correct: false }
+    ],
+    explain: "Needs shifts to needed, and the reflexive pronoun changes to match the person being told (himself)."
+  },
+  {
+    quote: '"You\'re on borrowed time, Fake Eleanor."',
+    speaker: "Trevor",
+    options: [
+      { text: "Trevor told Fake Eleanor that she was on borrowed time.", correct: true },
+      { text: "Trevor told Fake Eleanor that she is on borrowed time.", correct: false },
+      { text: "Trevor told Fake Eleanor she will be on borrowed time.", correct: false }
+    ],
+    explain: "\"You're\" (present) shifts to \"she was\" (past), with the pronoun changed for reported speech."
+  }
+];
+
+let solvedCount = 0;
+
+function shuffleArr(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function initGame(){
+  solvedCount = 0;
+  document.getElementById('solvedCount').textContent = 0;
+  document.getElementById('winScreen').style.display = 'none';
+
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  cases.forEach((c, idx) => {
+    const shuffledOptions = shuffleArr([...c.options]);
+    const card = document.createElement('div');
+    card.className = 'case-card';
+    card.dataset.index = idx;
+    card.innerHTML = `
+      <div class="case-header">
+        <div class="case-number">${idx + 1}</div>
+      </div>
+      <div class="original-quote">${c.quote}</div>
+      <div class="speaker-tag">Original speaker: ${c.speaker}</div>
+      <div class="options">
+        ${shuffledOptions.map((opt, oi) => `<div class="option" data-correct="${opt.correct}" data-explain="${idx}">${opt.text}</div>`).join('')}
+      </div>
+      <div class="feedback" id="feedback-${idx}"></div>
+    `;
+    board.appendChild(card);
+  });
+
+  document.querySelectorAll('.option').forEach(optEl => {
+    optEl.addEventListener('click', function(){
+      const cardEl = this.closest('.case-card');
+      if(cardEl.classList.contains('solved-correct') || cardEl.classList.contains('solved-wrong-fixed')) return;
+
+      const allOptions = cardEl.querySelectorAll('.option');
+      const idx = parseInt(cardEl.dataset.index);
+      const isCorrect = this.dataset.correct === 'true';
+
+      allOptions.forEach(o => o.classList.add('disabled'));
+
+      if(isCorrect){
+        this.classList.add('correct');
+        cardEl.classList.add('solved-correct');
+        solvedCount++;
+      } else {
+        this.classList.add('incorrect');
+        allOptions.forEach(o => {
+          if(o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        cardEl.classList.add('solved-wrong-fixed');
+        solvedCount++;
+      }
+
+      const fb = document.getElementById(`feedback-${idx}`);
+      fb.textContent = cases[idx].explain;
+      fb.style.display = 'block';
+
+      document.getElementById('solvedCount').textContent = solvedCount;
+
+      if(solvedCount === cases.length){
+        setTimeout(showWin, 400);
+      }
+    });
+  });
+}
+
+function showWin(){
+  document.getElementById('winScreen').style.display = 'block';
+  document.getElementById('finalStats').textContent = `You closed all ${cases.length} cases. Great work with reported speech!`;
+}
+
+initGame();
+</script>
+</body>
+</html>
