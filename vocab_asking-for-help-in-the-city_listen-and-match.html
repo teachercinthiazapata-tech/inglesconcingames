@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asking for Help in the City: Listen &amp; Match</title>
+<style>
+  :root { --navy:#1f3a5f; --coral:#e07a5f; --mint:#e8f5ef; --mint-d:#5fb58f; --peach:#fdeee6; --bg:#fffaf6; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--navy); }
+  .wrap { max-width:860px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { text-align:center; margin:6px 0 4px; font-size:1.6rem; }
+  .sub { text-align:center; color:#666; margin:0 0 16px; }
+  .tabs { display:flex; gap:8px; justify-content:center; margin-bottom:16px; flex-wrap:wrap; }
+  .tab { border:2px solid var(--navy); background:#fff; color:var(--navy); padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:bold; }
+  .tab.active { background:var(--navy); color:#fff; }
+  .hidden { display:none !important; }
+  .stats { display:flex; justify-content:center; gap:24px; margin-bottom:12px; font-weight:bold; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .col { display:flex; flex-direction:column; gap:10px; }
+  .card { background:#fff; border:2px solid #dde3ea; border-radius:12px; padding:12px; cursor:pointer; min-height:58px; display:flex; align-items:center; gap:8px; transition:.15s; font-size:.98rem; }
+  .card:hover { border-color:var(--coral); }
+  .card.sel { border-color:var(--coral); background:var(--peach); }
+  .card.done { background:var(--mint); border-color:var(--mint-d); cursor:default; opacity:.85; }
+  .card.wrong { animation:shake .35s; border-color:#d9534f; }
+  @keyframes shake { 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  .spk { border:none; background:var(--navy); color:#fff; border-radius:50%; width:32px; height:32px; flex:0 0 32px; cursor:pointer; font-size:15px; }
+  .panel { background:#fff; border:2px solid #dde3ea; border-radius:14px; padding:20px; text-align:center; }
+  .bigbtns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:10px 0 16px; }
+  .btn { border:none; border-radius:22px; padding:11px 20px; font-weight:bold; cursor:pointer; font-size:1rem; }
+  .play { background:var(--coral); color:#fff; }
+  .slow { background:var(--navy); color:#fff; }
+  .show { background:#eee; color:var(--navy); }
+  .opts { display:flex; flex-direction:column; gap:10px; max-width:560px; margin:0 auto; }
+  .opt { text-align:left; background:#fff; border:2px solid #dde3ea; border-radius:12px; padding:12px 14px; cursor:pointer; font-size:1rem; color:var(--navy); }
+  .opt:hover { border-color:var(--coral); }
+  .opt.right { background:var(--mint); border-color:var(--mint-d); }
+  .opt.no { background:#fbe9e7; border-color:#d9534f; }
+  .fb { min-height:48px; margin-top:12px; font-size:.95rem; }
+  .transcript { font-style:italic; color:#555; margin:6px 0 0; }
+  .next { background:var(--mint-d); color:#fff; margin-top:8px; }
+  .overlay { position:fixed; inset:0; background:rgba(31,58,95,.55); display:flex; align-items:center; justify-content:center; padding:16px; }
+  .modal { background:#fff; border-radius:16px; padding:24px; max-width:420px; text-align:center; }
+  .note { font-size:.85rem; color:#777; text-align:center; margin-top:18px; }
+  @media (max-width:560px){ .card{font-size:.9rem; padding:10px;} h1{font-size:1.3rem;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🗽 Asking for Help in the City</h1>
+  <p class="sub">Listen &amp; Match: survival English for a trip to New York</p>
+  <div class="tabs">
+    <button class="tab active" id="tab1">Round 1: Match</button>
+    <button class="tab" id="tab2">Round 2: Listen &amp; Choose</button>
+  </div>
+
+  <!-- ROUND 1 -->
+  <section id="r1">
+    <p class="sub">Tap a phrase, then tap its meaning. Press 🔊 to hear it.</p>
+    <div class="stats"><div>Matches: <span id="m">0</span>/8</div><div>Attempts: <span id="a">0</span></div></div>
+    <div class="grid"><div class="col" id="left"></div><div class="col" id="right"></div></div>
+    <div class="bigbtns"><button class="btn show" id="restart1">Restart</button></div>
+  </section>
+
+  <!-- ROUND 2 -->
+  <section id="r2" class="hidden">
+    <div class="panel">
+      <div class="stats"><div>Line <span id="qn">1</span>/<span id="qt">8</span></div><div>Score: <span id="sc">0</span></div></div>
+      <p>Listen to the New Yorker. What do you say?</p>
+      <div class="bigbtns">
+        <button class="btn play" id="playN">▶ Play (real speed)</button>
+        <button class="btn slow" id="playS">🐢 Slower</button>
+        <button class="btn show" id="showT">Show text</button>
+      </div>
+      <p class="transcript hidden" id="tr"></p>
+      <div class="opts" id="opts"></div>
+      <div class="fb" id="fb"></div>
+      <button class="btn next hidden" id="nextBtn">Next ➜</button>
+    </div>
+  </section>
+
+  <p class="note">Audio uses your browser's English voice. Works best in Chrome. Turn your volume up!</p>
+</div>
+
+<div class="overlay hidden" id="done">
+  <div class="modal">
+    <h2 id="doneTitle">Great job! 🎉</h2>
+    <p id="doneMsg"></p>
+    <button class="btn play" id="doneBtn">OK</button>
+  </div>
+</div>
+
+<script>
+const PAIRS = [
+  ["Excuse me", "Polite words to get attention before you ask something"],
+  ["Sorry, I didn't catch that.", "I didn't hear or understand what you said"],
+  ["Could you say that again, please?", "Please repeat what you said"],
+  ["Could you speak more slowly, please?", "Please talk at a lower speed"],
+  ["What does \"to go\" mean?", "You ask for the meaning of a word"],
+  ["subway", "Underground train in the city"],
+  ["block", "Distance from one street to the next (like a cuadra)"],
+  ["uptown / downtown", "North / south in Manhattan"]
+];
+const LINES = [
+  { say:"That'll be twelve seventy-five.", opts:["Sorry, I didn't catch that. Could you say that again?","Is this the uptown train?","Excuse me, where's the subway?"], a:0, why:"Prices at real speed are hard. Ask for a repeat: it was $12.75." },
+  { say:"For here or to go?", opts:["Two blocks from here.","What does \"to go\" mean?","Could you show me on the map?"], a:1, why:"\"To go\" means take away (para llevar). Now you can answer: For here, please! or To go, please!" },
+  { say:"Take the downtown six, get off at Astor Place, it's like two blocks east.", opts:["Could you speak more slowly, please?","For here, please.","My name is Silvia."], a:0, why:"Lots of information! Asking for a slower version is the perfect move." },
+  { say:"You want the express or the local?", opts:["Yes, please.","What does \"express\" mean?","Sorry, I'm from Buenos Aires."], a:1, why:"Express trains skip stations. Local trains stop at every station." },
+  { say:"Can I get a name for the order?", opts:["Uptown, please.","Twelve seventy-five.","Sure, it's Silvia. S, I, L, V, I, A."], a:2, why:"Coffee shops ask for your name. Spelling it helps a lot!" },
+  { say:"It's just around the corner, you can't miss it.", opts:["Around the corner? Thank you!","Could you to repeat?","What means corner?"], a:0, why:"\"Around the corner\" means very near. Checking a key word is a great strategy. (The other two options have grammar mistakes!)" },
+  { say:"Excuse me, ma'am, this seat's taken.", opts:["Oh, sorry! No problem.","I didn't catch the price.","Is this downtown?"], a:0, why:"\"This seat's taken\" means someone is sitting there. A quick \"Oh, sorry!\" is perfect." },
+  { say:"Yeah, the museum's uptown, like on Eighty-second. Just take the four or the five.", opts:["Could you say that again, please?","Where's the subway?","To go, please."], a:0, why:"Street numbers and train numbers together! Ask for a repeat, then listen for: uptown, 82nd Street, the 4 or 5 train." }
+];
+
+// ---------- audio ----------
+let voice = null;
+function pickVoice(){ const v = speechSynthesis.getVoices(); voice = v.find(x=>x.lang==='en-US' && /Google|Samantha|Aria|Jenny/i.test(x.name)) || v.find(x=>x.lang==='en-US') || v.find(x=>x.lang.startsWith('en')) || null; }
+if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(t, rate){ if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='en-US'; if(voice) u.voice=voice; u.rate=rate||1.05; speechSynthesis.speak(u); }
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const $ = id => document.getElementById(id);
+
+// ---------- round 1 ----------
+let selL=null, selR=null, matches=0, attempts=0;
+function initR1(){
+  matches=0; attempts=0; selL=selR=null; $('m').textContent=0; $('a').textContent=0;
+  const L=$('left'), R=$('right'); L.innerHTML=''; R.innerHTML='';
+  shuffle(PAIRS.map((p,i)=>({t:p[0],i}))).forEach(o=>{
+    const c=document.createElement('div'); c.className='card'; c.dataset.i=o.i;
+    const b=document.createElement('button'); b.className='spk'; b.textContent='🔊'; b.setAttribute('aria-label','Listen');
+    b.onclick=e=>{ e.stopPropagation(); speak(o.t.replace('/', 'or'), 0.95); };
+    const s=document.createElement('span'); s.textContent=o.t;
+    c.append(b,s); c.onclick=()=>pick(c,'L'); L.appendChild(c);
+  });
+  shuffle(PAIRS.map((p,i)=>({t:p[1],i}))).forEach(o=>{
+    const c=document.createElement('div'); c.className='card'; c.dataset.i=o.i; c.textContent=o.t; c.onclick=()=>pick(c,'R'); R.appendChild(c);
+  });
+}
+function pick(c,side){
+  if(c.classList.contains('done')) return;
+  if(side==='L'){ if(selL) selL.classList.remove('sel'); selL=(selL===c)?null:c; }
+  else { if(selR) selR.classList.remove('sel'); selR=(selR===c)?null:c; }
+  if(selL) selL.classList.add('sel'); if(selR) selR.classList.add('sel');
+  if(selL && selR){
+    attempts++; $('a').textContent=attempts;
+    const l=selL, r=selR; selL=selR=null;
+    if(l.dataset.i===r.dataset.i){
+      [l,r].forEach(x=>{x.classList.remove('sel'); x.classList.add('done');});
+      matches++; $('m').textContent=matches;
+      if(matches===PAIRS.length) showDone('Round 1 complete! 🎉','You matched all 8 in '+attempts+' attempts. Now try Round 2: Listen & Choose.');
+    } else {
+      [l,r].forEach(x=>{x.classList.add('wrong');});
+      setTimeout(()=>[l,r].forEach(x=>x.classList.remove('wrong','sel')),400);
+    }
+  }
+}
+
+// ---------- round 2 ----------
+let order=[], qi=0, score=0, answered=false;
+function initR2(){ order=shuffle(LINES); qi=0; score=0; $('sc').textContent=0; $('qt').textContent=order.length; showQ(); }
+function showQ(){
+  answered=false; const q=order[qi];
+  $('qn').textContent=qi+1; $('tr').textContent='"'+q.say+'"'; $('tr').classList.add('hidden');
+  $('fb').textContent=''; $('nextBtn').classList.add('hidden');
+  const box=$('opts'); box.innerHTML='';
+  shuffle(q.opts.map((t,i)=>({t,i}))).forEach(o=>{
+    const b=document.createElement('button'); b.className='opt'; b.textContent=o.t; b.dataset.i=o.i;
+    b.onclick=()=>answer(b,o.i); box.appendChild(b);
+  });
+}
+function answer(b,i){
+  if(answered) return; const q=order[qi];
+  if(i===q.a){ if(!b.parentNode.querySelector('.no')) { score++; $('sc').textContent=score; }
+    answered=true; b.classList.add('right');
+    $('fb').innerHTML='✅ <b>Great reaction!</b> '+q.why; $('tr').classList.remove('hidden'); $('nextBtn').classList.remove('hidden');
+  } else {
+    b.classList.add('no'); $('fb').innerHTML='Not quite. Listen again (try 🐢 Slower) and choose another answer.';
+  }
+}
+$('playN').onclick=()=>speak(order[qi].say,1.1);
+$('playS').onclick=()=>speak(order[qi].say,0.7);
+$('showT').onclick=()=>$('tr').classList.toggle('hidden');
+$('nextBtn').onclick=()=>{ qi++; if(qi<order.length) showQ(); else showDone('You did it! 🗽','You reacted to '+order.length+' real New York lines. Every day, you understand a little more!'); };
+
+// ---------- ui ----------
+function showDone(t,m){ $('doneTitle').textContent=t; $('doneMsg').textContent=m; $('done').classList.remove('hidden'); }
+$('doneBtn').onclick=()=>$('done').classList.add('hidden');
+$('restart1').onclick=initR1;
+$('tab1').onclick=()=>{ $('tab1').classList.add('active'); $('tab2').classList.remove('active'); $('r1').classList.remove('hidden'); $('r2').classList.add('hidden'); };
+$('tab2').onclick=()=>{ $('tab2').classList.add('active'); $('tab1').classList.remove('active'); $('r2').classList.remove('hidden'); $('r1').classList.add('hidden'); if(!order.length) initR2(); };
+initR1();
+</script>
+</body>
+</html>
