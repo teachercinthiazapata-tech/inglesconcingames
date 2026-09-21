@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Do You Say? Asking for Help in New York</title>
+<style>
+  :root { --navy:#1f3a5f; --coral:#e07a5f; --mint:#e8f5ef; --mint-d:#5fb58f; --peach:#fdeee6; --bg:#fffaf6; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--navy); }
+  .wrap { max-width:640px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { text-align:center; margin:6px 0 4px; font-size:1.6rem; }
+  .sub { text-align:center; color:#666; margin:0 0 16px; }
+  .hidden { display:none !important; }
+  .dots { display:flex; justify-content:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .dot { width:14px; height:14px; border-radius:50%; background:#dde3ea; }
+  .dot.now { background:var(--coral); transform:scale(1.2); }
+  .dot.done { background:var(--mint-d); }
+  .card { background:#fff; border:2px solid #dde3ea; border-radius:18px; padding:26px 20px; text-align:center; box-shadow:0 4px 14px rgba(31,58,95,.08); min-height:330px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .num { font-size:.9rem; color:#888; margin-bottom:6px; }
+  .emoji { font-size:4rem; line-height:1; margin:6px 0 12px; }
+  .situation { font-size:1.35rem; line-height:1.4; margin:0 0 18px; }
+  .question { font-weight:bold; color:var(--coral); margin-bottom:14px; }
+  .answer { background:var(--mint); border:2px solid var(--mint-d); border-radius:14px; padding:14px 16px; width:100%; }
+  .answer .main { font-size:1.35rem; font-weight:bold; margin-bottom:6px; }
+  .answer .alt { font-size:.95rem; color:#444; }
+  .answer .tip { font-size:.9rem; color:#666; margin-top:8px; font-style:italic; }
+  .btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+  .btn { border:none; border-radius:22px; padding:11px 20px; font-weight:bold; cursor:pointer; font-size:1rem; }
+  .reveal { background:var(--coral); color:#fff; }
+  .listen { background:var(--navy); color:#fff; }
+  .nav { background:#eee; color:var(--navy); }
+  .next { background:var(--mint-d); color:#fff; }
+  .end { text-align:center; }
+  .end .big { font-size:4rem; }
+  .note { font-size:.85rem; color:#777; text-align:center; margin-top:18px; }
+  @media (max-width:480px){ .situation{font-size:1.15rem;} .emoji{font-size:3.2rem;} h1{font-size:1.3rem;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🗽 What Do You Say?</h1>
+  <p class="sub">Asking for help in New York. Read the situation and say the phrase.</p>
+
+  <div class="dots" id="dots"></div>
+
+  <section id="game">
+    <div class="card">
+      <div class="num" id="num"></div>
+      <div class="emoji" id="emoji"></div>
+      <p class="situation" id="situation"></p>
+      <div class="question" id="question">What do you say? 💬</div>
+      <div class="answer hidden" id="answer">
+        <div class="main" id="main"></div>
+        <div class="alt" id="alt"></div>
+        <div class="tip" id="tip"></div>
+      </div>
+      <div class="btns">
+        <button class="btn reveal" id="revealBtn">Show answer</button>
+        <button class="btn listen hidden" id="listenBtn">🔊 Listen</button>
+        <button class="btn listen hidden" id="slowBtn">🐢 Slower</button>
+      </div>
+    </div>
+    <div class="btns">
+      <button class="btn nav" id="backBtn">⬅ Back</button>
+      <button class="btn nav" id="shuffleBtn">🔀 Shuffle</button>
+      <button class="btn next" id="nextBtn">Next ➜</button>
+    </div>
+  </section>
+
+  <section id="endScreen" class="hidden">
+    <div class="card end">
+      <div class="big">🎉</div>
+      <h2>Great job!</h2>
+      <p class="situation">You are ready to ask for help in New York.</p>
+      <div class="btns"><button class="btn reveal" id="againBtn">Play again</button></div>
+    </div>
+  </section>
+
+  <p class="note">Say your answer out loud first. Then press "Show answer" and listen. Audio works best in Chrome.</p>
+</div>
+
+<script>
+const CARDS = [
+  { e:"🙋‍♀️", s:"You need help. You want to ask a stranger a question.", a:"Excuse me...", alt:"Excuse me, could you help me?", tip:"Stress: ex-CUSE me." },
+  { e:"💵", s:"The cashier says the price very fast.", a:"Sorry, I didn't catch that.", alt:"Sorry, I didn't catch the price.", tip:"didn't catch = didn't hear or understand" },
+  { e:"📍", s:"A man tells you an address, but you didn't hear it well.", a:"Could you say that again, please?", alt:"Could you repeat the address, please?", tip:"Could you + verb. Your voice goes up at the end ↗" },
+  { e:"🧑‍🍳", s:"The waiter speaks really, really fast.", a:"Could you speak more slowly, please?", alt:"Sorry, could you speak a little more slowly?", tip:"slowly, not slow" },
+  { e:"📋", s:"The menu says: SIDES. What is that? 🤔", a:"What does \"sides\" mean?", alt:"Sides = small dishes with your meal, like fries or salad.", tip:"What DOES ___ mean? (not \"What means...?\")" },
+  { e:"🚇", s:"Central Park is very far. You don't want to walk.", a:"Let's take the subway.", alt:"We can take the subway.", tip:"TAKE the subway" },
+  { e:"☕", s:"Complete: \"The café is three ______ from here.\"", a:"blocks", alt:"The café is three blocks from here.", tip:"block = cuadra" },
+  { e:"⬆️", s:"You want to go north, to Central Park. Which train?", a:"The uptown train.", alt:"Excuse me, is this the uptown train?", tip:"north = uptown, south = downtown" }
+];
+
+let order = CARDS.map((_, i) => i), idx = 0, seen = new Set();
+const $ = id => document.getElementById(id);
+
+// audio
+let voice = null;
+function pickVoice(){ const v = speechSynthesis.getVoices(); voice = v.find(x=>x.lang==='en-US' && /Google|Samantha|Aria|Jenny/i.test(x.name)) || v.find(x=>x.lang==='en-US') || v.find(x=>x.lang.startsWith('en')) || null; }
+if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(t, rate){ if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='en-US'; if(voice) u.voice=voice; u.rate=rate||0.95; speechSynthesis.speak(u); }
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function drawDots(){
+  const d = $('dots'); d.innerHTML = '';
+  order.forEach((ci, i) => { const s = document.createElement('span'); s.className = 'dot' + (i===idx ? ' now' : (seen.has(ci) ? ' done' : '')); d.appendChild(s); });
+}
+function show(){
+  const c = CARDS[order[idx]];
+  $('num').textContent = 'Card ' + (idx+1) + ' of ' + order.length;
+  $('emoji').textContent = c.e;
+  $('situation').textContent = c.s;
+  $('main').textContent = c.a;
+  $('alt').textContent = c.alt ? 'Also: ' + c.alt : '';
+  $('tip').textContent = c.tip || '';
+  $('answer').classList.add('hidden');
+  $('question').classList.remove('hidden');
+  $('revealBtn').classList.remove('hidden');
+  $('listenBtn').classList.add('hidden');
+  $('slowBtn').classList.add('hidden');
+  $('backBtn').disabled = idx === 0;
+  $('nextBtn').textContent = idx === order.length-1 ? 'Finish ✓' : 'Next ➜';
+  drawDots();
+}
+$('revealBtn').onclick = () => {
+  seen.add(order[idx]);
+  $('answer').classList.remove('hidden');
+  $('question').classList.add('hidden');
+  $('revealBtn').classList.add('hidden');
+  $('listenBtn').classList.remove('hidden');
+  $('slowBtn').classList.remove('hidden');
+  drawDots();
+  speak(answerText());
+};
+function answerText(){ const c = CARDS[order[idx]]; return c.a === 'blocks' ? c.alt : c.a; }
+$('listenBtn').onclick = () => speak(answerText(), 0.95);
+$('slowBtn').onclick = () => speak(answerText(), 0.65);
+$('nextBtn').onclick = () => {
+  if (idx < order.length-1) { idx++; show(); }
+  else { $('game').classList.add('hidden'); $('endScreen').classList.remove('hidden'); $('dots').classList.add('hidden'); }
+};
+$('backBtn').onclick = () => { if (idx > 0) { idx--; show(); } };
+$('shuffleBtn').onclick = () => { order = shuffle(order); idx = 0; show(); };
+$('againBtn').onclick = () => { order = shuffle(CARDS.map((_, i) => i)); idx = 0; seen = new Set(); $('endScreen').classList.add('hidden'); $('game').classList.remove('hidden'); $('dots').classList.remove('hidden'); show(); };
+show();
+</script>
+</body>
+</html>
