@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Review Stations</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 640px;
+    width: 100%;
+    padding: 36px 32px;
+    box-shadow: 0 12px 40px rgba(60, 40, 100, 0.18);
+  }
+  .progress { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #e2d9f5; transition: background 0.3s; }
+  .dot.active { background: #9b7bd8; }
+  .dot.done { background: #6fcf97; }
+  h1 { text-align: center; font-size: 22px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 20px; }
+  .word-tag { text-align: center; font-size: 13px; color: #9b8fb8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 18px; font-weight: 700; }
+  .prompt-box {
+    background: #f5f2fc;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    color: #4a3b6b;
+    font-size: 17px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .option-btn {
+    background: #efe8fb;
+    border: 2px solid #e2d9f5;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #4a3b6b;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .option-btn:hover { background: #e2d3f9; }
+  .option-btn.correct { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .option-btn.wrong { background: #fbe2e2; border-color: #e79a9a; color: #a13a3a; }
+  .option-btn:disabled { cursor: default; }
+  .tile-pool, .tile-answer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: 46px;
+    margin-bottom: 14px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+  .tile-pool { background: #f5f2fc; }
+  .tile-answer { background: #fff; border: 2px dashed #d8cff0; }
+  .tile {
+    background: #9b7bd8;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+  }
+  .tile:hover { background: #8a68c9; }
+  .tile.space-tile { background: #c9bbe8; min-width: 24px; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { width: auto; flex: 1; }
+  .btn {
+    display: block;
+    width: 100%;
+    background: #6fcf97;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 10px;
+  }
+  .btn:last-child { margin-bottom: 0; }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #b9e5cb; cursor: default; }
+  .btn.secondary { background: #efe8fb; color: #5b3fa0; }
+  .btn.secondary:hover { background: #ddd0f7; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 14px 0; padding: 12px; border-radius: 12px; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .big-score { font-size: 48px; font-weight: 800; color: #5b3fa0; margin: 16px 0; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Vocabulary Review Stations</h1>
+  <div class="subtitle">Immigration Law Interview Vocabulary</div>
+  <div class="progress" id="progress"></div>
+
+  <div id="quizArea">
+    <div class="word-tag" id="wordTag"></div>
+    <div class="prompt-box" id="promptBox"></div>
+    <div id="mechanicArea"></div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>All done!</h1>
+    <div class="big-score" id="scoreCount">0 / 8</div>
+    <p style="color:#6b5f8a; margin-bottom: 18px;">Correct on the first try. Great review of the immigration law interview vocabulary.</p>
+    <button class="btn" onclick="restart()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const stations = [
+  {
+    mechanic: "choice",
+    word: "residency permit",
+    prompt: "Which definition is correct?",
+    options: [
+      "A document that lets you live in a country legally.",
+      "A document that lets you work in any country.",
+      "A paper that shows you own a house."
+    ],
+    correctAnswer: "A document that lets you live in a country legally."
+  },
+  {
+    mechanic: "order",
+    word: "passive income",
+    prompt: "Put the words in the correct order.",
+    pieces: ["The", "applicant", "has", "passive", "income"]
+  },
+  {
+    mechanic: "pos",
+    word: "proof of income",
+    prompt: "You need proof of income for the permit.",
+    question: "What part of speech is \"proof of income\"?",
+    options: ["noun", "verb", "adjective"],
+    correctAnswer: "noun"
+  },
+  {
+    mechanic: "letters",
+    word: "background check",
+    prompt: "Unscramble the word.",
+    letters: ["B","A","C","K","G","R","O","U","N","D"," ","C","H","E","C","K"],
+    target: "BACKGROUND CHECK"
+  },
+  {
+    mechanic: "choice",
+    word: "sworn translation",
+    prompt: "Which definition is correct?",
+    options: [
+      "An official translation of a document, checked by a certified translator.",
+      "A fast translation with no official check.",
+      "A short summary of a document in another language."
+    ],
+    correctAnswer: "An official translation of a document, checked by a certified translator."
+  },
+  {
+    mechanic: "order",
+    word: "to apply for",
+    prompt: "Put the words in the correct order.",
+    pieces: ["She", "wants", "to", "apply", "for", "a", "permit"]
+  },
+  {
+    mechanic: "pos",
+    word: "requirement",
+    prompt: "Passive income is a requirement for this visa.",
+    question: "What part of speech is \"requirement\"?",
+    options: ["noun", "verb", "adjective"],
+    correctAnswer: "noun"
+  },
+  {
+    mechanic: "letters",
+    word: "applicant",
+    prompt: "Unscramble the word.",
+    letters: ["A","P","P","L","I","C","A","N","T"],
+    target: "APPLICANT"
+  }
+];
+
+let current = 0;
+let correctCount = 0;
+let wrongAttempted = false;
+let pool = [];
+let placed = [];
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildProgress() {
+  const el = document.getElementById("progress");
+  el.innerHTML = "";
+  for (let i = 0; i < stations.length; i++) {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === current ? " active" : i < current ? " done" : "");
+    el.appendChild(d);
+  }
+}
+
+function showFeedback(kind, text) {
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(kind);
+  fb.textContent = text;
+}
+
+function clearFeedback() {
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  fb.classList.remove("correct", "wrong");
+}
+
+function renderStation() {
+  wrongAttempted = false;
+  clearFeedback();
+  buildProgress();
+  const st = stations[current];
+  document.getElementById("wordTag").textContent = st.mechanic === "letters" ? "VOCABULARY" : st.word;
+  document.getElementById("promptBox").textContent = st.prompt;
+  const area = document.getElementById("mechanicArea");
+
+  if (st.mechanic === "choice" || st.mechanic === "pos") {
+    let html = "";
+    if (st.mechanic === "pos") {
+      html += `<div style="text-align:center; font-weight:600; color:#4a3b6b; margin-bottom:12px;">` + st.question + `</div>`;
+    }
+    html += `<div class="options" id="optionsArea"></div>`;
+    area.innerHTML = html;
+    const optionsArea = document.getElementById("optionsArea");
+    const shuffledOptions = shuffle(st.options);
+    shuffledOptions.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.textContent = opt;
+      btn.onclick = () => checkChoice(opt, btn);
+      optionsArea.appendChild(btn);
+    });
+  } else if (st.mechanic === "order" || st.mechanic === "letters") {
+    const items = st.mechanic === "order" ? st.pieces : st.letters;
+    pool = shuffle(items.map((val, idx) => ({ val, id: idx })));
+    placed = [];
+    const clueButton = st.mechanic === "letters" ? '<button class="btn secondary" id="clueBtn" onclick="giveClue()">Clue</button>' : "";
+    area.innerHTML = `
+      <div class="tile-answer" id="answerArea"></div>
+      <div class="tile-pool" id="poolArea"></div>
+      <div class="btn-row">
+        <button class="btn secondary" id="undoBtn" onclick="undoTile()">Undo</button>
+        ${clueButton}
+        <button class="btn" id="checkBtn" onclick="checkTiles()">Check</button>
+      </div>
+    `;
+    renderTiles();
+  }
+}
+
+function renderTiles() {
+  const answerArea = document.getElementById("answerArea");
+  const poolArea = document.getElementById("poolArea");
+  answerArea.innerHTML = "";
+  poolArea.innerHTML = "";
+  placed.forEach(t => {
+    const el = document.createElement("div");
+    el.className = "tile" + (t.val === " " ? " space-tile" : "");
+    el.textContent = t.val === " " ? " " : t.val;
+    answerArea.appendChild(el);
+  });
+  pool.forEach(t => {
+    const el = document.createElement("div");
+    el.className = "tile" + (t.val === " " ? " space-tile" : "");
+    el.textContent = t.val === " " ? " " : t.val;
+    el.onclick = () => placeTile(t.id);
+    poolArea.appendChild(el);
+  });
+}
+
+function placeTile(id) {
+  const idx = pool.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  placed.push(pool[idx]);
+  pool.splice(idx, 1);
+  renderTiles();
+}
+
+function undoTile() {
+  if (placed.length === 0) return;
+  const t = placed.pop();
+  pool.push(t);
+  renderTiles();
+}
+
+function giveClue() {
+  const st = stations[current];
+  if (st.mechanic !== "letters") return;
+  if (placed.length >= st.target.length) return;
+  const neededChar = st.target[placed.length];
+  const idx = pool.findIndex(t => t.val === neededChar);
+  if (idx === -1) return;
+  placeTile(pool[idx].id);
+}
+
+function checkChoice(chosen, btn) {
+  const st = stations[current];
+  const allBtns = document.querySelectorAll("#optionsArea .option-btn");
+  if (chosen === st.correctAnswer) {
+    allBtns.forEach(b => b.disabled = true);
+    btn.classList.add("correct");
+    showFeedback("correct", "Correct! Well done.");
+    if (!wrongAttempted) correctCount++;
+    setTimeout(nextStation, 1600);
+  } else {
+    btn.classList.add("wrong");
+    btn.disabled = true;
+    wrongAttempted = true;
+    showFeedback("wrong", "Not quite, try again.");
+  }
+}
+
+function checkTiles() {
+  const st = stations[current];
+  const target = st.mechanic === "order" ? st.pieces.join(" ") : st.target;
+  const attempt = st.mechanic === "order" ? placed.map(t => t.val).join(" ") : placed.map(t => t.val).join("");
+  if (attempt === target) {
+    document.getElementById("checkBtn").disabled = true;
+    document.getElementById("undoBtn").disabled = true;
+    const clueBtn = document.getElementById("clueBtn");
+    if (clueBtn) clueBtn.disabled = true;
+    showFeedback("correct", "Correct! Well done.");
+    if (!wrongAttempted) correctCount++;
+    setTimeout(nextStation, 1600);
+  } else {
+    wrongAttempted = true;
+    showFeedback("wrong", "Not quite, try again.");
+  }
+}
+
+function nextStation() {
+  current++;
+  if (current >= stations.length) {
+    showFinish();
+  } else {
+    renderStation();
+  }
+}
+
+function showFinish() {
+  document.getElementById("quizArea").classList.add("hidden");
+  document.getElementById("progress").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  document.getElementById("scoreCount").textContent = correctCount + " / " + stations.length;
+}
+
+function restart() {
+  current = 0;
+  correctCount = 0;
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("progress").classList.remove("hidden");
+  document.getElementById("quizArea").classList.remove("hidden");
+  renderStation();
+}
+
+renderStation();
+</script>
+</body>
+</html>
