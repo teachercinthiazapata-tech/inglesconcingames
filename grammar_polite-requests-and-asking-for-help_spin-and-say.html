@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spin and Say: Polite Requests and Asking for Help</title>
+<style>
+  :root { --navy:#1f3a5f; --coral:#e07a5f; --mint:#e8f5ef; --mint-d:#5fb58f; --peach:#fdeee6; --bg:#fffaf6; --red:#d9534f; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--navy); }
+  .wrap { max-width:620px; margin:0 auto; padding:18px 16px 40px; }
+  h1 { text-align:center; margin:4px 0; font-size:1.5rem; }
+  .sub { text-align:center; color:#666; margin:4px 0 14px; }
+  .hidden { display:none !important; }
+  .tabs { display:flex; gap:8px; justify-content:center; margin-bottom:16px; flex-wrap:wrap; }
+  .tab { border:2px solid var(--navy); background:#fff; color:var(--navy); padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:.95rem; }
+  .tab.active { background:var(--navy); color:#fff; }
+  .wheelbox { position:relative; width:100%; max-width:380px; margin:0 auto; }
+  .pointer { position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:18px solid transparent; border-right:18px solid transparent; border-top:30px solid var(--coral); z-index:2; filter:drop-shadow(0 2px 2px rgba(0,0,0,.2)); }
+  svg#wheel { width:100%; height:auto; transition:transform 4s cubic-bezier(.17,.67,.21,1); }
+  .card { background:#fff; border:2px solid #dde3ea; border-radius:18px; padding:20px 18px; text-align:center; margin-top:16px; box-shadow:0 4px 14px rgba(31,58,95,.08); }
+  .emoji { font-size:3rem; line-height:1; }
+  .situation { font-size:1.25rem; line-height:1.4; margin:10px 0 14px; }
+  .prompt { font-weight:bold; color:var(--coral); }
+  .answer { background:var(--mint); border:2px solid var(--mint-d); border-radius:14px; padding:14px; margin-top:12px; }
+  .answer .main { font-size:1.25rem; font-weight:bold; margin-bottom:6px; }
+  .answer .tip { font-size:.9rem; color:#555; font-style:italic; }
+  .btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px; }
+  .btn { border:none; border-radius:22px; padding:11px 20px; font-weight:bold; cursor:pointer; font-size:1rem; }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .spin { background:var(--coral); color:#fff; font-size:1.1rem; padding:13px 30px; }
+  .reveal { background:var(--navy); color:#fff; }
+  .listen { background:var(--mint-d); color:#fff; }
+  .light { background:#eee; color:var(--navy); }
+  .sentence { font-size:1.3rem; line-height:1.45; margin:14px 0 6px; }
+  .choice { display:flex; gap:12px; justify-content:center; margin-top:14px; flex-wrap:wrap; }
+  .choice .btn { min-width:130px; }
+  .ok { background:var(--mint-d); color:#fff; }
+  .bad { background:var(--coral); color:#fff; }
+  .fb { min-height:40px; margin-top:14px; font-size:1rem; }
+  .fb.good { color:#2e7d5b; }
+  .fb.no { color:var(--red); }
+  .fix { background:var(--mint); border:2px solid var(--mint-d); border-radius:12px; padding:12px; margin-top:10px; }
+  .score { text-align:center; font-weight:bold; margin-bottom:8px; }
+  .note { font-size:.85rem; color:#777; text-align:center; margin-top:18px; }
+  @media (max-width:480px){ h1{font-size:1.25rem;} .situation{font-size:1.1rem;} .sentence{font-size:1.1rem;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎡 Spin and Say</h1>
+  <p class="sub">Polite requests and asking for help in the city</p>
+
+  <div class="tabs">
+    <button class="tab active" id="tabA">Spin and Say</button>
+    <button class="tab" id="tabB">Mistake or OK?</button>
+  </div>
+
+  <!-- ROUND A -->
+  <section id="roundA">
+    <div class="wheelbox">
+      <div class="pointer"></div>
+      <svg id="wheel" viewBox="0 0 400 400"></svg>
+    </div>
+    <div class="btns"><button class="btn spin" id="spinBtn">SPIN 🎡</button></div>
+
+    <div class="card hidden" id="resultCard">
+      <div class="emoji" id="rEmoji"></div>
+      <p class="situation" id="rSituation"></p>
+      <p class="prompt" id="rPrompt">What do you say? 💬</p>
+      <div class="answer hidden" id="rAnswer">
+        <div class="main" id="rMain"></div>
+        <div class="tip" id="rTip"></div>
+      </div>
+      <div class="btns">
+        <button class="btn reveal" id="revealBtn">Show answer</button>
+        <button class="btn listen hidden" id="listenBtn">🔊 Listen</button>
+        <button class="btn listen hidden" id="slowBtn">🐢 Slower</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROUND B -->
+  <section id="roundB" class="hidden">
+    <div class="card">
+      <div class="score">Sentence <span id="qn">1</span> of <span id="qt">6</span> &nbsp;|&nbsp; Score: <span id="sc">0</span></div>
+      <p class="sentence" id="bSentence"></p>
+      <div class="btns"><button class="btn light" id="bListen">🔊 Listen</button></div>
+      <div class="choice">
+        <button class="btn ok" id="okBtn">✅ It's OK</button>
+        <button class="btn bad" id="badBtn">❌ Mistake</button>
+      </div>
+      <div class="fb" id="bFb"></div>
+      <div class="fix hidden" id="bFix"></div>
+      <div class="btns"><button class="btn reveal hidden" id="bNext">Next ➜</button></div>
+    </div>
+    <div class="card hidden" id="bEnd">
+      <div class="emoji">🎉</div>
+      <h2>Great job!</h2>
+      <p class="situation" id="bEndMsg"></p>
+      <div class="btns"><button class="btn spin" id="bAgain">Play again</button></div>
+    </div>
+  </section>
+
+  <p class="note">Say your answer out loud first, then check it. Audio works best in Chrome.</p>
+</div>
+
+<script>
+const SITUATIONS = [
+  { e:"🙋‍♀️", s:"You want to ask a stranger a question.", a:"Excuse me...", tip:"Stress: ex-CUSE me." },
+  { e:"💵", s:"The cashier says the price very fast.", a:"Sorry, I didn't catch that.", tip:"catch = hear and understand" },
+  { e:"📍", s:"You didn't hear the address well.", a:"Could you say that again, please?", tip:"Could you + base verb. Your voice goes up at the end." },
+  { e:"🧑‍🍳", s:"The waiter speaks really fast.", a:"Could you speak more slowly, please?", tip:"slowly, not slow" },
+  { e:"📋", s:"There is a new word on the menu.", a:"What does \"sides\" mean?", tip:"What DOES ___ mean?" },
+  { e:"🚇", s:"The museum is very far. You don't want to walk.", a:"Let's take the subway.", tip:"TAKE the subway" },
+  { e:"🏙️", s:"The café is three streets from here. Say it in English.", a:"It's three blocks from here.", tip:"block = cuadra" },
+  { e:"⬆️", s:"You want to go north, to Central Park.", a:"I need the uptown train.", tip:"north = uptown, south = downtown" }
+];
+
+const SENTENCES = [
+  { t:"Could you to repeat that, please?", ok:false, fix:"Could you repeat that, please?", why:"After \"could\" we use the base verb, with no \"to\"." },
+  { t:"Could you speak more slowly, please?", ok:true, why:"Perfect! Could you + base verb + more slowly." },
+  { t:"What means \"block\"?", ok:false, fix:"What does \"block\" mean?", why:"Questions in the present simple need the auxiliary \"does\"." },
+  { t:"Sorry, I didn't catch that.", ok:true, why:"Perfect! This is your phrase when you don't hear something." },
+  { t:"Could you speaks more slow, please?", ok:false, fix:"Could you speak more slowly, please?", why:"Two things: no -s after a modal, and we need the adverb \"slowly\"." },
+  { t:"Excuse me, is this the uptown train?", ok:true, why:"Perfect! \"Excuse me\" opens the question, and the word order is correct." }
+];
+
+const $ = id => document.getElementById(id);
+const COLORS = ["#1f3a5f","#e07a5f","#5fb58f","#f2c14e","#1f3a5f","#e07a5f","#5fb58f","#f2c14e"];
+
+// ---------- audio ----------
+let voice = null;
+function pickVoice(){ const v = speechSynthesis.getVoices(); voice = v.find(x=>x.lang==='en-US' && /Google|Samantha|Aria|Jenny/i.test(x.name)) || v.find(x=>x.lang==='en-US') || v.find(x=>x.lang.startsWith('en')) || null; }
+if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(t, rate){ if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='en-US'; if(voice) u.voice=voice; u.rate=rate||0.95; speechSynthesis.speak(u); }
+
+// ---------- wheel ----------
+const N = SITUATIONS.length, STEP = 360 / N;
+function buildWheel(){
+  const svg = $('wheel'); const cx=200, cy=200, r=190;
+  let html = '';
+  for (let i=0;i<N;i++){
+    const a0 = (i*STEP - 90 - STEP/2) * Math.PI/180;
+    const a1 = ((i+1)*STEP - 90 - STEP/2) * Math.PI/180;
+    const x0 = cx + r*Math.cos(a0), y0 = cy + r*Math.sin(a0);
+    const x1 = cx + r*Math.cos(a1), y1 = cy + r*Math.sin(a1);
+    html += `<path d="M${cx} ${cy} L${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${COLORS[i%COLORS.length]}" stroke="#fffaf6" stroke-width="3"/>`;
+    const am = (i*STEP - 90) * Math.PI/180;
+    const tx = cx + (r*0.68)*Math.cos(am), ty = cy + (r*0.68)*Math.sin(am);
+    html += `<text x="${tx.toFixed(1)}" y="${(ty+12).toFixed(1)}" font-size="34" text-anchor="middle">${SITUATIONS[i].e}</text>`;
+  }
+  html += `<circle cx="${cx}" cy="${cy}" r="34" fill="#fffaf6" stroke="#1f3a5f" stroke-width="5"/><text x="${cx}" y="${cy+11}" font-size="28" text-anchor="middle">🗽</text>`;
+  svg.innerHTML = html;
+}
+buildWheel();
+
+let rotation = 0, spinning = false;
+$('spinBtn').onclick = () => {
+  if (spinning) return;
+  spinning = true;
+  $('spinBtn').disabled = true;
+  $('resultCard').classList.add('hidden');
+  const pick = Math.floor(Math.random() * N);
+  const target = 360*5 + (360 - pick*STEP);
+  rotation = rotation + (target - (rotation % 360));
+  $('wheel').style.transform = `rotate(${rotation}deg)`;
+  setTimeout(() => {
+    spinning = false;
+    $('spinBtn').disabled = false;
+    $('spinBtn').textContent = 'SPIN AGAIN 🎡';
+    showSituation(pick);
+  }, 4100);
+};
+let current = 0;
+function showSituation(i){
+  current = i; const c = SITUATIONS[i];
+  $('rEmoji').textContent = c.e;
+  $('rSituation').textContent = c.s;
+  $('rMain').textContent = c.a;
+  $('rTip').textContent = c.tip;
+  $('rAnswer').classList.add('hidden');
+  $('rPrompt').classList.remove('hidden');
+  $('revealBtn').classList.remove('hidden');
+  $('listenBtn').classList.add('hidden');
+  $('slowBtn').classList.add('hidden');
+  $('resultCard').classList.remove('hidden');
+}
+$('revealBtn').onclick = () => {
+  $('rAnswer').classList.remove('hidden');
+  $('rPrompt').classList.add('hidden');
+  $('revealBtn').classList.add('hidden');
+  $('listenBtn').classList.remove('hidden');
+  $('slowBtn').classList.remove('hidden');
+  speak(SITUATIONS[current].a);
+};
+$('listenBtn').onclick = () => speak(SITUATIONS[current].a, 0.95);
+$('slowBtn').onclick = () => speak(SITUATIONS[current].a, 0.65);
+
+// ---------- round B ----------
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+let bOrder = [], bi = 0, bScore = 0, bDone = false;
+function startB(){
+  bOrder = shuffle(SENTENCES); bi = 0; bScore = 0;
+  $('qt').textContent = bOrder.length; $('sc').textContent = 0;
+  $('bEnd').classList.add('hidden');
+  $('bSentence').parentElement.classList.remove('hidden');
+  showB();
+}
+function showB(){
+  bDone = false; const q = bOrder[bi];
+  $('qn').textContent = bi+1;
+  $('bSentence').textContent = '"' + q.t + '"';
+  $('bFb').textContent = ''; $('bFb').className = 'fb';
+  $('bFix').classList.add('hidden'); $('bFix').innerHTML = '';
+  $('bNext').classList.add('hidden');
+  $('okBtn').disabled = false; $('badBtn').disabled = false;
+}
+function answerB(said){
+  if (bDone) return;
+  const q = bOrder[bi];
+  const right = (said === q.ok);
+  bDone = true;
+  $('okBtn').disabled = true; $('badBtn').disabled = true;
+  if (right){ bScore++; $('sc').textContent = bScore; $('bFb').textContent = '✅ Correct!'; $('bFb').className = 'fb good'; }
+  else { $('bFb').textContent = '❌ Not this time. Look at the correct version:'; $('bFb').className = 'fb no'; }
+  $('bFix').innerHTML = (q.ok ? '<b>' + q.t + '</b>' : '<b>' + q.fix + '</b>') + '<div class="tip">' + q.why + '</div>';
+  $('bFix').classList.remove('hidden');
+  $('bNext').classList.remove('hidden');
+  $('bNext').textContent = (bi === bOrder.length-1) ? 'Finish ✓' : 'Next ➜';
+  speak(q.ok ? q.t : q.fix);
+}
+$('okBtn').onclick = () => answerB(true);
+$('badBtn').onclick = () => answerB(false);
+$('bListen').onclick = () => speak(bOrder[bi].t, 0.9);
+$('bNext').onclick = () => {
+  if (bi < bOrder.length-1){ bi++; showB(); }
+  else {
+    $('bSentence').parentElement.classList.add('hidden');
+    $('bEndMsg').textContent = 'Score: ' + bScore + ' of ' + bOrder.length + '. You are ready for New York!';
+    $('bEnd').classList.remove('hidden');
+  }
+};
+$('bAgain').onclick = startB;
+
+// ---------- tabs ----------
+$('tabA').onclick = () => { $('tabA').classList.add('active'); $('tabB').classList.remove('active'); $('roundA').classList.remove('hidden'); $('roundB').classList.add('hidden'); };
+$('tabB').onclick = () => { $('tabB').classList.add('active'); $('tabA').classList.remove('active'); $('roundB').classList.remove('hidden'); $('roundA').classList.add('hidden'); if(!bOrder.length) startB(); };
+</script>
+</body>
+</html>
