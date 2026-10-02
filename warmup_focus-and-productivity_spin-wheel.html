@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus and Productivity: Spin the Wheel</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #FFF8E7, #FDEFC9);
+    color: #2C3E50;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .wrap {
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+  }
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: #E8A33D;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .instructions {
+    font-size: 0.95rem;
+    color: #5a5a52;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .wheel-area {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: 0 auto 28px auto;
+  }
+  .pointer {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 26px solid #2C3E50;
+    z-index: 5;
+  }
+  .wheel {
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    position: relative;
+    border: 6px solid #2C3E50;
+    background: conic-gradient(
+      #E8A33D 0deg 45deg,
+      #E8734A 45deg 90deg,
+      #6FBF8B 90deg 135deg,
+      #4A6FA5 135deg 180deg,
+      #E8A33D 180deg 225deg,
+      #E8734A 225deg 270deg,
+      #6FBF8B 270deg 315deg,
+      #4A6FA5 315deg 360deg
+    );
+    transition: transform 4s cubic-bezier(0.17, 0.67, 0.21, 1);
+    box-shadow: 0 6px 18px rgba(44,62,80,0.25);
+  }
+  .seg-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 140px;
+    height: 24px;
+    margin-top: -12px;
+    transform-origin: left center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #FFF8E7;
+    letter-spacing: 0.5px;
+    text-align: right;
+    padding-right: 14px;
+    pointer-events: none;
+  }
+  .hub {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 56px;
+    height: 56px;
+    margin: -28px 0 0 -28px;
+    border-radius: 50%;
+    background: #FFF8E7;
+    border: 4px solid #2C3E50;
+    z-index: 4;
+  }
+  button#spin-btn {
+    background: #2C3E50;
+    color: #FFF8E7;
+    border: none;
+    padding: 14px 36px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+  }
+  button#spin-btn:hover:not(:disabled) {
+    background: #E8A33D;
+  }
+  button#spin-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .result-card {
+    margin-top: 26px;
+    background: #FFFFFF;
+    border: 2px solid #E8A33D;
+    border-radius: 16px;
+    padding: 22px;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(44,62,80,0.12);
+  }
+  .result-card.hidden { display: none !important; }
+  .result-tag {
+    display: inline-block;
+    background: #E8A33D;
+    color: #FFF8E7;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .result-question {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .result-placeholder {
+    color: #a9a89f;
+    font-size: 0.95rem;
+    font-style: italic;
+  }
+  .footer-note {
+    margin-top: 18px;
+    font-size: 0.82rem;
+    color: #8a8a80;
+  }
+  .credit {
+    margin-top: 6px;
+    font-size: 0.7rem;
+    color: #b3b2a8;
+  }
+  .remaining-count {
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    color: #8a8a80;
+  }
+  button#reset-btn {
+    background: none;
+    color: #2C3E50;
+    border: 2px solid #2C3E50;
+    padding: 10px 22px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    margin-top: 12px;
+  }
+  button#reset-btn:hover {
+    background: #2C3E50;
+    color: #FFF8E7;
+  }
+  button#reset-btn.hidden { display: none !important; }
+  @media (max-width: 400px) {
+    .wheel-area, .wheel { width: 260px; height: 260px; }
+    .pointer { top: -12px; }
+    .seg-label { width: 110px; font-size: 0.64rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="subtitle">Warm-up Game</div>
+  <h1>Spin the Wheel: Focus and Productivity</h1>
+  <p class="instructions">Press Spin. When the wheel stops, answer the question out loud. Use complete sentences and try to use today's vocabulary if it fits.</p>
+
+  <p class="remaining-count" id="remaining-count">8 questions left</p>
+
+  <div class="wheel-area">
+    <div class="pointer"></div>
+    <div class="wheel" id="wheel"></div>
+    <div class="hub"></div>
+  </div>
+
+  <button id="spin-btn">Spin the wheel</button>
+  <br>
+  <button id="reset-btn" class="hidden">Reset wheel</button>
+
+  <div class="result-card" id="result-card">
+    <p class="result-placeholder" id="result-text">Your question will appear here.</p>
+  </div>
+
+  <p class="footer-note">Focus and Productivity, Vocabulary Spin Wheel</p>
+  <p class="credit">By @inglesconcin.ok</p>
+</div>
+
+<script>
+  const allQuestions = [
+    { tag: "Motivation", text: "What motivates you to keep learning English, even on a tough day?" },
+    { tag: "Put It Off", text: "Have you ever put off something important? What happened in the end?" },
+    { tag: "Perfectionism", text: "Is perfectionism helping you or holding you back in your English practice?" },
+    { tag: "Overwhelmed", text: "When was the last time you felt overwhelmed? How did you handle it?" },
+    { tag: "Small Wins", text: "What is one small win you are proud of this month?" },
+    { tag: "Lighter Day", text: "If today felt overwhelming, what is one thing that could make it lighter?" },
+    { tag: "Be Kind", text: "Do you ever judge yourself for not being perfect in English? What would you tell a friend who felt that way?" },
+    { tag: "Start Today", text: "What is something you have been putting off that you could start today?" }
+  ];
+
+  const colors = ["#E8A33D", "#E8734A", "#6FBF8B", "#4A6FA5"];
+
+  const wheel = document.getElementById('wheel');
+  const spinBtn = document.getElementById('spin-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const resultText = document.getElementById('result-text');
+  const remainingCount = document.getElementById('remaining-count');
+
+  let remaining = [];
+  let spinning = false;
+
+  function buildWheel() {
+    const n = remaining.length;
+    const segmentAngle = 360 / n;
+
+    const gradientParts = [];
+    for (let i = 0; i < n; i++) {
+      const color = colors[i % colors.length];
+      gradientParts.push(color + " " + (i * segmentAngle) + "deg " + ((i + 1) * segmentAngle) + "deg");
+    }
+    wheel.style.transition = 'none';
+    wheel.style.transform = 'rotate(0deg)';
+    wheel.style.background = "conic-gradient(" + gradientParts.join(", ") + ")";
+
+    wheel.innerHTML = '';
+    remaining.forEach((q, i) => {
+      const label = document.createElement('div');
+      label.className = 'seg-label';
+      const angle = i * segmentAngle + segmentAngle / 2;
+      label.style.transform = 'rotate(' + angle + 'deg)';
+      label.textContent = q.tag.toUpperCase();
+      wheel.appendChild(label);
+    });
+
+    void wheel.offsetWidth;
+    wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.21, 1)';
+
+    remainingCount.textContent = n + (n === 1 ? ' question left' : ' questions left');
+  }
+
+  function resetGame() {
+    remaining = allQuestions.slice();
+    resultText.className = 'result-placeholder';
+    resultText.textContent = 'Your question will appear here.';
+    resetBtn.classList.add('hidden');
+    spinBtn.classList.remove('hidden');
+    buildWheel();
+  }
+
+  spinBtn.addEventListener('click', () => {
+    if (spinning || remaining.length === 0) return;
+    spinning = true;
+    spinBtn.disabled = true;
+    resultText.className = 'result-placeholder';
+    resultText.textContent = 'Spinning...';
+
+    const n = remaining.length;
+    const segmentAngle = 360 / n;
+    const randomIndex = Math.floor(Math.random() * n);
+    const extraSpins = 5 + Math.floor(Math.random() * 3);
+    const targetWithinCircle = 360 - (randomIndex * segmentAngle + segmentAngle / 2);
+    const finalRotation = extraSpins * 360 + targetWithinCircle;
+
+    wheel.style.transform = 'rotate(' + finalRotation + 'deg)';
+
+    setTimeout(() => {
+      const q = remaining[randomIndex];
+      resultText.className = 'result-question';
+      resultText.innerHTML = '<span class="result-tag">' + q.tag + '</span><br>' + q.text;
+
+      remaining.splice(randomIndex, 1);
+      spinning = false;
+
+      if (remaining.length === 0) {
+        spinBtn.classList.add('hidden');
+        resetBtn.classList.remove('hidden');
+      } else {
+        spinBtn.disabled = false;
+        buildWheel();
+      }
+      remainingCount.textContent = remaining.length + (remaining.length === 1 ? ' question left' : ' questions left');
+    }, 4100);
+  });
+
+  resetBtn.addEventListener('click', resetGame);
+
+  resetGame();
+</script>
+</body>
+</html>
