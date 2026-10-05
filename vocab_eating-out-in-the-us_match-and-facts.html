@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eating Out in the US: Match and Facts</title>
+<style>
+  :root { --navy:#1f3a5f; --coral:#e07a5f; --mint:#e8f5ef; --mint-d:#5fb58f; --peach:#fdeee6; --bg:#fffaf6; --red:#d9534f; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--navy); }
+  .wrap { max-width:860px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { text-align:center; margin:6px 0 4px; font-size:1.55rem; }
+  .sub { text-align:center; color:#666; margin:0 0 16px; }
+  .hidden { display:none !important; }
+  .tabs { display:flex; gap:8px; justify-content:center; margin-bottom:16px; flex-wrap:wrap; }
+  .tab { border:2px solid var(--navy); background:#fff; color:var(--navy); padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:bold; }
+  .tab.active { background:var(--navy); color:#fff; }
+  .stats { display:flex; justify-content:center; gap:24px; margin-bottom:12px; font-weight:bold; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .col { display:flex; flex-direction:column; gap:10px; }
+  .card { background:#fff; border:2px solid #dde3ea; border-radius:12px; padding:12px; cursor:pointer; min-height:56px; display:flex; align-items:center; gap:8px; font-size:.98rem; transition:.15s; }
+  .card:hover { border-color:var(--coral); }
+  .card.sel { border-color:var(--coral); background:var(--peach); }
+  .card.done { background:var(--mint); border-color:var(--mint-d); cursor:default; opacity:.85; }
+  .card.wrong { animation:shake .35s; border-color:var(--red); }
+  @keyframes shake { 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  .spk { border:none; background:var(--navy); color:#fff; border-radius:50%; width:32px; height:32px; flex:0 0 32px; cursor:pointer; font-size:15px; }
+  .panel { background:#fff; border:2px solid #dde3ea; border-radius:16px; padding:22px 18px; text-align:center; box-shadow:0 4px 14px rgba(31,58,95,.08); }
+  .emoji { font-size:3rem; }
+  .fact { font-size:1.2rem; line-height:1.45; margin:12px 0 18px; }
+  .btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+  .btn { border:none; border-radius:22px; padding:11px 22px; font-weight:bold; cursor:pointer; font-size:1rem; }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .true { background:var(--mint-d); color:#fff; min-width:130px; }
+  .false { background:var(--coral); color:#fff; min-width:130px; }
+  .next { background:var(--navy); color:#fff; }
+  .light { background:#eee; color:var(--navy); }
+  .fb { min-height:40px; margin-top:14px; font-weight:bold; }
+  .fb.good { color:#2e7d5b; }
+  .fb.no { color:var(--red); }
+  .why { background:var(--mint); border:2px solid var(--mint-d); border-radius:12px; padding:12px 14px; margin-top:10px; font-size:.98rem; font-weight:normal; text-align:left; }
+  .note { font-size:.85rem; color:#777; text-align:center; margin-top:18px; }
+  @media (max-width:560px){ .card{font-size:.9rem; padding:10px;} h1{font-size:1.25rem;} .fact{font-size:1.05rem;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🍕 Eating Out in the US</h1>
+  <p class="sub">Match the words, then test the facts</p>
+
+  <div class="tabs">
+    <button class="tab active" id="tab1">Round 1: Match</button>
+    <button class="tab" id="tab2">Round 2: True or False?</button>
+  </div>
+
+  <section id="r1">
+    <p class="sub">Tap a word, then tap its meaning. Press 🔊 to hear it.</p>
+    <div class="stats"><div>Matches: <span id="m">0</span>/7</div><div>Attempts: <span id="a">0</span></div></div>
+    <div class="grid"><div class="col" id="left"></div><div class="col" id="right"></div></div>
+    <div class="btns"><button class="btn light" id="restart1">Restart</button></div>
+  </section>
+
+  <section id="r2" class="hidden">
+    <div class="panel">
+      <div class="stats"><div>Fact <span id="qn">1</span>/<span id="qt">6</span></div><div>Score: <span id="sc">0</span></div></div>
+      <div class="emoji" id="fEmoji"></div>
+      <p class="fact" id="fText"></p>
+      <div class="btns">
+        <button class="btn true" id="tBtn">✅ True</button>
+        <button class="btn false" id="fBtn">❌ False</button>
+      </div>
+      <div class="fb" id="fb"></div>
+      <div class="why hidden" id="why"></div>
+      <div class="btns"><button class="btn next hidden" id="nextBtn">Next ➜</button></div>
+    </div>
+    <div class="panel hidden" id="endScreen" style="margin-top:14px">
+      <div class="emoji">🗽</div>
+      <h2>Great job!</h2>
+      <p class="fact" id="endMsg"></p>
+      <div class="btns"><button class="btn true" id="againBtn">Play again</button></div>
+    </div>
+  </section>
+
+  <p class="note">Say the words out loud while you play. Audio works best in Chrome.</p>
+</div>
+
+<script>
+const PAIRS = [
+  ["to order", "To ask for food or drink at a counter or a table"],
+  ["a slice", "One flat piece of pizza, cake or bread"],
+  ["a refill", "A second cup of the same drink, often free"],
+  ["the check", "The paper with the price of your meal"],
+  ["a tip", "Extra money you leave for the waiter"],
+  ["cash or card", "The question you hear when you pay"],
+  ["How much is it?", "The question you ask about the price"]
+];
+
+const FACTS = [
+  { e:"🧾", t:"In the US, the price on the menu is the final price.", a:false,
+    why:"False. Sales tax is added at the register. In New York City it is about 8.875 per cent, so the total is always a little higher." },
+  { e:"💵", t:"In a US restaurant, a tip of 15 to 20 per cent is expected.", a:true,
+    why:"True. The card machine often suggests 18, 20 or 25 per cent. It is not a gift, it is part of the waiter's pay." },
+  { e:"☕", t:"In many coffee shops and diners, the second cup of filter coffee is free.", a:true,
+    why:"True. It is called a refill. You can also ask: Can I have a refill, please?" },
+  { e:"💧", t:"You always pay for a glass of water in a US restaurant.", a:false,
+    why:"False. Tap water is free. You only have to ask: Can I have some water, please?" },
+  { e:"🍔", t:"Portions are usually big, and you can take the rest home in a box.", a:true,
+    why:"True. You can say: Can I have a box, please?" },
+  { e:"🗣️", t:"If you don't understand the price, the best thing to do is smile and pay.", a:false,
+    why:"False! You know what to say: Sorry, I didn't catch that. Could you say that again, please? And for numbers: Thirteen or thirty?" }
+];
+
+const $ = id => document.getElementById(id);
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+// audio
+let voice = null;
+function pickVoice(){ const v = speechSynthesis.getVoices(); voice = v.find(x=>x.lang==='en-US' && /Google|Samantha|Aria|Jenny/i.test(x.name)) || v.find(x=>x.lang==='en-US') || v.find(x=>x.lang.startsWith('en')) || null; }
+if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(t, rate){ if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='en-US'; if(voice) u.voice=voice; u.rate=rate||0.95; speechSynthesis.speak(u); }
+
+// round 1
+let selL=null, selR=null, matches=0, attempts=0;
+function initR1(){
+  matches=0; attempts=0; selL=selR=null; $('m').textContent=0; $('a').textContent=0;
+  const Lc=$('left'), Rc=$('right'); Lc.innerHTML=''; Rc.innerHTML='';
+  shuffle(PAIRS.map((p,i)=>({t:p[0],i}))).forEach(o=>{
+    const c=document.createElement('div'); c.className='card'; c.dataset.i=o.i;
+    const b=document.createElement('button'); b.className='spk'; b.textContent='🔊'; b.setAttribute('aria-label','Listen');
+    b.onclick=e=>{ e.stopPropagation(); speak(o.t); };
+    const s=document.createElement('span'); s.textContent=o.t;
+    c.append(b,s); c.onclick=()=>pick(c,'L'); Lc.appendChild(c);
+  });
+  shuffle(PAIRS.map((p,i)=>({t:p[1],i}))).forEach(o=>{
+    const c=document.createElement('div'); c.className='card'; c.dataset.i=o.i; c.textContent=o.t; c.onclick=()=>pick(c,'R'); Rc.appendChild(c);
+  });
+}
+function pick(c,side){
+  if(c.classList.contains('done')) return;
+  if(side==='L'){ if(selL) selL.classList.remove('sel'); selL=(selL===c)?null:c; }
+  else { if(selR) selR.classList.remove('sel'); selR=(selR===c)?null:c; }
+  if(selL) selL.classList.add('sel'); if(selR) selR.classList.add('sel');
+  if(selL && selR){
+    attempts++; $('a').textContent=attempts;
+    const l=selL, r=selR; selL=selR=null;
+    if(l.dataset.i===r.dataset.i){
+      [l,r].forEach(x=>{x.classList.remove('sel'); x.classList.add('done');});
+      matches++; $('m').textContent=matches;
+      speak(PAIRS[+l.dataset.i][0]);
+    } else {
+      [l,r].forEach(x=>x.classList.add('wrong'));
+      setTimeout(()=>[l,r].forEach(x=>x.classList.remove('wrong','sel')),400);
+    }
+  }
+}
+
+// round 2
+let order=[], qi=0, score=0, answered=false;
+function initR2(){ order=shuffle(FACTS); qi=0; score=0; $('sc').textContent=0; $('qt').textContent=order.length; $('endScreen').classList.add('hidden'); $('fText').parentElement.classList.remove('hidden'); showQ(); }
+function showQ(){
+  answered=false; const q=order[qi];
+  $('qn').textContent=qi+1; $('fEmoji').textContent=q.e; $('fText').textContent=q.t;
+  $('fb').textContent=''; $('fb').className='fb';
+  $('why').classList.add('hidden'); $('why').textContent='';
+  $('nextBtn').classList.add('hidden');
+  $('tBtn').disabled=false; $('fBtn').disabled=false;
+}
+function answer(said){
+  if(answered) return; answered=true;
+  const q=order[qi];
+  $('tBtn').disabled=true; $('fBtn').disabled=true;
+  if(said===q.a){ score++; $('sc').textContent=score; $('fb').textContent='✅ Correct!'; $('fb').className='fb good'; }
+  else { $('fb').textContent='❌ Not this time.'; $('fb').className='fb no'; }
+  $('why').textContent=q.why; $('why').classList.remove('hidden');
+  $('nextBtn').classList.remove('hidden');
+  $('nextBtn').textContent = (qi===order.length-1) ? 'Finish ✓' : 'Next ➜';
+}
+$('tBtn').onclick=()=>answer(true);
+$('fBtn').onclick=()=>answer(false);
+$('nextBtn').onclick=()=>{
+  if(qi<order.length-1){ qi++; showQ(); }
+  else { $('fText').parentElement.classList.add('hidden'); $('endMsg').textContent='Score: '+score+' of '+order.length+'. Now you know how it works in New York!'; $('endScreen').classList.remove('hidden'); }
+};
+$('againBtn').onclick=initR2;
+$('restart1').onclick=initR1;
+$('tab1').onclick=()=>{ $('tab1').classList.add('active'); $('tab2').classList.remove('active'); $('r1').classList.remove('hidden'); $('r2').classList.add('hidden'); };
+$('tab2').onclick=()=>{ $('tab2').classList.add('active'); $('tab1').classList.remove('active'); $('r2').classList.remove('hidden'); $('r1').classList.add('hidden'); if(!order.length) initR2(); };
+initR1();
+</script>
+</body>
+</html>
