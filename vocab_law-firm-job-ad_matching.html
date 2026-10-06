@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Law Firm Job Ad Vocabulary</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 700px;
+    width: 100%;
+    padding: 34px 30px;
+    box-shadow: 0 12px 40px rgba(60, 40, 100, 0.18);
+  }
+  h1 { text-align: center; font-size: 22px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 18px; }
+  .round-tag { text-align: center; font-size: 13px; color: #9b8fb8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; font-weight: 700; }
+  .progress { display: flex; justify-content: center; gap: 8px; margin-bottom: 18px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #e2d9f5; transition: background 0.3s; }
+  .dot.active { background: #9b7bd8; }
+  .dot.done { background: #6fcf97; }
+  .instructions { text-align: center; color: #4a3b6b; font-size: 15px; margin-bottom: 16px; line-height: 1.5; }
+  .match-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px 14px; margin-bottom: 14px; }
+  .match-btn {
+    background: #efe8fb;
+    border: 2px solid #e2d9f5;
+    border-radius: 12px;
+    padding: 12px 12px;
+    font-size: 14px;
+    color: #4a3b6b;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .match-btn.word { font-weight: 700; text-align: center; }
+  .match-btn:hover { background: #e2d3f9; }
+  .match-btn.selected { border-color: #9b7bd8; background: #ddd0f7; }
+  .match-btn.matched { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; cursor: default; }
+  .match-btn.wrong { background: #fbe2e2; border-color: #e79a9a; color: #a13a3a; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .sentence-box {
+    background: #f5f2fc;
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+    color: #4a3b6b;
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .blank-slot { display: inline-block; min-width: 90px; border-bottom: 3px solid #9b7bd8; margin: 0 4px; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .option-btn {
+    background: #efe8fb;
+    border: 2px solid #e2d9f5;
+    border-radius: 12px;
+    padding: 13px 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #4a3b6b;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .option-btn:hover { background: #e2d3f9; }
+  .option-btn.correct { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .option-btn.wrong { background: #fbe2e2; border-color: #e79a9a; color: #a13a3a; }
+  .option-btn:disabled { cursor: default; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 12px 0; padding: 12px; border-radius: 12px; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .btn {
+    display: block;
+    width: 100%;
+    background: #6fcf97;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: #5cbf85; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .big-score { font-size: 48px; font-weight: 800; color: #5b3fa0; margin: 14px 0; }
+  .score-screen p { color: #6b5f8a; margin-bottom: 10px; }
+  .footer { text-align: center; color: #9b8fb8; font-size: 12px; margin-top: 18px; }
+  @media (max-width: 520px) {
+    .match-grid { grid-template-columns: 1fr; }
+    .card { padding: 26px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Law Firm Job Ad Vocabulary</h1>
+  <div class="subtitle">Words from a real job ad at an immigration law firm</div>
+
+  <div id="round1">
+    <div class="round-tag">Round 1: Match the word with its meaning</div>
+    <div class="instructions">Tap a word, then tap its meaning. Take your time.</div>
+    <div class="match-grid">
+      <div class="col" id="wordCol"></div>
+      <div class="col" id="meaningCol"></div>
+    </div>
+    <div class="feedback hidden" id="matchFeedback"></div>
+    <button class="btn hidden" id="toRound2Btn" onclick="startRound2()">Go to Round 2</button>
+  </div>
+
+  <div id="round2" class="hidden">
+    <div class="round-tag">Round 2: Complete the job ad</div>
+    <div class="progress" id="progress"></div>
+    <div class="sentence-box" id="sentenceBox"></div>
+    <div class="options" id="optionsArea"></div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>All done!</h1>
+    <div class="big-score" id="scoreCount">0 / 6</div>
+    <p>Round 2: correct on the first try.</p>
+    <p id="matchMistakes"></p>
+    <p>Great work with the job ad vocabulary.</p>
+    <button class="btn" onclick="restart()">Play Again</button>
+  </div>
+
+  <div class="footer">Law Firm Job Ad Vocabulary</div>
+</div>
+
+<script>
+const pairs = [
+  { word: "responsibilities", meaning: "The tasks that are part of your job." },
+  { word: "to handle", meaning: "To deal with something or someone." },
+  { word: "client intake", meaning: "The first meeting and forms with a new client." },
+  { word: "deadline", meaning: "The last day or time to finish something." },
+  { word: "fluent", meaning: "Able to speak a language easily and well." },
+  { word: "to file", meaning: "To officially send documents to an office or court." }
+];
+
+const sentences = [
+  { before: "Our paralegal will", after: "client questions every day.", answer: "to handle", display: "handle" },
+  { before: "We start every case with a", after: "meeting.", answer: "client intake", display: "client intake" },
+  { before: "You must meet every", after: "for the application.", answer: "deadline", display: "deadline" },
+  { before: "A good candidate is", after: "in English and Spanish.", answer: "fluent", display: "fluent" },
+  { before: "We need to", after: "the documents before Friday.", answer: "to file", display: "file" },
+  { before: "Please read the list of", after: "in the job ad.", answer: "responsibilities", display: "responsibilities" }
+];
+
+let selectedWord = null;
+let selectedMeaning = null;
+let matchedCount = 0;
+let matchMistakes = 0;
+let lockedMatch = false;
+
+let current = 0;
+let correctCount = 0;
+let wrongAttempted = false;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function setupRound1() {
+  matchedCount = 0;
+  matchMistakes = 0;
+  selectedWord = null;
+  selectedMeaning = null;
+  lockedMatch = false;
+  document.getElementById("matchFeedback").classList.add("hidden");
+  document.getElementById("toRound2Btn").classList.add("hidden");
+  const wordCol = document.getElementById("wordCol");
+  const meaningCol = document.getElementById("meaningCol");
+  wordCol.innerHTML = "";
+  meaningCol.innerHTML = "";
+  shuffle(pairs).forEach(p => {
+    const b = document.createElement("button");
+    b.className = "match-btn word";
+    b.textContent = p.word;
+    b.dataset.word = p.word;
+    b.onclick = () => pickWord(b);
+    wordCol.appendChild(b);
+  });
+  shuffle(pairs).forEach(p => {
+    const b = document.createElement("button");
+    b.className = "match-btn meaning";
+    b.textContent = p.meaning;
+    b.dataset.word = p.word;
+    b.onclick = () => pickMeaning(b);
+    meaningCol.appendChild(b);
+  });
+}
+
+function pickWord(btn) {
+  if (lockedMatch || btn.classList.contains("matched")) return;
+  document.querySelectorAll("#wordCol .match-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedWord = btn;
+  tryMatch();
+}
+
+function pickMeaning(btn) {
+  if (lockedMatch || btn.classList.contains("matched")) return;
+  document.querySelectorAll("#meaningCol .match-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedMeaning = btn;
+  tryMatch();
+}
+
+function tryMatch() {
+  if (!selectedWord || !selectedMeaning) return;
+  const w = selectedWord;
+  const m = selectedMeaning;
+  if (w.dataset.word === m.dataset.word) {
+    w.classList.remove("selected");
+    m.classList.remove("selected");
+    w.classList.add("matched");
+    m.classList.add("matched");
+    matchedCount++;
+    selectedWord = null;
+    selectedMeaning = null;
+    if (matchedCount === pairs.length) {
+      const fb = document.getElementById("matchFeedback");
+      fb.className = "feedback correct";
+      fb.textContent = "All matched! Now let's use the words.";
+      document.getElementById("toRound2Btn").classList.remove("hidden");
+    }
+  } else {
+    lockedMatch = true;
+    matchMistakes++;
+    w.classList.add("wrong");
+    m.classList.add("wrong");
+    setTimeout(() => {
+      w.classList.remove("wrong", "selected");
+      m.classList.remove("wrong", "selected");
+      selectedWord = null;
+      selectedMeaning = null;
+      lockedMatch = false;
+    }, 800);
+  }
+}
+
+function startRound2() {
+  document.getElementById("round1").classList.add("hidden");
+  document.getElementById("round2").classList.remove("hidden");
+  current = 0;
+  correctCount = 0;
+  renderSentence();
+}
+
+function buildProgress() {
+  const el = document.getElementById("progress");
+  el.innerHTML = "";
+  for (let i = 0; i < sentences.length; i++) {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === current ? " active" : i < current ? " done" : "");
+    el.appendChild(d);
+  }
+}
+
+function renderSentence() {
+  wrongAttempted = false;
+  const fb = document.getElementById("feedback");
+  fb.className = "feedback hidden";
+  buildProgress();
+  const s = sentences[current];
+  document.getElementById("sentenceBox").innerHTML = s.before + ' <span class="blank-slot"></span> ' + s.after;
+  const others = shuffle(sentences.filter(x => x.answer !== s.answer)).slice(0, 2);
+  const options = shuffle([s].concat(others));
+  const area = document.getElementById("optionsArea");
+  area.innerHTML = "";
+  options.forEach(o => {
+    const b = document.createElement("button");
+    b.className = "option-btn";
+    b.textContent = o.display;
+    b.onclick = () => checkOption(o, b);
+    area.appendChild(b);
+  });
+}
+
+function checkOption(o, btn) {
+  const s = sentences[current];
+  const fb = document.getElementById("feedback");
+  if (o.answer === s.answer) {
+    document.querySelectorAll("#optionsArea .option-btn").forEach(b => b.disabled = true);
+    btn.classList.add("correct");
+    fb.className = "feedback correct";
+    fb.textContent = "Correct! Well done.";
+    if (!wrongAttempted) correctCount++;
+    setTimeout(nextSentence, 1600);
+  } else {
+    btn.classList.add("wrong");
+    btn.disabled = true;
+    wrongAttempted = true;
+    fb.className = "feedback wrong";
+    fb.textContent = "Not quite, try again.";
+  }
+}
+
+function nextSentence() {
+  current++;
+  if (current >= sentences.length) {
+    showFinish();
+  } else {
+    renderSentence();
+  }
+}
+
+function showFinish() {
+  document.getElementById("round2").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  document.getElementById("scoreCount").textContent = correctCount + " / " + sentences.length;
+  document.getElementById("matchMistakes").textContent = matchMistakes === 0
+    ? "Round 1: no mistakes. Perfect!"
+    : "Round 1: " + matchMistakes + (matchMistakes === 1 ? " mistake" : " mistakes") + " before matching everything.";
+}
+
+function restart() {
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("round2").classList.add("hidden");
+  document.getElementById("round1").classList.remove("hidden");
+  setupRound1();
+}
+
+setupRound1();
+</script>
+</body>
+</html>
