@@ -147,7 +147,7 @@
 <div class="wrap">
   <h1>Vocabulary Type Quiz</h1>
   <div class="subtitle">The Good Place, Episode 10 &middot; Clase 64 &middot; inglés con cin</div>
-  <div class="instructions">Read the meaning and example, then type the word or phrase. Press Enter or click Check.</div>
+  <div class="instructions">Read the sentence and the meaning, then type the missing word. Press Enter or click Check.</div>
   <div class="stats">Score: <span id="score">0</span> / 9 &nbsp;&nbsp; Item <span id="current">1</span> / 9</div>
 
   <div class="card" id="quizCard">
@@ -157,7 +157,7 @@
     <div id="hintDisplay" style="font-family:monospace;font-size:20px;letter-spacing:2px;color:#B5651D;margin-bottom:6px;min-height:26px;"></div>
     <button class="hint-btn" id="hintBtn" onclick="showHint()">Need a hint? (show one more letter)</button>
     <br>
-    <input type="text" id="answerInput" placeholder="Type your answer here..." autocomplete="off">
+    <input type="text" id="answerInput" placeholder="Type the missing word..." autocomplete="off">
     <div class="btn-row">
       <button onclick="checkAnswer()" id="checkBtn">Check</button>
       <button class="secondary" onclick="giveUp()" id="giveUpBtn">Show answer</button>
@@ -176,67 +176,76 @@
 <script>
 const items = [
   {
-    answer: "to be into someone/something",
-    accept: ["to be into someone", "to be into something", "be into", "to be into"],
-    clue: "To like or be attracted to someone or something.",
-    example: "Example: \"He's really ___ hiking these days.\"",
-    quote: '"I could be into it." — Eleanor'
-  },
-  {
-    answer: "to make a move on someone",
-    accept: ["to make a move", "make a move on someone", "make a move"],
-    clue: "To do or say something that shows romantic interest in someone.",
-    example: "Example: \"He finally ___ her after months of flirting.\"",
-    quote: '"Are you making a move on me?" — Eleanor to Chidi'
-  },
-  {
-    answer: "a conflict of interest",
-    accept: ["conflict of interest"],
-    clue: "A situation where someone's personal interest could improperly affect their judgment.",
-    example: "Example: \"The judge stepped down because of a ___.\"",
-    quote: '"Having feelings for my soul mate would be a conflict of interest." — Bambadjan'
-  },
-  {
-    answer: "to get something off your chest",
-    accept: ["get something off your chest", "off your chest", "to get off your chest"],
-    clue: "To say something that has been worrying or bothering you, so you feel relief.",
-    example: "Example: \"She finally ___ and told him the truth.\"",
-    quote: '"I just needed to get that off my chest." — Chidi'
-  },
-  {
-    answer: "a buzzkill",
-    accept: ["buzzkill"],
-    clue: "A person or thing that ruins the fun or excitement of a situation.",
-    example: "Example: \"Don't be such a ___, let's stay a little longer.\"",
-    quote: '"You are way more of a buzzkill than any of those dudes." — Eleanor to Chidi'
-  },
-  {
-    answer: "vexed",
+    expression: "to be into someone/something",
+    blank: "into",
     accept: [],
-    clue: "Annoyed, confused, or frustrated by a difficult decision.",
-    example: "Example: \"He seemed ___ by the complicated instructions.\"",
-    quote: '"I\'m vexed, Uzo, vexed." — Chidi'
+    clue: "Meaning: to like or be attracted to someone or something.",
+    sentence: "He's really ___ hiking these days.",
+    quote: '"I could be into it." (Eleanor)'
   },
   {
-    answer: "to dodge a bullet",
-    accept: ["dodge a bullet", "dodged a bullet"],
-    clue: "To narrowly avoid a bad or dangerous situation.",
-    example: "Example: \"We ___ by leaving before the storm hit.\"",
-    quote: '"I think I\'ve dodged a bullet." — Tahani'
+    expression: "to make a move on someone",
+    blank: "move",
+    accept: [],
+    clue: "Meaning: to do or say something that shows romantic interest in someone.",
+    sentence: "He finally made a ___ on her after months of flirting.",
+    quote: '"Are you making a move on me?"'
   },
   {
-    answer: "to settle on something",
-    accept: ["settle on something", "settle on", "to settle on"],
-    clue: "To finally choose or decide on something after considering options.",
-    example: "Example: \"They finally ___ a restaurant for the party.\"",
-    quote: '"You could never settle on a location or time." — Michael to Chidi'
+    expression: "a conflict of interest",
+    blank: "interest",
+    accept: [],
+    clue: "Meaning: a situation where someone's personal interest could improperly affect their judgment.",
+    sentence: "The judge stepped down because of a conflict of ___.",
+    quote: '"Having feelings for my soul mate would be a conflict of interest."'
   },
   {
-    answer: "to trust your gut",
-    accept: ["trust your gut", "trust my gut"],
-    clue: "To rely on your instinct or feeling instead of overthinking.",
-    example: "Example: \"I didn't have all the facts, so I just ___.\"",
-    quote: '"I\'m gonna look each of these women in the eye, trust my gut, and figure out how I feel." — Chidi'
+    expression: "to get something off your chest",
+    blank: "chest",
+    accept: [],
+    clue: "Meaning: to say something that has been bothering you, so you feel relief.",
+    sentence: "She finally got it off her ___ and told him the truth.",
+    quote: '"I just needed to get that off my chest."'
+  },
+  {
+    expression: "a buzzkill",
+    blank: "buzzkill",
+    accept: ["buzz kill"],
+    clue: "Meaning: a person or thing that ruins the fun or excitement of a situation.",
+    sentence: "Don't be such a ___, let's stay a little longer.",
+    quote: '"You are way more of a buzzkill than any of those dudes."'
+  },
+  {
+    expression: "vexed",
+    blank: "vexed",
+    accept: [],
+    clue: "Meaning: annoyed, confused, or frustrated by a difficult decision.",
+    sentence: "He seemed ___ by the complicated instructions.",
+    quote: '"I\'m vexed, Uzo, vexed." (Chidi)'
+  },
+  {
+    expression: "to dodge a bullet",
+    blank: "dodged",
+    accept: [],
+    clue: "Meaning: to narrowly avoid a bad or dangerous situation.",
+    sentence: "We ___ a bullet by leaving before the storm hit.",
+    quote: '"I think I\'ve dodged a bullet."'
+  },
+  {
+    expression: "to settle on something",
+    blank: "on",
+    accept: [],
+    clue: "Meaning: to finally choose or decide after considering options.",
+    sentence: "They finally settled ___ a restaurant for the party.",
+    quote: '"You could never settle on a location or time."'
+  },
+  {
+    expression: "to trust your gut",
+    blank: "gut",
+    accept: [],
+    clue: "Meaning: to rely on your instinct or feeling instead of overthinking.",
+    sentence: "I didn't have all the facts, so I just trusted my ___.",
+    quote: '"I\'m gonna look each of these women in the eye, trust my gut, and figure out how I feel."'
   }
 ];
 
@@ -273,8 +282,8 @@ function loadQuestion(){
   const item = items[order[currentIndex]];
   document.getElementById('current').textContent = currentIndex + 1;
   document.getElementById('progressLabel').textContent = `Word ${currentIndex + 1} of ${items.length}`;
-  document.getElementById('clueText').textContent = item.clue;
-  document.getElementById('exampleText').textContent = item.example;
+  document.getElementById('clueText').textContent = item.sentence;
+  document.getElementById('exampleText').textContent = item.clue;
   const input = document.getElementById('answerInput');
   input.value = '';
   input.className = '';
@@ -313,9 +322,9 @@ function hintPattern(answer, n){
 function showHint(){
   if(answered) return;
   const item = items[order[currentIndex]];
-  const totalLetters = item.answer.replace(/[^a-zA-Z]/g, '').length;
+  const totalLetters = item.blank.replace(/[^a-zA-Z]/g, '').length;
   if(hintCount < totalLetters - 1) hintCount++;
-  document.getElementById('hintDisplay').textContent = hintPattern(item.answer, hintCount);
+  document.getElementById('hintDisplay').textContent = hintPattern(item.blank, hintCount);
 }
 
 function revealAnswer(item, input, feedback, gaveUp){
@@ -323,7 +332,7 @@ function revealAnswer(item, input, feedback, gaveUp){
   input.disabled = true;
   input.className = 'incorrect-input';
   feedback.className = 'feedback incorrect';
-  feedback.innerHTML = `${gaveUp ? 'The answer was' : 'Not quite. The answer was'}: <strong>${item.answer}</strong><span class="quote">${item.quote}</span>`;
+  feedback.innerHTML = `${gaveUp ? 'The answer was' : 'Not quite. The answer was'}: <strong>${item.blank}</strong> (${item.expression})<span class="quote">${item.quote}</span>`;
   document.getElementById('hintDisplay').textContent = '';
   document.getElementById('checkBtn').style.display = 'none';
   document.getElementById('giveUpBtn').style.display = 'none';
@@ -342,7 +351,7 @@ function checkAnswer(){
   const item = items[order[currentIndex]];
   const input = document.getElementById('answerInput');
   const userAnswer = normalize(input.value);
-  const validAnswers = [item.answer, ...item.accept].map(normalize);
+  const validAnswers = [item.blank, ...item.accept].map(normalize);
   const isCorrect = validAnswers.includes(userAnswer) && userAnswer.length > 0;
   const feedback = document.getElementById('feedback');
 
@@ -351,7 +360,7 @@ function checkAnswer(){
     input.disabled = true;
     input.className = 'correct-input';
     feedback.className = 'feedback correct';
-    feedback.innerHTML = `Correct! <strong>${item.answer}</strong><span class="quote">${item.quote}</span>`;
+    feedback.innerHTML = `Correct! <strong>${item.blank}</strong> (${item.expression})<span class="quote">${item.quote}</span>`;
     if(wrongTries === 0){
       score++;
       document.getElementById('score').textContent = score;
@@ -363,9 +372,9 @@ function checkAnswer(){
     document.getElementById('nextBtn').style.display = 'inline-block';
   } else {
     wrongTries++;
-    const totalLetters = item.answer.replace(/[^a-zA-Z]/g, '').length;
+    const totalLetters = item.blank.replace(/[^a-zA-Z]/g, '').length;
     if(hintCount < totalLetters - 1) hintCount++;
-    document.getElementById('hintDisplay').textContent = hintPattern(item.answer, hintCount);
+    document.getElementById('hintDisplay').textContent = hintPattern(item.blank, hintCount);
     input.className = 'incorrect-input';
     feedback.className = 'feedback incorrect';
     feedback.innerHTML = 'Not quite. Try again! One more letter was added to the hint.';
@@ -400,3 +409,4 @@ initQuiz();
 </script>
 </body>
 </html>
+
