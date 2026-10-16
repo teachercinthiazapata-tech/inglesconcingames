@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Clase 64 - Reported Questions Sentence Builder</title>
+<style>
+  :root{
+    --navy:#1B2A4A;
+    --orange:#B5651D;
+    --gold:#8A5A00;
+    --green:#2E7D32;
+    --red:#C0392B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:linear-gradient(135deg,#FBF7F0 0%,#F0E6D6 100%);
+    margin:0;
+    padding:20px;
+    color:#222;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{color:var(--navy);text-align:center;margin-bottom:4px;font-size:26px;}
+  .subtitle{text-align:center;color:var(--gold);font-style:italic;margin-bottom:6px;}
+  .instructions{
+    text-align:center;
+    background:#fff;
+    border-left:5px solid var(--orange);
+    padding:12px 18px;
+    border-radius:8px;
+    margin-bottom:20px;
+    font-size:15px;
+  }
+  .stats{
+    text-align:center;
+    font-weight:bold;
+    color:var(--navy);
+    margin-bottom:18px;
+    font-size:18px;
+  }
+  .stats span{color:var(--orange);}
+  .card{
+    background:#fff;
+    border-radius:14px;
+    padding:24px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  }
+  .progress-label{
+    font-size:13px;
+    color:#888;
+    margin-bottom:10px;
+    text-align:center;
+  }
+  .original-quote{
+    text-align:center;
+    font-style:italic;
+    color:var(--gold);
+    font-size:16px;
+    margin-bottom:4px;
+  }
+  .speaker{
+    text-align:center;
+    font-size:13px;
+    color:#888;
+    margin-bottom:18px;
+  }
+  .build-zone{
+    min-height:60px;
+    border:2px dashed #ccc;
+    border-radius:10px;
+    padding:12px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+    align-items:flex-start;
+  }
+  .word-chip{
+    background:var(--navy);
+    color:#fff;
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:15px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .word-chip:hover{background:#2c4270;}
+  .bank{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:12px;
+    background:#f7f7f7;
+    border-radius:10px;
+    margin-bottom:16px;
+    min-height:50px;
+  }
+  .bank .word-chip{
+    background:#fff;
+    color:var(--navy);
+    border:2px solid var(--navy);
+  }
+  .bank .word-chip:hover{background:#f0f4fa;}
+  .btn-row{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+  }
+  button{
+    background:var(--orange);
+    color:#fff;
+    border:none;
+    padding:11px 22px;
+    border-radius:8px;
+    font-size:15px;
+    cursor:pointer;
+  }
+  button:hover{background:var(--gold);}
+  button.secondary{
+    background:#eee;
+    color:var(--navy);
+  }
+  button.secondary:hover{background:#ddd;}
+  .feedback{
+    margin-top:14px;
+    padding:12px 16px;
+    border-radius:8px;
+    font-size:14.5px;
+    display:none;
+  }
+  .feedback.correct{
+    background:#e8f5e9;
+    color:#1b5e20;
+    display:block;
+  }
+  .feedback.incorrect{
+    background:#fdecea;
+    color:var(--red);
+    display:block;
+  }
+  #winScreen{
+    display:none;
+    text-align:center;
+    margin-top:24px;
+    background:#fff;
+    padding:26px;
+    border-radius:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.15);
+  }
+  #winScreen h2{color:var(--green);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Reported Questions: Sentence Builder</h1>
+  <div class="subtitle">The Good Place, Episode 10 &middot; Clase 64 &middot; inglés con cin</div>
+  <div class="instructions">Click the words in the word bank, in order, to build the correct reported speech question. Click a word in your sentence to remove it.</div>
+  <div class="stats">Sentences built: <span id="builtCount">0</span> / 6</div>
+
+  <div class="card" id="gameCard">
+    <div class="progress-label" id="progressLabel"></div>
+    <div class="original-quote" id="originalQuote"></div>
+    <div class="speaker" id="speakerTag"></div>
+    <div class="build-zone" id="buildZone"></div>
+    <div class="bank" id="wordBank"></div>
+    <div class="btn-row">
+      <button onclick="checkSentence()">Check</button>
+      <button class="secondary" onclick="clearSentence()">Clear</button>
+      <button class="secondary" onclick="nextSentence()" id="nextBtn" style="display:none;">Next</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div id="winScreen">
+    <h2>Great work! You built all 6 reported questions!</h2>
+    <button onclick="initGame()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const sentences = [
+  {
+    quote: '"Do you want to use a dry erase board or the regular pen and paper?"',
+    speaker: "Uzo to Chidi",
+    correct: ["Uzo", "asked", "Chidi", "whether", "he", "wanted", "to", "use", "a", "dry", "erase", "board", "or", "the", "regular", "pen", "and", "paper"]
+  },
+  {
+    quote: '"Are you ready to take our bonding to the next level?"',
+    speaker: "Michael",
+    correct: ["Michael", "asked", "whether", "he", "was", "ready", "to", "take", "their", "bonding", "to", "the", "next", "level"]
+  },
+  {
+    quote: '"What are you talking about?"',
+    speaker: "Bambadjan to Eleanor",
+    correct: ["Bambadjan", "asked", "what", "she", "was", "talking", "about"]
+  },
+  {
+    quote: '"How did you get here?"',
+    speaker: "Chidi to Jason",
+    correct: ["Chidi", "asked", "how", "he", "had", "gotten", "there"]
+  },
+  {
+    quote: '"Are you making a move on me?"',
+    speaker: "Eleanor to Chidi",
+    correct: ["Eleanor", "asked", "whether", "he", "was", "making", "a", "move", "on", "her"]
+  },
+  {
+    quote: '"Do you mind if I borrow Professor Stomachache for a second?"',
+    speaker: "Michael to the ethics team",
+    correct: ["Michael", "asked", "whether", "they", "minded", "if", "he", "borrowed", "Professor", "Stomachache", "for", "a", "second"]
+  }
+];
+
+let order = [];
+let currentIndex = 0;
+let builtCount = 0;
+let built = [];
+let answered = false;
+
+function shuffleArr(arr){
+  const copy = [...arr];
+  for(let i = copy.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function initGame(){
+  order = shuffleArr(sentences.map((_, i) => i));
+  currentIndex = 0;
+  builtCount = 0;
+  document.getElementById('builtCount').textContent = 0;
+  document.getElementById('winScreen').style.display = 'none';
+  document.getElementById('gameCard').style.display = 'block';
+  loadSentence();
+}
+
+function loadSentence(){
+  answered = false;
+  built = [];
+  const s = sentences[order[currentIndex]];
+  document.getElementById('progressLabel').textContent = `Case ${currentIndex + 1} of ${sentences.length}`;
+  document.getElementById('originalQuote').textContent = s.quote;
+  document.getElementById('speakerTag').textContent = 'Original: ' + s.speaker;
+  document.getElementById('feedback').className = 'feedback';
+    document.getElementById('nextBtn').style.display = 'none';
+  renderBuildZone();
+  renderBank(s);
+}
+
+function renderBank(s){
+  const bank = document.getElementById('wordBank');
+  bank.innerHTML = '';
+  const shuffledWords = shuffleArr(s.correct.map((w, i) => ({ word: w, id: i })));
+  shuffledWords.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.textContent = item.word;
+    chip.dataset.word = item.word;
+    chip.dataset.usedId = item.id;
+    chip.addEventListener('click', () => {
+      if(answered) return;
+      built.push(item.word);
+      chip.style.visibility = 'hidden';
+      chip.dataset.hidden = 'true';
+      renderBuildZone();
+    });
+    bank.appendChild(chip);
+  });
+}
+
+function renderBuildZone(){
+  const zone = document.getElementById('buildZone');
+  zone.innerHTML = '';
+  built.forEach((word, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.textContent = word;
+    chip.addEventListener('click', () => {
+      if(answered) return;
+      built.splice(idx, 1);
+      renderBuildZone();
+      restoreBankWord(word);
+    });
+    zone.appendChild(chip);
+  });
+}
+
+function restoreBankWord(word){
+  const bank = document.getElementById('wordBank');
+  const chips = bank.querySelectorAll('.word-chip');
+  for(const chip of chips){
+    if(chip.dataset.word === word && chip.dataset.hidden === 'true'){
+      chip.style.visibility = 'visible';
+      chip.dataset.hidden = 'false';
+      break;
+    }
+  }
+}
+
+function checkSentence(){
+  if(answered) return;
+  const s = sentences[order[currentIndex]];
+  const userSentence = built.join(' ').toLowerCase();
+  const correctSentence = s.correct.join(' ').toLowerCase();
+  const feedback = document.getElementById('feedback');
+
+  answered = true;
+  if(userSentence === correctSentence){
+    feedback.className = 'feedback correct';
+    feedback.textContent = `Correct! ${s.correct.join(' ')}.`;
+    builtCount++;
+    document.getElementById('builtCount').textContent = builtCount;
+  } else {
+    feedback.className = 'feedback incorrect';
+    feedback.textContent = `Not quite. The correct order is: ${s.correct.join(' ')}.`;
+  }
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function clearSentence(){
+  if(answered) return;
+  const s = sentences[order[currentIndex]];
+  built = [];
+  renderBuildZone();
+  const bank = document.getElementById('wordBank');
+  bank.querySelectorAll('.word-chip').forEach(chip => {
+    chip.style.visibility = 'visible';
+    chip.dataset.hidden = 'false';
+  });
+}
+
+function nextSentence(){
+  currentIndex++;
+  if(currentIndex >= sentences.length){
+    showWin();
+  } else {
+    loadSentence();
+  }
+}
+
+function showWin(){
+  document.getElementById('gameCard').style.display = 'none';
+  document.getElementById('winScreen').style.display = 'block';
+}
+
+initGame();
+</script>
+</body>
+</html>
