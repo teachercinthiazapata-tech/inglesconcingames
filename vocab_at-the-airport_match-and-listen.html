@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>At the Airport: Match and Listen</title>
+<style>
+  :root { --navy:#1f3a5f; --coral:#e07a5f; --mint:#e8f5ef; --mint-d:#5fb58f; --peach:#fdeee6; --bg:#fffaf6; --red:#d9534f; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--navy); }
+  .wrap { max-width:860px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { text-align:center; margin:6px 0 4px; font-size:1.55rem; }
+  .sub { text-align:center; color:#666; margin:0 0 16px; }
+  .hidden { display:none !important; }
+  .tabs { display:flex; gap:8px; justify-content:center; margin-bottom:16px; flex-wrap:wrap; }
+  .tab { border:2px solid var(--navy); background:#fff; color:var(--navy); padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:bold; }
+  .tab.active { background:var(--navy); color:#fff; }
+  .stats { display:flex; justify-content:center; gap:24px; margin-bottom:12px; font-weight:bold; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .col { display:flex; flex-direction:column; gap:10px; }
+  .card { background:#fff; border:2px solid #dde3ea; border-radius:12px; padding:12px; cursor:pointer; min-height:56px; display:flex; align-items:center; gap:8px; font-size:.98rem; transition:.15s; }
+  .card:hover { border-color:var(--coral); }
+  .card.sel { border-color:var(--coral); background:var(--peach); }
+  .card.done { background:var(--mint); border-color:var(--mint-d); cursor:default; opacity:.85; }
+  .card.wrong { animation:shake .35s; border-color:var(--red); }
+  @keyframes shake { 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  .spk { border:none; background:var(--navy); color:#fff; border-radius:50%; width:32px; height:32px; flex:0 0 32px; cursor:pointer; font-size:15px; }
+  .panel { background:#fff; border:2px solid #dde3ea; border-radius:16px; padding:22px 18px; text-align:center; box-shadow:0 4px 14px rgba(31,58,95,.08); }
+  .speaker { font-size:3rem; }
+  .q { font-size:1.15rem; font-weight:bold; margin:10px 0 16px; }
+  .btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:10px 0; }
+  .btn { border:none; border-radius:22px; padding:11px 20px; font-weight:bold; cursor:pointer; font-size:1rem; }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .play { background:var(--coral); color:#fff; }
+  .slow { background:var(--navy); color:#fff; }
+  .light { background:#eee; color:var(--navy); }
+  .next { background:var(--mint-d); color:#fff; }
+  .opts { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .opt { background:#fff; border:2px solid #dde3ea; border-radius:12px; padding:12px 20px; cursor:pointer; font-size:1.1rem; font-weight:bold; color:var(--navy); min-width:110px; }
+  .opt:hover { border-color:var(--coral); }
+  .opt.right { background:var(--mint); border-color:var(--mint-d); }
+  .opt.no { background:#fbe9e7; border-color:var(--red); }
+  .fb { min-height:40px; margin-top:12px; font-weight:bold; }
+  .fb.good { color:#2e7d5b; }
+  .fb.no { color:var(--red); }
+  .transcript { font-style:italic; color:#555; margin-top:8px; font-weight:normal; }
+  .note { font-size:.85rem; color:#777; text-align:center; margin-top:18px; }
+  @media (max-width:560px){ .card{font-size:.9rem; padding:10px;} h1{font-size:1.25rem;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>✈️ At the Airport</h1>
+  <p class="sub">Match the words, then catch the information in the announcements</p>
+
+  <div class="tabs">
+    <button class="tab active" id="tab1">Round 1: Match</button>
+    <button class="tab" id="tab2">Round 2: Listen and catch</button>
+  </div>
+
+  <section id="r1">
+    <p class="sub">Tap a word, then tap its meaning. Press 🔊 to hear it.</p>
+    <div class="stats"><div>Matches: <span id="m">0</span>/7</div><div>Attempts: <span id="a">0</span></div></div>
+    <div class="grid"><div class="col" id="left"></div><div class="col" id="right"></div></div>
+    <div class="btns"><button class="btn light" id="restart1">Restart</button></div>
+  </section>
+
+  <section id="r2" class="hidden">
+    <div class="panel" id="qPanel">
+      <div class="stats"><div>Announcement <span id="qn">1</span>/<span id="qt">6</span></div><div>Score: <span id="sc">0</span></div></div>
+      <div class="speaker">📢</div>
+      <div class="btns">
+        <button class="btn play" id="playN">▶ Play</button>
+        <button class="btn slow" id="playS">🐢 Slower</button>
+        <button class="btn light" id="showT">Show text</button>
+      </div>
+      <p class="transcript hidden" id="tr"></p>
+      <p class="q" id="qText"></p>
+      <div class="opts" id="opts"></div>
+      <div class="fb" id="fb"></div>
+      <div class="btns"><button class="btn next hidden" id="nextBtn">Next ➜</button></div>
+    </div>
+    <div class="panel hidden" id="endScreen" style="margin-top:14px">
+      <div class="speaker">🛫</div>
+      <h2>Great job!</h2>
+      <p class="q" id="endMsg"></p>
+      <div class="btns"><button class="btn play" id="againBtn">Play again</button></div>
+    </div>
+  </section>
+
+  <p class="note">Listen first, then choose. Audio works best in Chrome.</p>
+</div>
+
+<script>
+const PAIRS = [
+  ["a flight", "The journey in a plane, for example Buenos Aires to New York"],
+  ["a boarding pass", "The paper or phone screen you show to get on the plane"],
+  ["a gate", "The door in the airport where you get on your plane"],
+  ["a carry-on", "The small bag you take with you on the plane"],
+  ["baggage claim", "The place where you pick up your suitcase after the flight"],
+  ["customs", "The control where they can check what you bring into the country"],
+  ["delayed", "Later than the time on your ticket"]
+];
+
+const ANNOUNCEMENTS = [
+  { say:"Attention, passengers. Flight four eight two to New York is now boarding at gate B twelve.",
+    q:"Which gate?", opts:["B12","B20","D12"], a:0,
+    why:"Gate B twelve. Listen for the \"teen\" sound at the end: B twelve, not B twenty." },
+  { say:"Flight nine fifteen to Miami is delayed. The new departure time is ten thirty.",
+    q:"What is the new time?", opts:["10:30","10:13","9:15"], a:0,
+    why:"Ten thirty. Nine fifteen is the flight number, not the time." },
+  { say:"Passengers for flight two sixty, please proceed to gate A four. This is the final call.",
+    q:"Which gate?", opts:["A4","A14","A40"], a:0,
+    why:"Gate A four. \"Final call\" means: go now, the plane is closing." },
+  { say:"Baggage for flight four eight two is now at carousel number three.",
+    q:"Where is the baggage?", opts:["Carousel 3","Carousel 13","Gate 3"], a:0,
+    why:"Carousel number three. A carousel is the moving belt at baggage claim." },
+  { say:"The gate for flight six forty to Chicago has changed. The new gate is C fourteen.",
+    q:"Which gate now?", opts:["C14","C40","C4"], a:0,
+    why:"C fourteen, with the strong sound at the end: four-TEEN. Six forty is the flight number." },
+  { say:"Attention: flight three thirty to Boston is now boarding. All rows, please.",
+    q:"Which flight is boarding?", opts:["330","313","30"], a:0,
+    why:"Flight three thirty. THIR-ty is strong at the beginning; thir-TEEN is strong at the end." }
+];
+
+const $ = id => document.getElementById(id);
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+let voice = null;
+function pickVoice(){ const v = speechSynthesis.getVoices(); voice = v.find(x=>x.lang==='en-US' && /Google|Samantha|Aria|Jenny/i.test(x.name)) || v.find(x=>x.lang==='en-US') || v.find(x=>x.lang.startsWith('en')) || null; }
+if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(t, rate){ if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='en-US'; if(voice) u.voice=voice; u.rate=rate||1; speechSynthesis.speak(u); }
+
+// round 1
+let selL=null, selR=null, matches=0, attempts=0;
+function initR1(){
+  matches=0; attempts=0; selL=selR=null; $('m').textContent=0; $('a').textContent=0;
+  const Lc=$('left'), Rc=$('right'); Lc.innerHTML=''; Rc.innerHTML='';
+  shuffle(PAIRS.map((p,i)=>({t:p[0],i}))).forEach(o=>{
+    const c=document.createElement('div'); c.className='card'; c.dataset.i=o.i;
+    const b=document.createElement('button'); b.className='spk'; b.textContent='🔊'; b.setAttribute('aria-label','Listen');
+    b.onclick=e=>{ e.stopPropagation(); speak(o.t, 0.95); };
+    const s=document.createElement('span'); s.textContent=o.t;
+    c.append(b,s); c.onclick=()=>pick(c,'L'); Lc.appendChild(c);
+  });
+  shuffle(PAIRS.map((p,i)=>({t:p[1],i}))).forEach(o=>{
+    const c=document.createElement('div'); c.className='card'; c.dataset.i=o.i; c.textContent=o.t; c.onclick=()=>pick(c,'R'); Rc.appendChild(c);
+  });
+}
+function pick(c,side){
+  if(c.classList.contains('done')) return;
+  if(side==='L'){ if(selL) selL.classList.remove('sel'); selL=(selL===c)?null:c; }
+  else { if(selR) selR.classList.remove('sel'); selR=(selR===c)?null:c; }
+  if(selL) selL.classList.add('sel'); if(selR) selR.classList.add('sel');
+  if(selL && selR){
+    attempts++; $('a').textContent=attempts;
+    const l=selL, r=selR; selL=selR=null;
+    if(l.dataset.i===r.dataset.i){
+      [l,r].forEach(x=>{x.classList.remove('sel'); x.classList.add('done');});
+      matches++; $('m').textContent=matches;
+      speak(PAIRS[+l.dataset.i][0], 0.95);
+    } else {
+      [l,r].forEach(x=>x.classList.add('wrong'));
+      setTimeout(()=>[l,r].forEach(x=>x.classList.remove('wrong','sel')),400);
+    }
+  }
+}
+
+// round 2
+let order=[], qi=0, score=0, answered=false;
+function initR2(){ order=shuffle(ANNOUNCEMENTS); qi=0; score=0; $('sc').textContent=0; $('qt').textContent=order.length; $('endScreen').classList.add('hidden'); $('qPanel').classList.remove('hidden'); showQ(); }
+function showQ(){
+  answered=false; const q=order[qi];
+  $('qn').textContent=qi+1;
+  $('tr').textContent='"'+q.say+'"'; $('tr').classList.add('hidden');
+  $('qText').textContent=q.q;
+  $('fb').textContent=''; $('fb').className='fb';
+  $('nextBtn').classList.add('hidden');
+  const box=$('opts'); box.innerHTML='';
+  shuffle(q.opts.map((t,i)=>({t,i}))).forEach(o=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=o.t; b.onclick=()=>answer(b,o.i); box.appendChild(b); });
+  setTimeout(()=>speak(q.say, 1), 300);
+}
+function answer(btn,i){
+  if(answered) return; const q=order[qi];
+  if(i===q.a){
+    answered=true; btn.classList.add('right'); score++; $('sc').textContent=score;
+    $('fb').innerHTML='✅ Correct! <span style="font-weight:normal">'+q.why+'</span>';
+    $('fb').className='fb good';
+    $('tr').classList.remove('hidden');
+    $('nextBtn').classList.remove('hidden');
+    $('nextBtn').textContent = (qi===order.length-1) ? 'Finish ✓' : 'Next ➜';
+  } else {
+    btn.classList.add('no');
+    $('fb').textContent='Not quite. Listen again, try the 🐢 button.';
+    $('fb').className='fb no';
+  }
+}
+$('playN').onclick=()=>speak(order[qi].say, 1);
+$('playS').onclick=()=>speak(order[qi].say, 0.65);
+$('showT').onclick=()=>$('tr').classList.toggle('hidden');
+$('nextBtn').onclick=()=>{
+  if(qi<order.length-1){ qi++; showQ(); }
+  else { $('qPanel').classList.add('hidden'); $('endMsg').textContent='Score: '+score+' of '+order.length+'. You are ready for the airport!'; $('endScreen').classList.remove('hidden'); }
+};
+$('againBtn').onclick=initR2;
+$('restart1').onclick=initR1;
+$('tab1').onclick=()=>{ $('tab1').classList.add('active'); $('tab2').classList.remove('active'); $('r1').classList.remove('hidden'); $('r2').classList.add('hidden'); };
+$('tab2').onclick=()=>{ $('tab2').classList.add('active'); $('tab1').classList.remove('active'); $('r2').classList.remove('hidden'); $('r1').classList.add('hidden'); if(!order.length) initR2(); };
+initR1();
+</script>
+</body>
+</html>
