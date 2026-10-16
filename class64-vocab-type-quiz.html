@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Clase 64 - Vocabulary Type Quiz</title>
+<style>
+  :root{
+    --navy:#1B2A4A;
+    --orange:#B5651D;
+    --gold:#8A5A00;
+    --green:#2E7D32;
+    --red:#C0392B;
+    --cream:#FBF7F0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:linear-gradient(135deg,#FBF7F0 0%,#F0E6D6 100%);
+    margin:0;
+    padding:20px;
+    color:#222;
+  }
+  .wrap{max-width:700px;margin:0 auto;}
+  h1{color:var(--navy);text-align:center;margin-bottom:4px;font-size:26px;}
+  .subtitle{text-align:center;color:var(--gold);font-style:italic;margin-bottom:6px;}
+  .instructions{
+    text-align:center;
+    background:#fff;
+    border-left:5px solid var(--orange);
+    padding:12px 18px;
+    border-radius:8px;
+    margin-bottom:20px;
+    font-size:15px;
+  }
+  .stats{
+    text-align:center;
+    font-weight:bold;
+    color:var(--navy);
+    margin-bottom:18px;
+    font-size:18px;
+  }
+  .stats span{color:var(--orange);}
+  .card{
+    background:#fff;
+    border-radius:14px;
+    padding:24px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12);
+    text-align:center;
+  }
+  .progress-label{
+    font-size:13px;
+    color:#888;
+    margin-bottom:10px;
+  }
+  .clue{
+    font-size:17px;
+    color:var(--navy);
+    font-weight:600;
+    margin-bottom:10px;
+    line-height:1.4;
+  }
+  .example{
+    font-style:italic;
+    color:#666;
+    font-size:14.5px;
+    margin-bottom:18px;
+  }
+  input[type="text"]{
+    width:100%;
+    padding:12px 14px;
+    font-size:16px;
+    border:2px solid #ddd;
+    border-radius:10px;
+    outline:none;
+    margin-bottom:14px;
+  }
+  input[type="text"]:focus{border-color:var(--navy);}
+  input.correct-input{border-color:var(--green);background:#f4fbf4;}
+  input.incorrect-input{border-color:var(--red);background:#fdecea;}
+  .btn-row{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+  }
+  button{
+    background:var(--orange);
+    color:#fff;
+    border:none;
+    padding:11px 22px;
+    border-radius:8px;
+    font-size:15px;
+    cursor:pointer;
+  }
+  button:hover{background:var(--gold);}
+  button.secondary{
+    background:#eee;
+    color:var(--navy);
+  }
+  button.secondary:hover{background:#ddd;}
+  .feedback{
+    margin-top:14px;
+    padding:12px 16px;
+    border-radius:8px;
+    font-size:14.5px;
+    display:none;
+    text-align:left;
+  }
+  .feedback.correct{
+    background:#e8f5e9;
+    color:#1b5e20;
+    display:block;
+  }
+  .feedback.incorrect{
+    background:#fdecea;
+    color:var(--red);
+    display:block;
+  }
+  .feedback .quote{
+    display:block;
+    margin-top:6px;
+    font-style:italic;
+    color:var(--gold);
+  }
+  #winScreen{
+    display:none;
+    text-align:center;
+    margin-top:24px;
+    background:#fff;
+    padding:26px;
+    border-radius:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.15);
+  }
+  #winScreen h2{color:var(--green);}
+  .hint-btn{
+    background:none;
+    border:none;
+    color:var(--navy);
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:13px;
+    padding:0;
+    margin-bottom:10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vocabulary Type Quiz</h1>
+  <div class="subtitle">The Good Place, Episode 10 &middot; Clase 64 &middot; inglés con cin</div>
+  <div class="instructions">Read the meaning and example, then type the word or phrase. Press Enter or click Check.</div>
+  <div class="stats">Score: <span id="score">0</span> / 9 &nbsp;&nbsp; Item <span id="current">1</span> / 9</div>
+
+  <div class="card" id="quizCard">
+    <div class="progress-label" id="progressLabel"></div>
+    <div class="clue" id="clueText"></div>
+    <div class="example" id="exampleText"></div>
+    <div id="hintDisplay" style="font-family:monospace;font-size:20px;letter-spacing:2px;color:#B5651D;margin-bottom:6px;min-height:26px;"></div>
+    <button class="hint-btn" id="hintBtn" onclick="showHint()">Need a hint? (show one more letter)</button>
+    <br>
+    <input type="text" id="answerInput" placeholder="Type your answer here..." autocomplete="off">
+    <div class="btn-row">
+      <button onclick="checkAnswer()" id="checkBtn">Check</button>
+      <button class="secondary" onclick="giveUp()" id="giveUpBtn">Show answer</button>
+      <button class="secondary" onclick="nextQuestion()" id="nextBtn" style="display:none;">Next</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div id="winScreen">
+    <h2>Quiz complete!</h2>
+    <p id="finalStats"></p>
+    <button onclick="initQuiz()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const items = [
+  {
+    answer: "to be into someone/something",
+    accept: ["to be into someone", "to be into something", "be into", "to be into"],
+    clue: "To like or be attracted to someone or something.",
+    example: "Example: \"He's really ___ hiking these days.\"",
+    quote: '"I could be into it." — Eleanor'
+  },
+  {
+    answer: "to make a move on someone",
+    accept: ["to make a move", "make a move on someone", "make a move"],
+    clue: "To do or say something that shows romantic interest in someone.",
+    example: "Example: \"He finally ___ her after months of flirting.\"",
+    quote: '"Are you making a move on me?" — Eleanor to Chidi'
+  },
+  {
+    answer: "a conflict of interest",
+    accept: ["conflict of interest"],
+    clue: "A situation where someone's personal interest could improperly affect their judgment.",
+    example: "Example: \"The judge stepped down because of a ___.\"",
+    quote: '"Having feelings for my soul mate would be a conflict of interest." — Bambadjan'
+  },
+  {
+    answer: "to get something off your chest",
+    accept: ["get something off your chest", "off your chest", "to get off your chest"],
+    clue: "To say something that has been worrying or bothering you, so you feel relief.",
+    example: "Example: \"She finally ___ and told him the truth.\"",
+    quote: '"I just needed to get that off my chest." — Chidi'
+  },
+  {
+    answer: "a buzzkill",
+    accept: ["buzzkill"],
+    clue: "A person or thing that ruins the fun or excitement of a situation.",
+    example: "Example: \"Don't be such a ___, let's stay a little longer.\"",
+    quote: '"You are way more of a buzzkill than any of those dudes." — Eleanor to Chidi'
+  },
+  {
+    answer: "vexed",
+    accept: [],
+    clue: "Annoyed, confused, or frustrated by a difficult decision.",
+    example: "Example: \"He seemed ___ by the complicated instructions.\"",
+    quote: '"I\'m vexed, Uzo, vexed." — Chidi'
+  },
+  {
+    answer: "to dodge a bullet",
+    accept: ["dodge a bullet", "dodged a bullet"],
+    clue: "To narrowly avoid a bad or dangerous situation.",
+    example: "Example: \"We ___ by leaving before the storm hit.\"",
+    quote: '"I think I\'ve dodged a bullet." — Tahani'
+  },
+  {
+    answer: "to settle on something",
+    accept: ["settle on something", "settle on", "to settle on"],
+    clue: "To finally choose or decide on something after considering options.",
+    example: "Example: \"They finally ___ a restaurant for the party.\"",
+    quote: '"You could never settle on a location or time." — Michael to Chidi'
+  },
+  {
+    answer: "to trust your gut",
+    accept: ["trust your gut", "trust my gut"],
+    clue: "To rely on your instinct or feeling instead of overthinking.",
+    example: "Example: \"I didn't have all the facts, so I just ___.\"",
+    quote: '"I\'m gonna look each of these women in the eye, trust my gut, and figure out how I feel." — Chidi'
+  }
+];
+
+let order = [];
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+
+function shuffleArr(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function normalize(str){
+  return str.toLowerCase().trim().replace(/[.,!?"']/g, "").replace(/\s+/g, " ");
+}
+
+function initQuiz(){
+  order = shuffleArr(items.map((_, i) => i));
+  currentIndex = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('score').textContent = 0;
+  document.getElementById('winScreen').style.display = 'none';
+  document.getElementById('quizCard').style.display = 'block';
+  loadQuestion();
+}
+
+function loadQuestion(){
+  answered = false;
+  const item = items[order[currentIndex]];
+  document.getElementById('current').textContent = currentIndex + 1;
+  document.getElementById('progressLabel').textContent = `Word ${currentIndex + 1} of ${items.length}`;
+  document.getElementById('clueText').textContent = item.clue;
+  document.getElementById('exampleText').textContent = item.example;
+  const input = document.getElementById('answerInput');
+  input.value = '';
+  input.className = '';
+  input.disabled = false;
+  input.focus();
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('checkBtn').style.display = 'inline-block';
+  document.getElementById('giveUpBtn').style.display = 'inline-block';
+  document.getElementById('hintBtn').style.display = 'inline-block';
+  hintCount = 0;
+  wrongTries = 0;
+  document.getElementById('hintDisplay').textContent = '';
+  document.getElementById('hintBtn').textContent = 'Need a hint? (show one more letter)';
+}
+
+let hintCount = 0;
+let wrongTries = 0;
+
+function hintPattern(answer, n){
+  let shown = 0;
+  let out = '';
+  for(const ch of answer){
+    if(/[a-zA-Z]/.test(ch)){
+      if(shown < n){ out += ch; shown++; }
+      else { out += '_'; }
+    } else {
+      out += (ch === ' ') ? '   ' : ch;
+    }
+    out += ' ';
+  }
+  return out.trim();
+}
+
+function showHint(){
+  if(answered) return;
+  const item = items[order[currentIndex]];
+  const totalLetters = item.answer.replace(/[^a-zA-Z]/g, '').length;
+  if(hintCount < totalLetters - 1) hintCount++;
+  document.getElementById('hintDisplay').textContent = hintPattern(item.answer, hintCount);
+}
+
+function revealAnswer(item, input, feedback, gaveUp){
+  answered = true;
+  input.disabled = true;
+  input.className = 'incorrect-input';
+  feedback.className = 'feedback incorrect';
+  feedback.innerHTML = `${gaveUp ? 'The answer was' : 'Not quite. The answer was'}: <strong>${item.answer}</strong><span class="quote">${item.quote}</span>`;
+  document.getElementById('hintDisplay').textContent = '';
+  document.getElementById('checkBtn').style.display = 'none';
+  document.getElementById('giveUpBtn').style.display = 'none';
+  document.getElementById('hintBtn').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function giveUp(){
+  if(answered) return;
+  const item = items[order[currentIndex]];
+  revealAnswer(item, document.getElementById('answerInput'), document.getElementById('feedback'), true);
+}
+
+function checkAnswer(){
+  if(answered) return;
+  const item = items[order[currentIndex]];
+  const input = document.getElementById('answerInput');
+  const userAnswer = normalize(input.value);
+  const validAnswers = [item.answer, ...item.accept].map(normalize);
+  const isCorrect = validAnswers.includes(userAnswer) && userAnswer.length > 0;
+  const feedback = document.getElementById('feedback');
+
+  if(isCorrect){
+    answered = true;
+    input.disabled = true;
+    input.className = 'correct-input';
+    feedback.className = 'feedback correct';
+    feedback.innerHTML = `Correct! <strong>${item.answer}</strong><span class="quote">${item.quote}</span>`;
+    if(wrongTries === 0){
+      score++;
+      document.getElementById('score').textContent = score;
+    }
+    document.getElementById('hintDisplay').textContent = '';
+    document.getElementById('checkBtn').style.display = 'none';
+    document.getElementById('giveUpBtn').style.display = 'none';
+    document.getElementById('hintBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'inline-block';
+  } else {
+    wrongTries++;
+    const totalLetters = item.answer.replace(/[^a-zA-Z]/g, '').length;
+    if(hintCount < totalLetters - 1) hintCount++;
+    document.getElementById('hintDisplay').textContent = hintPattern(item.answer, hintCount);
+    input.className = 'incorrect-input';
+    feedback.className = 'feedback incorrect';
+    feedback.innerHTML = 'Not quite. Try again! One more letter was added to the hint.';
+    input.focus();
+    input.select();
+  }
+}
+
+function nextQuestion(){
+  currentIndex++;
+  if(currentIndex >= items.length){
+    showWin();
+  } else {
+    loadQuestion();
+  }
+}
+
+function showWin(){
+  document.getElementById('quizCard').style.display = 'none';
+  document.getElementById('winScreen').style.display = 'block';
+  document.getElementById('finalStats').textContent = `You scored ${score} out of ${items.length}.`;
+}
+
+document.getElementById('answerInput').addEventListener('keydown', function(e){
+  if(e.key === 'Enter'){
+    if(!answered) checkAnswer();
+    else nextQuestion();
+  }
+});
+
+initQuiz();
+</script>
+</body>
+</html>
