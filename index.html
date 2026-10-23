@@ -669,7 +669,11 @@
         const title = card.dataset.title.toLowerCase();
         const tags = (card.dataset.tags || card.dataset.category).split(' ');
         const matchesSearch = title.includes(query);
-        const matchesFilter = activeFilter === 'all' || tags.includes(activeFilter);
+        const seriesTags = ['good-place', 'friends', 'series'];
+        const matchesFilter =
+  activeFilter === 'all' ||
+  tags.includes(activeFilter) ||
+  (activeFilter === 'series' && tags.some(t => seriesTags.includes(t)));
         const shouldShow = matchesSearch && matchesFilter;
 
         card.style.display = shouldShow ? 'flex' : 'none';
