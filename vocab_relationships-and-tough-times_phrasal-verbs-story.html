@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phrasal Verbs for Relationships and Tough Times: Complete the Story</title>
+<style>
+  :root{--navy:#1B2A4A;--orange:#B5651D;--gold:#8A5A00;--green:#2E7D32;--red:#C0392B;}
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#FBF7F0 0%,#F0E6D6 100%);margin:0;padding:20px;color:#222;}
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{color:var(--navy);text-align:center;margin:0 0 4px;font-size:25px;}
+  .subtitle{text-align:center;color:var(--gold);font-style:italic;margin-bottom:12px;}
+  .instructions{background:#fff;border-left:5px solid var(--orange);padding:12px 18px;border-radius:8px;margin-bottom:16px;font-size:15px;}
+  .hidden{display:none !important;}
+  .bank{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px;background:#fff;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,.08);margin-bottom:16px;min-height:56px;}
+  .chip{background:#fff;border:2px solid var(--navy);color:var(--navy);padding:8px 14px;border-radius:10px;font-size:15px;cursor:pointer;user-select:none;}
+  .chip:hover{background:#f0f4fa;}
+  .chip.selected{background:var(--navy);color:#fff;}
+  .story{background:#fff;border-radius:14px;padding:22px;box-shadow:0 6px 18px rgba(0,0,0,.12);line-height:2.2;font-size:17px;}
+  .gap{display:inline-block;min-width:130px;border-bottom:3px dashed var(--orange);text-align:center;padding:0 6px;cursor:pointer;color:var(--navy);font-weight:700;background:#fff8ec;border-radius:6px;}
+  .gap.filled{border-bottom-style:solid;background:#eef3fb;}
+  .gap.right{background:#e8f5e9;border-bottom-color:var(--green);color:#1b5e20;}
+  .gap.wrong{background:#fdecea;border-bottom-color:var(--red);color:var(--red);}
+  .btns{text-align:center;margin-top:16px;}
+  button{background:var(--orange);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:15px;cursor:pointer;margin:4px;}
+  button:hover{background:var(--gold);}
+  button.secondary{background:#eee;color:var(--navy);}
+  .feedback{margin-top:14px;padding:12px 16px;border-radius:8px;background:#f0f4fa;color:var(--navy);text-align:center;font-weight:600;}
+  .answers{margin-top:10px;font-size:14px;color:#555;text-align:left;}
+  footer{margin-top:22px;text-align:center;font-size:13px;color:#888;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Phrasal Verbs for Relationships and Tough Times</h1>
+  <div class="subtitle">Complete the Story</div>
+  <div class="instructions">Tap an expression in the bank, then tap a gap to place it. Tap a filled gap to take the expression back. Press Check when every gap is full.</div>
+  <div class="bank" id="bank"></div>
+  <div class="story" id="story"></div>
+  <div class="btns">
+    <button onclick="check()">Check</button>
+    <button class="secondary" onclick="resetGame()">Start again</button>
+  </div>
+  <div class="feedback hidden" id="feedback"></div>
+  <footer>Inglés con Cin &middot; Interactive English Practice</footer>
+</div>
+<script>
+const answers = ["drifted apart","walked out on","hung out","got through","get it together","catch on","hitting on","asked her out"];
+const parts = [
+  "Mark and Lisa were happy for years, but they slowly ", 0, " because of their busy jobs. One night, Lisa packed a bag and ", 1, " him. His friends ", 2, " with him every weekend so he would not be alone, and little by little he ", 3, " the hardest months. Mark knew he had to ", 4, ", so he joined a gym. There he met Anna, but she did not ", 5, " at first that he liked her. A stranger kept ", 6, " Anna, and Mark was not sure how to react. After a few weeks, Mark finally ", 7, " for dinner."
+];
+let placed = [];
+let selected = null;
+let checked = false;
+
+function shuffle(a){const c=[...a];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];}return c;}
+
+function resetGame(){
+  placed = answers.map(() => null);
+  selected = null;
+  checked = false;
+  document.getElementById('feedback').classList.add('hidden');
+  render();
+}
+
+function render(){
+  const bank = document.getElementById('bank');
+  bank.innerHTML = '';
+  if(!window._order) window._order = shuffle(answers.map((a,i)=>i));
+  window._order.forEach(i => {
+    if(placed.includes(i)) return;
+    const c = document.createElement('div');
+    c.className = 'chip' + (selected === i ? ' selected' : '');
+    c.textContent = answers[i];
+    c.addEventListener('click', () => { if(checked) return; selected = (selected === i) ? null : i; render(); });
+    bank.appendChild(c);
+  });
+  const story = document.getElementById('story');
+  story.innerHTML = '';
+  parts.forEach(p => {
+    if(typeof p === 'string'){
+      story.appendChild(document.createTextNode(p));
+    } else {
+      const g = document.createElement('span');
+      g.className = 'gap';
+      g.dataset.gap = p;
+      if(placed[p] !== null){
+        g.classList.add('filled');
+        g.textContent = answers[placed[p]];
+      } else {
+        g.textContent = '      ';
+      }
+      if(checked){
+        if(placed[p] === p) g.classList.add('right'); else g.classList.add('wrong');
+      }
+      g.addEventListener('click', () => gapClick(p));
+      story.appendChild(g);
+    }
+  });
+}
+
+function gapClick(p){
+  if(checked) return;
+  if(placed[p] !== null){
+    placed[p] = null;
+    render();
+    return;
+  }
+  if(selected !== null){
+    placed[p] = selected;
+    selected = null;
+    render();
+  }
+}
+
+function check(){
+  const fb = document.getElementById('feedback');
+  if(placed.includes(null)){
+    fb.textContent = 'Fill every gap first.';
+    fb.classList.remove('hidden');
+    return;
+  }
+  checked = true;
+  let right = 0;
+  placed.forEach((v,i) => { if(v === i) right++; });
+  render();
+  if(right === answers.length){
+    fb.textContent = 'Perfect! All ' + answers.length + ' correct.';
+  } else {
+    fb.innerHTML = right + ' of ' + answers.length + ' correct. Red gaps are wrong. Press Start again to try once more.<div class="answers">Correct order: ' + answers.join(' / ') + '</div>';
+  }
+  fb.classList.remove('hidden');
+}
+
+resetGame();
+</script>
+</body>
+</html>

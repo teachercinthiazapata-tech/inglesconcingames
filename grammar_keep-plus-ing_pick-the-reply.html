@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keep + -ing: Pick the Reply</title>
+<style>
+  :root{--navy:#1B2A4A;--orange:#B5651D;--gold:#8A5A00;--green:#2E7D32;--red:#C0392B;}
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#FBF7F0 0%,#F0E6D6 100%);margin:0;padding:20px;color:#222;}
+  .wrap{max-width:620px;margin:0 auto;}
+  h1{color:var(--navy);text-align:center;margin:0 0 4px;font-size:26px;}
+  .subtitle{text-align:center;color:var(--gold);font-style:italic;margin-bottom:12px;}
+  .instructions{background:#fff;border-left:5px solid var(--orange);padding:12px 18px;border-radius:8px;margin-bottom:16px;font-size:15px;}
+  .hidden{display:none !important;}
+  .stats{text-align:center;font-weight:700;color:var(--navy);margin-bottom:12px;font-size:18px;}
+  .stats span{color:var(--orange);}
+  .chat{background:#fff;border-radius:14px;padding:20px;box-shadow:0 6px 18px rgba(0,0,0,.12);}
+  .label{font-size:13px;color:#888;text-align:center;margin-bottom:10px;}
+  .bubble{max-width:85%;padding:12px 16px;border-radius:16px;margin-bottom:12px;font-size:16px;}
+  .bubble.them{background:#eef3fb;color:var(--navy);border-bottom-left-radius:4px;}
+  .bubble.you{background:#fff8ec;border:2px solid var(--orange);color:var(--gold);margin-left:auto;border-bottom-right-radius:4px;}
+  .opts{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+  .opt{padding:11px 14px;border:2px solid var(--navy);border-radius:12px;background:#fff;color:var(--navy);cursor:pointer;font-size:15.5px;text-align:left;}
+  .opt:hover{background:#f0f4fa;}
+  .opt.good{background:#e8f5e9;border-color:var(--green);color:#1b5e20;font-weight:700;}
+  .opt.bad{background:#fdecea;border-color:var(--red);color:var(--red);}
+  .opt.locked{pointer-events:none;}
+  .explain{margin-top:12px;padding:12px 16px;border-radius:8px;background:#f0f4fa;color:var(--navy);font-size:14.5px;}
+  .center{text-align:center;}
+  button{background:var(--orange);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:15px;cursor:pointer;margin-top:12px;}
+  button:hover{background:var(--gold);}
+  #win{text-align:center;background:#fff;border-radius:14px;padding:26px;box-shadow:0 6px 18px rgba(0,0,0,.12);}
+  #win h2{color:var(--green);}
+  footer{margin-top:22px;text-align:center;font-size:13px;color:#888;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Keep + -ing: Pick the Reply</h1>
+  <div class="subtitle">Grammar practice</div>
+  <div class="instructions">Read the message. Choose the reply that uses keep + verb-ing correctly. You can try again if you choose a wrong one.</div>
+  <div class="stats">Correct on the first try: <span id="score">0</span> / 8</div>
+
+  <div class="chat" id="chat">
+    <div class="label" id="label"></div>
+    <div class="bubble them" id="prompt"></div>
+    <div class="bubble you" id="you">Your reply:</div>
+    <div class="opts" id="opts"></div>
+    <div class="explain hidden" id="explain"></div>
+    <div class="center"><button id="nextBtn" class="hidden" onclick="next()">Next</button></div>
+  </div>
+
+  <div id="win" class="hidden">
+    <h2>Great work!</h2>
+    <p id="winText"></p>
+    <button onclick="init()">Play again</button>
+  </div>
+  <footer>Inglés con Cin &middot; Interactive English Practice</footer>
+</div>
+<script>
+const items = [
+  {p:"Are your neighbors noisy?", ok:"Yes, they keep playing music at midnight.", bad:["Yes, they keeps playing music at midnight.","Yes, they keep to play music at midnight."], why:"With they we use keep, and the next verb ends in -ing: keep playing."},
+  {p:"Why are you so tired?", ok:"My baby keeps waking me up.", bad:["My baby keeps wake me up.","My baby keep waking me up."], why:"The subject is my baby (he or she), so keeps, followed by a verb with -ing: keeps waking."},
+  {p:"Did you finish the report?", ok:"Not yet. I keep forgetting my password.", bad:["Not yet. I keep forget my password.","Not yet. I keeping forgetting my password."], why:"After keep we use verb-ing (forgetting). With I we use keep, not keeping."},
+  {p:"Why don't you ask her out?", ok:"Because I keep thinking she'll say no.", bad:["Because I keep to think she'll say no.","Because I keeps thinking she'll say no."], why:"We never use keep + to-infinitive. With I the form is keep, plus thinking."},
+  {p:"Is your phone broken?", ok:"No, but it keeps freezing.", bad:["No, but it keeps freeze.","No, but it keep freezing."], why:"The subject it takes keeps, and the second verb takes -ing: keeps freezing."},
+  {p:"Why are you so annoyed with Sam?", ok:"He keeps interrupting me.", bad:["He keeps interrupt me.","He is keep interrupting me."], why:"keeps (he) + interrupting. We do not add is before keep."},
+  {p:"I'm sorry for asking again!", ok:"Don't keep apologizing, it's fine.", bad:["Don't keep apologize, it's fine.","Don't keeping apologizing, it's fine."], why:"In the negative we use don't keep + verb-ing: don't keep apologizing."},
+  {p:"Your friend asks you the same question again and again. What do you say?", ok:"Why do you keep asking me the same question?", bad:["Why you keep asking me the same question?","Why do you keep to ask me the same question?"], why:"A question needs do + subject: why do you keep, followed by asking."}
+];
+let order=[], idx=0, score=0, firstTry=true;
+
+function shuffle(a){const c=[...a];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];}return c;}
+
+function init(){
+  order = shuffle(items.map((_,i)=>i));
+  idx = 0; score = 0;
+  document.getElementById('score').textContent = 0;
+  document.getElementById('win').classList.add('hidden');
+  document.getElementById('chat').classList.remove('hidden');
+  load();
+}
+
+function load(){
+  firstTry = true;
+  const it = items[order[idx]];
+  document.getElementById('label').textContent = 'Chat ' + (idx+1) + ' of ' + items.length;
+  document.getElementById('prompt').textContent = it.p;
+  document.getElementById('explain').classList.add('hidden');
+  document.getElementById('nextBtn').classList.add('hidden');
+  const box = document.getElementById('opts');
+  box.innerHTML = '';
+  shuffle([it.ok, ...it.bad]).forEach(text => {
+    const o = document.createElement('div');
+    o.className = 'opt';
+    o.textContent = text;
+    o.addEventListener('click', () => pick(o, text, it));
+    box.appendChild(o);
+  });
+}
+
+function pick(el, text, it){
+  if(el.classList.contains('locked')) return;
+  if(text === it.ok){
+    el.classList.add('good');
+    document.querySelectorAll('#opts .opt').forEach(o => o.classList.add('locked'));
+    if(firstTry){ score++; document.getElementById('score').textContent = score; }
+    const ex = document.getElementById('explain');
+    ex.textContent = 'Correct! ' + it.why;
+    ex.classList.remove('hidden');
+    document.getElementById('nextBtn').classList.remove('hidden');
+  } else {
+    firstTry = false;
+    el.classList.add('bad');
+    el.classList.add('locked');
+    const ex = document.getElementById('explain');
+    ex.textContent = 'Not quite. Try another reply.';
+    ex.classList.remove('hidden');
+  }
+}
+
+function next(){
+  idx++;
+  if(idx >= items.length){
+    document.getElementById('chat').classList.add('hidden');
+    document.getElementById('win').classList.remove('hidden');
+    document.getElementById('winText').textContent = 'You got ' + score + ' of ' + items.length + ' right on the first try.';
+  } else {
+    load();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
