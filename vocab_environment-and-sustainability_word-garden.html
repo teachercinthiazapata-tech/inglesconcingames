@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Garden: Environment Vocabulary</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(180deg, #CDEAE0, #F6D9C4); min-height: 100vh; padding: 22px; color: #1F3864; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 1.6rem; margin: 0 0 4px; }
+  p.sub { text-align: center; margin: 0 0 14px; color: #4a5a75; }
+  .garden { background: #8c6a4a; border-radius: 16px; padding: 12px; display: flex; justify-content: space-around; margin-bottom: 16px; box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+  .plot { width: 15%; text-align: center; font-size: 2rem; background: #a47b57; border-radius: 10px; padding: 8px 0; min-height: 62px; }
+  .card { background: #FFFBF4; border-radius: 18px; padding: 22px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+  .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #E8836B; font-weight: bold; margin-bottom: 8px; }
+  .clue { font-size: 1.1rem; line-height: 1.5; margin-bottom: 16px; }
+  .blanks { font-size: 1.6rem; letter-spacing: 4px; text-align: center; margin: 12px 0; font-family: monospace; min-height: 2em; }
+  input { width: 100%; font-size: 1.1rem; padding: 12px 14px; border: 2px solid #e2e2e2; border-radius: 10px; outline: none; }
+  input:focus { border-color: #E8836B; }
+  .shake { animation: shake 0.4s; border-color: #d1504a; }
+  @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); } 100% { transform: translateX(0); } }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+  button { background: #1F3864; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  button.alt { background: #fff; color: #1F3864; border: 2px solid #1F3864; }
+  .feedback { text-align: center; font-weight: bold; min-height: 2.6em; margin-top: 12px; line-height: 1.4; }
+  .good { color: #3aa76d; }
+  .bad { color: #d1504a; }
+  .hidden { display: none !important; }
+  .final { text-align: center; }
+  .final .big { font-size: 3rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Word Garden</h1>
+  <p class="sub">Type the missing word to make your garden grow. Tip: Listen to the word counts as a hint.</p>
+  <div class="garden" id="garden"></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+var words = [
+  { answer: "sustainability", clues: ["Using resources in a way that does not damage the future.", "A company that thinks about future generations cares about ______."] },
+  { answer: "carbon footprint", clues: ["The amount of carbon dioxide your activities produce.", "Flying a lot increases your ______."] },
+  { answer: "renewable energy", clues: ["Energy from the sun, wind and water that never runs out.", "Solar panels give us ______."] },
+  { answer: "pollution", clues: ["Harmful substances in the air, water or land.", "Traffic causes a lot of ______ in big cities."] },
+  { answer: "ecosystem", clues: ["A community of living things and the environment they live in.", "A forest, a lake or a coral reef is a complex ______."] },
+  { answer: "cut down on", clues: ["A phrasal verb: to use or do less of something.", "I'm trying to ______ plastic, so I use a reusable bag."] }
+];
+var order, idx, hints, plants, solved, usedHint;
+
+function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+function norm(s) { return s.toLowerCase().replace(/\s+/g, ' ').trim(); }
+
+function begin() { order = shuffle(words); idx = 0; hints = 0; plants = []; solved = false; usedHint = false; renderGarden(); renderCard(''); }
+
+function renderGarden() {
+  var g = document.getElementById('garden'); g.innerHTML = '';
+  for (var i = 0; i < words.length; i++) {
+    var p = document.createElement('div'); p.className = 'plot';
+    p.textContent = plants[i] ? plants[i] : '\u{1F7EB}';
+    g.appendChild(p);
+  }
+}
+
+function blanksText(w) {
+  var out = '';
+  for (var i = 0; i < w.length; i++) {
+    var ch = w.charAt(i);
+    if (ch === ' ') out += '   ';
+    else out += (i < hints ? ch.toUpperCase() : '_') + ' ';
+  }
+  return out;
+}
+
+function speak(t) {
+  try { var u = new SpeechSynthesisUtterance(t.replace(/_+/g, 'blank')); u.lang = 'en-US'; u.rate = 0.9; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch (e) {}
+}
+
+function renderCard(msg, cls) {
+  var card = document.getElementById('card'); card.innerHTML = '';
+  if (idx >= order.length) {
+    var d = document.createElement('div'); d.className = 'final';
+    var flowers = plants.filter(function (p) { return p === '\u{1F338}'; }).length;
+    d.innerHTML = '<div class="big">\u{1F33C}\u{1F333}\u{1F338}</div><h2>Your garden is in bloom!</h2><p>' + flowers + ' of ' + words.length + ' words without a hint.</p><p>Every word you type is a word you can use.</p>';
+    var b = document.createElement('button'); b.textContent = 'Plant a new garden'; b.onclick = begin;
+    d.appendChild(b); card.appendChild(d); return;
+  }
+  var w = order[idx];
+  if (!w.clue) w.clue = w.clues[Math.floor(Math.random() * w.clues.length)];
+  var lab = document.createElement('div'); lab.className = 'label'; lab.textContent = 'Word ' + (idx + 1) + ' of ' + words.length;
+  var cl = document.createElement('div'); cl.className = 'clue'; cl.textContent = w.clue;
+  var bl = document.createElement('div'); bl.className = 'blanks'; bl.textContent = blanksText(w.answer);
+  var inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = 'Type the word here'; inp.autocomplete = 'off';
+  inp.disabled = solved;
+  var fb = document.createElement('div'); fb.className = 'feedback ' + (cls || ''); fb.textContent = msg || '';
+  var bar = document.createElement('div'); bar.className = 'bar';
+  function submit() {
+    if (solved) return;
+    if (norm(inp.value) === w.answer) {
+      solved = true;
+      plants[idx] = usedHint ? '\u{1F331}' : '\u{1F338}';
+      renderGarden();
+      renderCard('Yes! ' + w.answer + (usedHint ? '. Your plant is growing.' : '. A flower, no hints needed!'), 'good');
+    } else {
+      inp.className = 'shake';
+      fb.textContent = 'Not quite. Try again or ask for a hint.'; fb.className = 'feedback bad';
+      setTimeout(function () { inp.className = ''; }, 450);
+    }
+  }
+  inp.onkeydown = function (e) { if (e.key === 'Enter') submit(); };
+  var ok = document.createElement('button'); ok.textContent = 'Check'; ok.className = solved ? 'hidden' : '';
+  ok.onclick = submit;
+  var hint = document.createElement('button'); hint.className = solved ? 'hidden' : 'alt'; hint.textContent = 'Hint (one letter)';
+  hint.onclick = function () {
+    var real = w.answer.replace(/ /g, '').length;
+    var shown = 0; for (var i = 0; i < hints; i++) { if (w.answer.charAt(i) !== ' ') shown++; }
+    if (hints < w.answer.length) { hints++; if (w.answer.charAt(hints - 1) === ' ' && hints < w.answer.length) hints++; }
+    usedHint = true; var keep = inp.value; renderCard('', ''); document.querySelector('input').value = keep;
+  };
+  var ear = document.createElement('button'); ear.className = 'alt'; ear.textContent = 'Listen to the word';
+  ear.onclick = function () { if (!solved) usedHint = true; speak(w.answer); };
+  var nx = document.createElement('button'); nx.textContent = idx === order.length - 1 ? 'See my garden' : 'Next word'; nx.className = solved ? '' : 'hidden';
+  nx.onclick = function () { idx++; hints = 0; solved = false; usedHint = false; renderCard(''); };
+  bar.appendChild(ok); bar.appendChild(hint); bar.appendChild(ear); bar.appendChild(nx);
+  card.appendChild(lab); card.appendChild(cl); card.appendChild(bl); card.appendChild(inp); card.appendChild(fb); card.appendChild(bar);
+  if (!solved) inp.focus();
+}
+begin();
+</script>
+</body>
+</html>
