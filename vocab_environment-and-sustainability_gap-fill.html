@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Green Words: Environment Vocabulary Gap Fill</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #CDEAE0, #F6D9C4); min-height: 100vh; padding: 22px; color: #1F3864; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 1.5rem; margin: 0 0 4px; }
+  p.sub { text-align: center; margin: 0 0 16px; color: #4a5a75; }
+  .bank { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 16px; min-height: 64px; }
+  .chip { background: #1F3864; color: #fff; border-radius: 999px; padding: 9px 16px; cursor: pointer; font-size: 0.95rem; border: 2px solid #1F3864; user-select: none; }
+  .chip.selected { background: #E8836B; border-color: #E8836B; }
+  .hidden { display: none !important; }
+  .sentence { background: #FFFBF4; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; line-height: 2; font-size: 1.02rem; box-shadow: 0 3px 10px rgba(0,0,0,0.06); }
+  .gap { display: inline-block; min-width: 130px; border-bottom: 3px dashed #E8836B; text-align: center; padding: 0 8px; cursor: pointer; color: #1F3864; font-weight: bold; }
+  .gap.filled { border-bottom-style: solid; background: #fdeee8; border-radius: 6px; }
+  .gap.right { background: #d9f2e3; border-bottom-color: #3aa76d; }
+  .gap.wrong { background: #fbdada; border-bottom-color: #d1504a; }
+  .tip { font-size: 0.85rem; color: #3aa76d; display: block; line-height: 1.4; }
+  .bar { display: flex; gap: 10px; justify-content: center; margin: 16px 0; flex-wrap: wrap; }
+  button { background: #1F3864; color: #fff; border: none; padding: 11px 22px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  button.alt { background: #fff; color: #1F3864; border: 2px solid #1F3864; }
+  #result { text-align: center; font-size: 1.2rem; font-weight: bold; color: #E8836B; min-height: 1.6em; }
+  .hint { text-align: center; font-size: 0.88rem; color: #4a5a75; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Green Words</h1>
+  <p class="sub">Environment vocabulary gap fill</p>
+  <p class="hint">Tap a word, then tap a gap to place it. Tap a filled gap to take the word back.</p>
+  <p class="hint" id="status" style="font-weight:bold;color:#E8836B">Step 1: tap a word.</p>
+  <div class="bank" id="bank"></div>
+  <div id="sentences"></div>
+  <div class="bar">
+    <button id="undoBtn" class="alt">Undo last</button>
+    <button id="checkBtn">Check answers</button>
+    <button id="resetBtn" class="alt">Start again</button>
+  </div>
+  <div id="result"></div>
+</div>
+<script>
+var items = [
+  { before: "Using solar and wind power is a great way to switch to ", after: ".", answer: "renewable energy", tip: "Renewable energy comes from sources that never run out, like sun and wind." },
+  { before: "Flying a lot increases your ", after: ".", answer: "carbon footprint", tip: "Your carbon footprint is the carbon dioxide your activities produce." },
+  { before: "Air ", after: " is a big problem in many large cities.", answer: "pollution", tip: "Pollution is harmful substances in the environment, like smog." },
+  { before: "A forest is a complex ", after: " where plants, animals and water depend on each other.", answer: "ecosystem", tip: "An ecosystem is a community of living things and their environment." },
+  { before: "I'm trying to ", after: " plastic, so I always use a reusable bottle.", answer: "cut down on", tip: "Cut down on means to use or do less of something." },
+  { before: "A company that cares about ", after: " thinks about future generations, not only about profit.", answer: "sustainability", tip: "Sustainability means using resources without harming the future." }
+];
+var words = items.map(function (i) { return i.answer; });
+var placed = [];
+var moves = [];
+var selected = null;
+var pendingGap = null;
+
+function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+
+var order = shuffle(words);
+
+function render(checked) {
+  var st = document.getElementById('status');
+  st.textContent = selected ? 'Selected: ' + selected + '. Now tap a gap.' : (pendingGap !== null ? 'Gap selected. Now tap a word.' : 'Tap a word, then tap a gap (or tap a gap first).');
+  var bank = document.getElementById('bank');
+  bank.innerHTML = '';
+  order.forEach(function (w) {
+    if (placed.indexOf(w) !== -1) return;
+    var c = document.createElement('div');
+    c.className = 'chip' + (selected === w ? ' selected' : '');
+    c.textContent = w;
+    c.onclick = function () {
+      if (pendingGap !== null) { placed[pendingGap] = w; moves.push(pendingGap); pendingGap = null; selected = null; }
+      else { selected = (selected === w) ? null : w; }
+      render(false);
+    };
+    bank.appendChild(c);
+  });
+  var box = document.getElementById('sentences');
+  box.innerHTML = '';
+  items.forEach(function (it, idx) {
+    var s = document.createElement('div');
+    s.className = 'sentence';
+    var g = document.createElement('span');
+    var val = placed[idx] || null;
+    g.className = 'gap' + (val ? ' filled' : '') + (pendingGap === idx ? ' right' : '');
+    if (checked && val) { g.className += (val === it.answer ? ' right' : ' wrong'); }
+    g.textContent = val ? val : '          ';
+    g.onclick = function () {
+      if (val) { placed[idx] = null; moves = moves.filter(function (h) { return h !== idx; }); }
+      else if (selected) { placed[idx] = selected; moves.push(idx); selected = null; pendingGap = null; }
+      else { pendingGap = (pendingGap === idx) ? null : idx; }
+      render(false);
+    };
+    s.appendChild(document.createTextNode(it.before));
+    s.appendChild(g);
+    s.appendChild(document.createTextNode(it.after));
+    if (checked) {
+      var t = document.createElement('span');
+      t.className = 'tip';
+      t.textContent = (val === it.answer ? 'Correct. ' : 'Answer: ' + it.answer + '. ') + it.tip;
+      s.appendChild(t);
+    }
+    box.appendChild(s);
+  });
+}
+
+function cleanPlaced() { for (var i = 0; i < items.length; i++) { if (placed[i] === undefined) placed[i] = null; } }
+function placedWords() { return placed.filter(function (p) { return p; }); }
+
+document.getElementById('undoBtn').onclick = function () {
+  if (moves.length === 0) return;
+  var idx = moves.pop();
+  placed[idx] = null;
+  render(false);
+  document.getElementById('result').textContent = '';
+};
+document.getElementById('checkBtn').onclick = function () {
+  var score = 0;
+  items.forEach(function (it, i) { if (placed[i] === it.answer) score++; });
+  render(true);
+  document.getElementById('result').textContent = score + ' / ' + items.length + (score === items.length ? '  Great work!' : '  Good try, check the green and red gaps.');
+};
+document.getElementById('resetBtn').onclick = function () {
+  placed = []; moves = []; selected = null; pendingGap = null; cleanPlaced(); order = shuffle(words);
+  document.getElementById('result').textContent = '';
+  render(false);
+};
+cleanPlaced();
+render(false);
+</script>
+</body>
+</html>

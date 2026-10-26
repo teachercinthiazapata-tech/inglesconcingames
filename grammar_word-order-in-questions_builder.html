@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Question Builder: Word Order in Questions</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #CBA9E3, #CDEAE0); min-height: 100vh; padding: 22px; color: #1F3864; }
+  .wrap { max-width: 740px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 1.5rem; margin: 0 0 4px; }
+  p.sub { text-align: center; margin: 0 0 14px; color: #4a5a75; }
+  .card { background: #FFFBF4; border-radius: 16px; padding: 22px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+  .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #E8836B; font-weight: bold; margin-bottom: 8px; }
+  .line { min-height: 62px; border: 2px dashed #E8836B; border-radius: 12px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #fff; margin-bottom: 14px; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; min-height: 48px; }
+  .tile { background: #1F3864; color: #fff; padding: 9px 14px; border-radius: 10px; cursor: pointer; user-select: none; font-size: 1rem; }
+  .tile.in { background: #E8836B; }
+  .mark { font-size: 1.3rem; font-weight: bold; color: #1F3864; }
+  .feedback { font-weight: bold; min-height: 2.6em; line-height: 1.4; margin-bottom: 10px; }
+  .good { color: #3aa76d; }
+  .bad { color: #d1504a; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  button { background: #1F3864; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  button.alt { background: #fff; color: #1F3864; border: 2px solid #1F3864; }
+  .hidden { display: none !important; }
+  .final { text-align: center; }
+  .final .score { font-size: 2rem; font-weight: bold; color: #E8836B; margin: 12px 0; }
+  .hint { background: #fff; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Question Builder</h1>
+  <p class="sub">Put the words in the right order to build each question</p>
+  <div class="hint">Reminder: in direct questions use <b>auxiliary + subject + verb</b>. In indirect questions use <b>question word + subject + verb</b>, with no inversion.</div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+var items = [
+  { words: ["Do", "you", "recycle", "at home"], mark: "?", why: "Yes/no question: auxiliary (Do) + subject (you) + verb (recycle)." },
+  { words: ["What", "can", "we", "do"], mark: "?", why: "Wh- question: question word + auxiliary (can) + subject (we) + verb (do)." },
+  { words: ["Why", "should", "we", "protect", "the environment"], mark: "?", why: "Wh- question: Why + should + subject + verb. Not: Why we should protect." },
+  { words: ["Have", "you", "ever", "used", "renewable energy"], mark: "?", why: "Present Perfect question: Have + subject + ever + past participle." },
+  { words: ["What", "causes", "air pollution"], mark: "?", why: "Subject question: What is the subject, so there is no do/does and no inversion." },
+  { words: ["Could you", "tell me", "where", "I", "can", "recycle batteries"], mark: "?", why: "Indirect question: after 'where' use normal order (I can), not 'can I'." },
+  { words: ["Do you know", "what time", "the center", "opens"], mark: "?", why: "Indirect question: after 'what time' use statement order (the center opens), with no 'does'." }
+];
+var idx = 0, score = 0, answer = [], checked = false, attempts = 0;
+
+function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+var tilesOrder = [];
+
+function start() { tilesOrder = shuffle(items[idx].words.map(function (w, i) { return { w: w, id: i }; })); answer = []; checked = false; attempts = 0; render(''); }
+
+function render(msg, cls) {
+  var card = document.getElementById('card');
+  card.innerHTML = '';
+  if (idx >= items.length) {
+    var d = document.createElement('div'); d.className = 'final';
+    d.innerHTML = '<h2>Well done!</h2><div class="score">' + score + ' / ' + items.length + '</div><p>Questions are everywhere: in conversations, podcasts and daily life. Keep listening for the word order.</p>';
+    var b = document.createElement('button'); b.textContent = 'Play again';
+    b.onclick = function () { idx = 0; score = 0; start(); };
+    d.appendChild(b); card.appendChild(d); return;
+  }
+  var lab = document.createElement('div'); lab.className = 'label'; lab.textContent = 'Question ' + (idx + 1) + ' of ' + items.length;
+  var line = document.createElement('div'); line.className = 'line';
+  answer.forEach(function (t, pos) {
+    var el = document.createElement('div'); el.className = 'tile in'; el.textContent = t.w;
+    el.onclick = function () { if (checked) return; answer.splice(pos, 1); render(''); };
+    line.appendChild(el);
+  });
+  var m = document.createElement('span'); m.className = 'mark'; m.textContent = items[idx].mark; line.appendChild(m);
+  var tiles = document.createElement('div'); tiles.className = 'tiles';
+  tilesOrder.forEach(function (t) {
+    if (answer.indexOf(t) !== -1) return;
+    var el = document.createElement('div'); el.className = 'tile'; el.textContent = t.w;
+    el.onclick = function () { if (checked) return; answer.push(t); render(''); };
+    tiles.appendChild(el);
+  });
+  var fb = document.createElement('div'); fb.className = 'feedback ' + (cls || ''); fb.textContent = msg || '';
+  var bar = document.createElement('div'); bar.className = 'bar';
+  var undo = document.createElement('button'); undo.className = 'alt'; undo.textContent = 'Undo';
+  undo.onclick = function () { if (checked) return; answer.pop(); render(''); };
+  var check = document.createElement('button'); check.textContent = 'Check';
+  check.className = checked ? 'hidden' : '';
+  check.onclick = function () {
+    var ok = answer.length === items[idx].words.length && answer.every(function (t, i) { return t.id === i; });
+    if (ok) {
+      checked = true;
+      if (attempts === 0) score++;
+      render('Correct! ' + items[idx].why, 'good');
+    } else {
+      attempts++;
+      render('Not quite. Check the order and try again. Hint: ' + items[idx].why, 'bad');
+    }
+  };
+  var show = document.createElement('button'); show.className = (!checked && attempts >= 2) ? 'alt' : 'hidden'; show.textContent = 'Show answer';
+  show.onclick = function () {
+    checked = true;
+    render('Correct order: ' + items[idx].words.join(' ') + items[idx].mark + ' ' + items[idx].why, 'bad');
+  };
+  var next = document.createElement('button'); next.textContent = idx === items.length - 1 ? 'See score' : 'Next';
+  next.className = checked ? '' : 'hidden';
+  next.onclick = function () { idx++; if (idx < items.length) start(); else render(''); };
+  bar.appendChild(undo); bar.appendChild(check); bar.appendChild(show); bar.appendChild(next);
+  card.appendChild(lab); card.appendChild(line); card.appendChild(tiles); card.appendChild(fb); card.appendChild(bar);
+}
+start();
+</script>
+</body>
+</html>
