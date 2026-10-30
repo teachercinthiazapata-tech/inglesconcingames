@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Office Escape</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card { background: #fff; border-radius: 24px; max-width: 660px; width: 100%; padding: 32px 30px; box-shadow: 0 12px 40px rgba(60,40,100,0.18); }
+  h1 { text-align: center; font-size: 24px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 14px; }
+  .doors { display: flex; justify-content: center; gap: 10px; margin-bottom: 16px; font-size: 26px; }
+  .door { opacity: 0.45; transition: opacity 0.3s, transform 0.3s; }
+  .door.active { opacity: 1; transform: scale(1.2); }
+  .door.done { opacity: 1; }
+  .intro { text-align: center; color: #4a3b6b; line-height: 1.6; }
+  .intro .big { font-size: 56px; margin: 6px 0; }
+  .intro p { margin-bottom: 14px; }
+  .tag { text-align: center; font-size: 13px; color: #9b8fb8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 700; }
+  .prompt-box { background: #f5f2fc; border-radius: 14px; padding: 18px; text-align: center; color: #4a3b6b; font-size: 17px; line-height: 1.6; margin-bottom: 16px; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .option-btn { background: #efe8fb; border: 2px solid #e2d9f5; border-radius: 12px; padding: 14px 16px; font-size: 15px; color: #4a3b6b; cursor: pointer; text-align: left; transition: background 0.15s; }
+  .option-btn:hover { background: #e2d3f9; }
+  .option-btn.correct { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .option-btn.wrong { background: #fbe2e2; border-color: #e79a9a; color: #a13a3a; }
+  .option-btn:disabled { cursor: default; }
+  .tf-row { display: flex; gap: 12px; margin-bottom: 14px; }
+  .tf-row .option-btn { flex: 1; text-align: center; font-weight: 700; font-size: 17px; }
+  .match-cols { display: flex; gap: 20px; margin-bottom: 14px; }
+  .match-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .match-item { background: #efe8fb; border: 2px solid #e2d9f5; border-radius: 10px; padding: 11px; text-align: center; font-size: 15px; color: #4a3b6b; cursor: pointer; }
+  .match-item:hover { background: #e2d3f9; }
+  .match-item.sel { border-color: #9b7bd8; background: #e2d3f9; }
+  .match-item.done { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; cursor: default; }
+  .match-item.bad { background: #fbe2e2; border-color: #e79a9a; }
+  .card-word { text-align: center; font-size: 26px; font-weight: 800; color: #5b3fa0; background: #f5f2fc; border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .bucket-row { display: flex; gap: 12px; margin-bottom: 14px; }
+  .bucket-row .btn { margin-bottom: 0; }
+  .sel-line { line-height: 2.4; text-align: center; color: #4a3b6b; font-size: 16px; margin-bottom: 14px; background: #f5f2fc; border-radius: 14px; padding: 14px; }
+  .sel-line select { font-size: 15px; padding: 6px 8px; border-radius: 8px; border: 2px solid #d8cff0; color: #4a3b6b; }
+  .sel-line select.good { border-color: #6fcf97; background: #d4f4e2; }
+  .sel-line select.bad { border-color: #e79a9a; background: #fbe2e2; }
+  .btn { display: block; width: 100%; background: #6fcf97; color: white; border: none; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #b9e5cb; cursor: default; }
+  .btn.secondary { background: #efe8fb; color: #5b3fa0; }
+  .btn.secondary:hover { background: #ddd0f7; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 12px 0; padding: 12px; border-radius: 12px; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .stars { font-size: 36px; margin: 10px 0; letter-spacing: 4px; }
+  .score-screen .big-score { font-size: 44px; font-weight: 800; color: #5b3fa0; margin: 8px 0; }
+  .footer { text-align: center; color: #9b8fb8; font-size: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Office Escape</h1>
+  <div class="subtitle">Vocabulary Review</div>
+
+  <div id="introScreen" class="intro">
+    <div class="big">&#128274;</div>
+    <p>The office door is locked! Open <b>6 doors</b> to escape.<br>Each door has a different vocabulary challenge.</p>
+    <p style="font-size:14px;color:#7a6f95;">No timer. If you make a mistake, just try again.</p>
+    <button class="btn" onclick="startGame()">Start the Escape</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div class="doors" id="doors"></div>
+    <div class="tag" id="tag"></div>
+    <div class="prompt-box" id="promptBox"></div>
+    <div id="mechanicArea"></div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>You escaped! &#127881;</h1>
+    <div class="stars" id="stars"></div>
+    <div class="big-score" id="scoreCount">0 / 6</div>
+    <p id="finalMsg" style="color:#6b5f8a; margin-bottom: 18px;"></p>
+    <button class="btn" onclick="startGame()">Play Again</button>
+  </div>
+  <div class="footer">Inglés con Cin</div>
+</div>
+
+<script>
+const doors = [
+  {
+    mechanic: "match", tag: "Door 1: Word partners",
+    prompt: "Match the word partners. Click one word on the left and one on the right.",
+    pairs: [["make", "an appointment"], ["wait for", "approval"], ["first", "step"], ["meet the", "deadline"], ["cause a", "delay"]],
+    tip: "These word partners are very common when we explain a process."
+  },
+  {
+    mechanic: "sort", tag: "Door 2: Verb or noun?",
+    prompt: "Is it a verb (an action) or a noun (a thing)?",
+    cards: [
+      { text: "to confirm", answer: "verb" }, { text: "an appointment", answer: "noun" },
+      { text: "to receive", answer: "verb" }, { text: "a deadline", answer: "noun" },
+      { text: "an approval", answer: "noun" }, { text: "to handle", answer: "verb" }
+    ],
+    tip: "Verbs often have to before them. Nouns often have a or an."
+  },
+  {
+    mechanic: "choice", tag: "Door 3: Odd one out",
+    prompt: "Which word is NOT about time?",
+    options: ["deadline", "delay", "appointment", "approval"],
+    correctAnswer: "approval",
+    tip: "A deadline, a delay and an appointment are all connected to time. Approval is a yes from someone."
+  },
+  {
+    mechanic: "tf", tag: "Door 4: True or false?",
+    prompt: "Read each sentence. True or false?",
+    statements: [
+      { text: "A delay means something happens earlier.", answer: false },
+      { text: "You make an appointment with a lawyer.", answer: true },
+      { text: "To receive means to send something.", answer: false },
+      { text: "A deadline is the last day to finish something.", answer: true }
+    ],
+    tip: "A delay is later than planned. To receive means to get something."
+  },
+  {
+    mechanic: "mistake", tag: "Door 5: Spot the mistake",
+    prompt: "One sentence in each group has a mistake. Click it.",
+    groups: [
+      { options: ["You will receive an email from our office.", "If you will miss the deadline, there will be a delay.", "Please confirm your appointment by email."], correctAnswer: "If you will miss the deadline, there will be a delay.", why: "After if, we use the present simple: if you miss." },
+      { options: ["We are waiting for the approval of your application.", "The first step is send your documents.", "Step by step, we explain the process."], correctAnswer: "The first step is send your documents.", why: "We say: The first step is to send your documents." }
+    ],
+    tip: ""
+  },
+  {
+    mechanic: "email", tag: "Door 6: The final door",
+    prompt: "Complete the email with the correct words.",
+    parts: ["Dear client, please ", 0, " your appointment. If you miss the ", 1, ", there will be a ", 2, ". You will ", 3, " an email soon."],
+    answers: ["confirm", "deadline", "delay", "receive"],
+    bank: ["confirm", "deadline", "delay", "receive", "approval", "step"],
+    tip: "Great job! You used the words in a real message."
+  }
+];
+
+let current = 0;
+let firstTry = 0;
+let wrongAttempted = false;
+let sub = 0;
+let selLeft = null;
+let matched = 0;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  current = 0;
+  firstTry = 0;
+  document.getElementById("introScreen").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  renderDoor();
+}
+
+function buildDoors() {
+  const el = document.getElementById("doors");
+  el.innerHTML = "";
+  for (let i = 0; i < doors.length; i++) {
+    const d = document.createElement("span");
+    d.className = "door" + (i === current ? " active" : i < current ? " done" : "");
+    d.textContent = i < current ? "🔓" : "🚪";
+    el.appendChild(d);
+  }
+}
+
+function showFeedback(kind, text) {
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(kind);
+  fb.textContent = text;
+}
+function clearFeedback() {
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  fb.classList.remove("correct", "wrong");
+}
+
+function doorDone(msg) {
+  if (!wrongAttempted) firstTry++;
+  showFeedback("correct", msg);
+  setTimeout(nextDoor, 2200);
+}
+
+function renderDoor() {
+  wrongAttempted = false;
+  sub = 0;
+  selLeft = null;
+  matched = 0;
+  clearFeedback();
+  buildDoors();
+  const d = doors[current];
+  document.getElementById("tag").textContent = d.tag;
+  document.getElementById("promptBox").textContent = d.prompt;
+  const area = document.getElementById("mechanicArea");
+  area.innerHTML = "";
+
+  if (d.mechanic === "match") renderMatch(area, d);
+  else if (d.mechanic === "sort") renderSort(area, d);
+  else if (d.mechanic === "choice") renderChoice(area, d.options, d.correctAnswer, d.tip);
+  else if (d.mechanic === "tf") renderTF(area, d);
+  else if (d.mechanic === "mistake") renderMistake(area, d);
+  else if (d.mechanic === "email") renderEmail(area, d);
+}
+
+function renderMatch(area, d) {
+  const lefts = shuffle(d.pairs.map(p => p[0]));
+  const rights = shuffle(d.pairs.map(p => p[1]));
+  area.innerHTML = '<div class="match-cols"><div class="match-col" id="colL"></div><div class="match-col" id="colR"></div></div>';
+  lefts.forEach(t => {
+    const b = document.createElement("div");
+    b.className = "match-item"; b.textContent = t; b.dataset.side = "L";
+    b.onclick = () => pickMatch(b);
+    document.getElementById("colL").appendChild(b);
+  });
+  rights.forEach(t => {
+    const b = document.createElement("div");
+    b.className = "match-item"; b.textContent = t; b.dataset.side = "R";
+    b.onclick = () => pickMatch(b);
+    document.getElementById("colR").appendChild(b);
+  });
+}
+
+function pickMatch(el) {
+  if (el.classList.contains("done")) return;
+  const d = doors[current];
+  if (el.dataset.side === "L") {
+    document.querySelectorAll('#colL .match-item').forEach(x => x.classList.remove("sel"));
+    el.classList.add("sel");
+    selLeft = el;
+    return;
+  }
+  if (!selLeft) { showFeedback("wrong", "First click a word on the left."); return; }
+  const pair = d.pairs.find(p => p[0] === selLeft.textContent);
+  if (pair && pair[1] === el.textContent) {
+    selLeft.classList.remove("sel");
+    selLeft.classList.add("done");
+    el.classList.add("done");
+    selLeft = null;
+    matched++;
+    clearFeedback();
+    if (matched === d.pairs.length) doorDone("Door open! " + d.tip);
+  } else {
+    wrongAttempted = true;
+    el.classList.add("bad");
+    setTimeout(function() { el.classList.remove("bad"); }, 600);
+    showFeedback("wrong", "Not a good partner. Try again.");
+  }
+}
+
+function renderSort(area, d) {
+  area.innerHTML = '<div class="card-word" id="cardWord"></div>' +
+    '<div class="bucket-row"><button class="btn secondary" id="bVerb" onclick="sortPick(\'verb\')">Verb (action)</button>' +
+    '<button class="btn secondary" id="bNoun" onclick="sortPick(\'noun\')">Noun (thing)</button></div>';
+  d.order = shuffle(d.cards);
+  showSortCard();
+}
+function showSortCard() {
+  const d = doors[current];
+  document.getElementById("cardWord").textContent = d.order[sub].text + "   (" + (sub + 1) + "/" + d.order.length + ")";
+}
+function sortPick(choice) {
+  const d = doors[current];
+  if (d.order[sub].answer === choice) {
+    sub++;
+    clearFeedback();
+    if (sub >= d.order.length) { document.getElementById("bVerb").disabled = true; document.getElementById("bNoun").disabled = true; doorDone("Door open! " + d.tip); }
+    else showSortCard();
+  } else {
+    wrongAttempted = true;
+    showFeedback("wrong", "Not quite. Think about it and try the other one.");
+  }
+}
+
+function renderChoice(area, options, correct, tip) {
+  area.innerHTML = '<div class="options" id="optionsArea"></div>';
+  const oa = document.getElementById("optionsArea");
+  shuffle(options).forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn"; btn.textContent = opt;
+    btn.onclick = function() {
+      if (opt === correct) {
+        oa.querySelectorAll(".option-btn").forEach(b => b.disabled = true);
+        btn.classList.add("correct");
+        doorDone("Door open! " + tip);
+      } else {
+        btn.classList.add("wrong"); btn.disabled = true;
+        wrongAttempted = true;
+        showFeedback("wrong", "Not quite. Try another one.");
+      }
+    };
+    oa.appendChild(btn);
+  });
+}
+
+function renderTF(area, d) {
+  area.innerHTML = '<div class="prompt-box" id="tfText" style="background:#fff;border:2px solid #e2d9f5;"></div>' +
+    '<div class="tf-row"><button class="option-btn" onclick="tfPick(true)">True</button><button class="option-btn" onclick="tfPick(false)">False</button></div>';
+  showTF();
+}
+function showTF() {
+  const d = doors[current];
+  document.getElementById("tfText").textContent = (sub + 1) + "/" + d.statements.length + ".  " + d.statements[sub].text;
+}
+function tfPick(v) {
+  const d = doors[current];
+  if (d.statements[sub].answer === v) {
+    sub++;
+    clearFeedback();
+    if (sub >= d.statements.length) {
+      document.querySelectorAll(".tf-row .option-btn").forEach(b => b.disabled = true);
+      doorDone("Door open! " + d.tip);
+    } else showTF();
+  } else {
+    wrongAttempted = true;
+    showFeedback("wrong", "Not quite. Read it again.");
+  }
+}
+
+function renderMistake(area, d) {
+  area.innerHTML = '<div class="options" id="optionsArea"></div>';
+  showMistake();
+}
+function showMistake() {
+  const d = doors[current];
+  const g = d.groups[sub];
+  const oa = document.getElementById("optionsArea");
+  oa.innerHTML = "";
+  shuffle(g.options).forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn"; btn.textContent = opt;
+    btn.onclick = function() {
+      if (opt === g.correctAnswer) {
+        oa.querySelectorAll(".option-btn").forEach(b => b.disabled = true);
+        btn.classList.add("correct");
+        sub++;
+        if (sub >= d.groups.length) doorDone("Door open! " + g.why);
+        else { showFeedback("correct", "Yes! " + g.why); setTimeout(function() { clearFeedback(); showMistake(); }, 2200); }
+      } else {
+        btn.classList.add("wrong"); btn.disabled = true;
+        wrongAttempted = true;
+        showFeedback("wrong", "That sentence is fine. Find the mistake.");
+      }
+    };
+    oa.appendChild(btn);
+  });
+}
+
+function renderEmail(area, d) {
+  const bank = shuffle(d.bank);
+  let html = '<div class="sel-line" id="emailLine">';
+  d.parts.forEach(p => {
+    if (typeof p === "string") html += p;
+    else {
+      html += '<select id="sel' + p + '"><option value="">...</option>' + bank.map(w => '<option value="' + w + '">' + w + '</option>').join("") + '</select>';
+    }
+  });
+  html += '</div><button class="btn" id="emailCheck" onclick="checkEmail()">Check</button>';
+  area.innerHTML = html;
+}
+function checkEmail() {
+  const d = doors[current];
+  let ok = true;
+  d.answers.forEach((a, i) => {
+    const s = document.getElementById("sel" + i);
+    s.classList.remove("good", "bad");
+    if (s.value === a) s.classList.add("good");
+    else { s.classList.add("bad"); ok = false; }
+  });
+  if (ok) {
+    document.getElementById("emailCheck").disabled = true;
+    doorDone("The last door is open! " + d.tip);
+  } else {
+    wrongAttempted = true;
+    showFeedback("wrong", "Some words are not right yet. Fix the red ones.");
+  }
+}
+
+function nextDoor() {
+  current++;
+  if (current >= doors.length) showFinish();
+  else renderDoor();
+}
+
+function showFinish() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  let stars = "";
+  for (let i = 0; i < doors.length; i++) stars += i < firstTry ? "⭐" : "☆";
+  document.getElementById("stars").textContent = stars;
+  document.getElementById("scoreCount").textContent = firstTry + " / " + doors.length;
+  let msg;
+  if (firstTry === doors.length) msg = "Perfect! You opened every door on the first try.";
+  else if (firstTry >= 4) msg = "Great job! Play again to open every door on the first try.";
+  else msg = "You escaped! Play again to collect more stars.";
+  document.getElementById("finalMsg").textContent = msg;
+}
+</script>
+</body>
+</html>

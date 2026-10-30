@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deadline Day</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card { background: #fff; border-radius: 24px; max-width: 660px; width: 100%; padding: 32px 30px; box-shadow: 0 12px 40px rgba(60,40,100,0.18); }
+  h1 { text-align: center; font-size: 24px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 14px; }
+  .intro { text-align: center; color: #4a3b6b; line-height: 1.6; }
+  .intro .big { font-size: 56px; margin: 6px 0; }
+  .intro p { margin-bottom: 14px; }
+  .clock-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .clock { font-size: 20px; font-weight: 800; color: #5b3fa0; min-width: 96px; }
+  .day-bar { flex: 1; height: 12px; background: #e2d9f5; border-radius: 8px; overflow: hidden; }
+  .day-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #9b7bd8, #6fcf97); transition: width 0.8s; }
+  .scene { background: #f5f2fc; border-radius: 16px; padding: 18px; color: #4a3b6b; line-height: 1.6; margin-bottom: 14px; }
+  .scene .place { font-size: 34px; margin-bottom: 4px; }
+  .scene .says { margin-top: 8px; font-weight: 600; }
+  .task-line { text-align: center; font-weight: 600; color: #4a3b6b; margin-bottom: 12px; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .option-btn { background: #efe8fb; border: 2px solid #e2d9f5; border-radius: 12px; padding: 14px 16px; font-size: 15px; color: #4a3b6b; cursor: pointer; text-align: left; }
+  .option-btn:hover { background: #e2d3f9; }
+  .option-btn.correct { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .option-btn.wrong { background: #fbe2e2; border-color: #e79a9a; color: #a13a3a; }
+  .option-btn:disabled { cursor: default; }
+  .tile-pool, .tile-answer { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 46px; margin-bottom: 14px; padding: 10px; border-radius: 12px; }
+  .tile-pool { background: #f5f2fc; }
+  .tile-answer { background: #fff; border: 2px dashed #d8cff0; }
+  .tile { background: #9b7bd8; color: white; padding: 8px 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; user-select: none; }
+  .tile:hover { background: #8a68c9; }
+  .type-input { width: 100%; padding: 13px 14px; border: 2px solid #e2d9f5; border-radius: 12px; font-size: 16px; margin-bottom: 12px; text-align: center; }
+  .type-input:focus { outline: none; border-color: #9b7bd8; }
+  .clue-line { text-align: center; font-size: 22px; letter-spacing: 6px; color: #5b3fa0; font-weight: 700; margin-bottom: 12px; min-height: 30px; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { width: auto; flex: 1; }
+  .btn { display: block; width: 100%; background: #6fcf97; color: white; border: none; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #b9e5cb; cursor: default; }
+  .btn.secondary { background: #efe8fb; color: #5b3fa0; }
+  .btn.secondary:hover { background: #ddd0f7; }
+  .btn.secondary:disabled { background: #f3eefb; color: #b8aad6; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 12px 0; padding: 12px; border-radius: 12px; line-height: 1.5; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .stars { font-size: 36px; margin: 10px 0; letter-spacing: 4px; }
+  .score-screen .big-score { font-size: 44px; font-weight: 800; color: #5b3fa0; margin: 8px 0; }
+  .footer { text-align: center; color: #9b8fb8; font-size: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Deadline Day</h1>
+  <div class="subtitle">First Conditional Story Game</div>
+
+  <div id="introScreen" class="intro">
+    <div class="big">&#9200;</div>
+    <p>It is 9:00 AM at Andes Migration Law. You are <b>Sofia</b>, the paralegal.<br>Today is a big deadline day. Help your clients and finish the day at 6:00 PM!</p>
+    <p style="font-size:14px;color:#7a6f95;">Your answers change what happens next. No timer. You can try again.</p>
+    <button class="btn" onclick="startGame()">Start the Day</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div class="clock-row"><div class="clock" id="clock">9:00 AM</div><div class="day-bar"><div class="day-fill" id="dayFill"></div></div></div>
+    <div class="scene"><div class="place" id="place"></div><div id="story"></div><div class="says" id="says"></div></div>
+    <div class="task-line" id="taskLine"></div>
+    <div id="mechanicArea"></div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>Deadline met! &#127881;</h1>
+    <div class="subtitle" style="margin-bottom:6px;">It is 6:00 PM. All your clients are happy.</div>
+    <div class="stars" id="stars"></div>
+    <div class="big-score" id="scoreCount">0 / 6</div>
+    <p id="finalMsg" style="color:#6b5f8a; margin-bottom: 18px;"></p>
+    <button class="btn" onclick="startGame()">Play Again</button>
+  </div>
+  <div class="footer">Inglés con Cin</div>
+</div>
+
+<script>
+const scenes = [
+  {
+    time: "9:00 AM", place: "☎️",
+    story: "The phone rings. It is Mr. Weber, a client from Germany.",
+    says: "\"If I send the documents today, when will you start the process?\"",
+    mechanic: "choice", task: "Choose Sofia's answer.",
+    options: [
+      { text: "If you send the documents today, we will start tomorrow.", correct: true, outcome: "Mr. Weber smiles. \"Perfect, I will send them now!\"" },
+      { text: "If you will send the documents today, we start tomorrow.", correct: false, outcome: "Mr. Weber is confused. After if, we use the present simple: if you send." },
+      { text: "If you send the documents today, we starting tomorrow.", correct: false, outcome: "Mr. Weber is confused. We need will + a base verb: we will start." }
+    ]
+  },
+  {
+    time: "10:30 AM", place: "📧",
+    story: "An email arrives from Ms. Dupont. Her documents are in French.",
+    says: "Sofia starts her reply:  ______ , we will need a translation.",
+    mechanic: "build", task: "Build the first half of Sofia's sentence. Tap the words in order.",
+    pieces: ["If", "they", "are", "in", "French"],
+    outcomeOk: "Ms. Dupont replies: \"Thank you! I will call a translator.\""
+  },
+  {
+    time: "12:00 PM", place: "🍝",
+    story: "It is lunch time, but a client calls. He is worried about the deadline.",
+    says: "\"What happens if I miss the deadline?\"",
+    mechanic: "type", task: "Complete Sofia's answer. Use Clue if you need help.",
+    before: "If you miss the deadline, there", after: "be a delay.",
+    answers: ["will"], clueWord: "will",
+    outcomeOk: "The client relaxes. \"Understood. I will send everything today.\""
+  },
+  {
+    time: "2:00 PM", place: "👩‍💼",
+    story: "Ms. Rossi comes to the office. She cannot decide how she wants to receive news.",
+    says: "\"How will you tell me about the result?\"  (There are two good answers. You choose the path!)",
+    mechanic: "choice", task: "Choose Sofia's answer.",
+    options: [
+      { text: "If you want, we will call you tomorrow.", correct: true, outcome: "PATH 1: Ms. Rossi loves phone calls. \"Great, call me at ten!\"" },
+      { text: "If you prefer, I will send you an email.", correct: true, outcome: "PATH 2: Ms. Rossi likes everything in writing. \"Perfect, an email is better.\"" },
+      { text: "If you will prefer, I send an email.", correct: false, outcome: "Ms. Rossi looks confused. Use the present simple after if, and will in the result." }
+    ]
+  },
+  {
+    time: "4:00 PM", place: "📋",
+    story: "The application is almost ready. Sofia writes a note for the client.",
+    says: "Sofia writes: If everything is correct, ______ .",
+    mechanic: "build", task: "Build the second half of Sofia's sentence. Tap the words in order.",
+    pieces: ["you", "will", "receive", "your", "permit", "by", "mail"],
+    outcomeOk: "The client is delighted. \"I cannot wait for my permit!\""
+  },
+  {
+    time: "5:30 PM", place: "🕒",
+    story: "Last call of the day. Ms. Silva is not sure about her appointment.",
+    says: "\"What happens if I do not confirm my appointment?\"",
+    mechanic: "choice", task: "Choose Sofia's answer.",
+    options: [
+      { text: "If you do not confirm your appointment, we will cancel it.", correct: true, outcome: "Ms. Silva says: \"Oh, I will confirm right now. Thank you, Sofia!\"" },
+      { text: "If you not confirm your appointment, we will cancel it.", correct: false, outcome: "Ms. Silva is confused. The negative is: if you do not confirm." },
+      { text: "If you do not confirm your appointment, we cancel will it.", correct: false, outcome: "Ms. Silva is confused. The order is: we will cancel it." }
+    ]
+  }
+];
+
+let current = 0;
+let firstTry = 0;
+let wrongAttempted = false;
+let pool = [];
+let placed = [];
+let clueCount = 0;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  current = 0;
+  firstTry = 0;
+  document.getElementById("introScreen").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  renderScene();
+}
+
+function showFeedback(kind, text) {
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(kind);
+  fb.textContent = text;
+}
+function clearFeedback() {
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  fb.classList.remove("correct", "wrong");
+}
+
+function sceneDone(outcome) {
+  if (!wrongAttempted) firstTry++;
+  document.getElementById("dayFill").style.width = Math.round(((current + 1) / scenes.length) * 100) + "%";
+  showFeedback("correct", outcome);
+  setTimeout(nextScene, 3000);
+}
+
+function renderScene() {
+  wrongAttempted = false;
+  clearFeedback();
+  const s = scenes[current];
+  document.getElementById("clock").textContent = s.time;
+  document.getElementById("dayFill").style.width = Math.round((current / scenes.length) * 100) + "%";
+  document.getElementById("place").textContent = s.place;
+  document.getElementById("story").textContent = s.story;
+  document.getElementById("says").textContent = s.says;
+  document.getElementById("taskLine").textContent = s.task;
+  const area = document.getElementById("mechanicArea");
+
+  if (s.mechanic === "choice") {
+    area.innerHTML = '<div class="options" id="optionsArea"></div>';
+    const oa = document.getElementById("optionsArea");
+    shuffle(s.options).forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.textContent = opt.text;
+      btn.onclick = function() {
+        if (opt.correct) {
+          oa.querySelectorAll(".option-btn").forEach(b => b.disabled = true);
+          btn.classList.add("correct");
+          sceneDone(opt.outcome);
+        } else {
+          btn.classList.add("wrong");
+          btn.disabled = true;
+          wrongAttempted = true;
+          showFeedback("wrong", opt.outcome + " Try again.");
+        }
+      };
+      oa.appendChild(btn);
+    });
+  } else if (s.mechanic === "build") {
+    pool = shuffle(s.pieces.map((val, idx) => ({ val: val, id: idx })));
+    placed = [];
+    area.innerHTML =
+      '<div class="tile-answer" id="answerArea"></div>' +
+      '<div class="tile-pool" id="poolArea"></div>' +
+      '<div class="btn-row">' +
+      '<button class="btn secondary" id="undoBtn" onclick="undoTile()">Undo</button>' +
+      '<button class="btn secondary" id="clueBtn" onclick="giveClue()">Clue</button>' +
+      '<button class="btn" id="checkBtn" onclick="checkTiles()">Check</button></div>';
+    renderTiles();
+  } else if (s.mechanic === "type") {
+    clueCount = 0;
+    area.innerHTML =
+      '<div class="scene" style="text-align:center;">' + s.before + ' ______ ' + s.after + '</div>' +
+      '<div class="clue-line" id="clueLine"></div>' +
+      '<input type="text" class="type-input" id="typeInput" placeholder="Type the missing word..." autocomplete="off">' +
+      '<div class="btn-row"><button class="btn secondary" id="typeClueBtn" onclick="typeClue()">Clue</button>' +
+      '<button class="btn" id="typeCheckBtn" onclick="checkTyped()">Check</button></div>';
+    document.getElementById("typeInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") checkTyped();
+    });
+    document.getElementById("typeInput").focus();
+  }
+}
+
+function renderTiles() {
+  const aa = document.getElementById("answerArea");
+  const pa = document.getElementById("poolArea");
+  aa.innerHTML = ""; pa.innerHTML = "";
+  placed.forEach(t => {
+    const el = document.createElement("div");
+    el.className = "tile"; el.textContent = t.val;
+    aa.appendChild(el);
+  });
+  pool.forEach(t => {
+    const el = document.createElement("div");
+    el.className = "tile"; el.textContent = t.val;
+    el.onclick = () => placeTile(t.id);
+    pa.appendChild(el);
+  });
+}
+function placeTile(id) {
+  const idx = pool.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  placed.push(pool[idx]);
+  pool.splice(idx, 1);
+  renderTiles();
+}
+function undoTile() {
+  if (placed.length === 0) return;
+  pool.push(placed.pop());
+  renderTiles();
+}
+function giveClue() {
+  const s = scenes[current];
+  if (placed.length >= s.pieces.length) return;
+  const needed = s.pieces[placed.length];
+  const idx = pool.findIndex(t => t.val === needed);
+  if (idx === -1) return;
+  placeTile(pool[idx].id);
+}
+function typeClue() {
+  const s = scenes[current];
+  if (clueCount >= s.clueWord.length) return;
+  clueCount++;
+  document.getElementById("clueLine").textContent = s.clueWord.split("").map((c, i) => i < clueCount ? c : "_").join(" ");
+}
+
+function checkTiles() {
+  const s = scenes[current];
+  if (placed.map(t => t.val).join(" ") === s.pieces.join(" ")) {
+    document.getElementById("checkBtn").disabled = true;
+    document.getElementById("undoBtn").disabled = true;
+    document.getElementById("clueBtn").disabled = true;
+    sceneDone(s.outcomeOk);
+  } else {
+    wrongAttempted = true;
+    showFeedback("wrong", "Not quite. Use Undo or Clue and try again.");
+  }
+}
+function checkTyped() {
+  const s = scenes[current];
+  const input = document.getElementById("typeInput");
+  if (input.disabled) return;
+  if (s.answers.includes(input.value.trim().toLowerCase())) {
+    input.disabled = true;
+    document.getElementById("typeCheckBtn").disabled = true;
+    document.getElementById("typeClueBtn").disabled = true;
+    sceneDone(s.outcomeOk);
+  } else {
+    wrongAttempted = true;
+    showFeedback("wrong", "Not quite. Remember: will + base verb. Try again or use Clue.");
+  }
+}
+
+function nextScene() {
+  current++;
+  if (current >= scenes.length) showFinish();
+  else renderScene();
+}
+
+function showFinish() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  let stars = "";
+  for (let i = 0; i < scenes.length; i++) stars += i < firstTry ? "⭐" : "☆";
+  document.getElementById("stars").textContent = stars;
+  document.getElementById("scoreCount").textContent = firstTry + " / " + scenes.length;
+  let msg;
+  if (firstTry === scenes.length) msg = "Perfect day! Every answer was right on the first try.";
+  else if (firstTry >= 4) msg = "Great day! Play again to collect every star.";
+  else msg = "You finished the day! Play again and see if you can get more stars.";
+  document.getElementById("finalMsg").textContent = msg;
+}
+</script>
+</body>
+</html>
