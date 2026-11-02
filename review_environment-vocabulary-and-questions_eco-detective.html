@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco Detective: Grammar and Vocabulary Case Files</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(160deg, #F6D9C4, #CDEAE0); min-height: 100vh; padding: 22px; color: #1F3864; }
+  .wrap { max-width: 740px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 1.6rem; margin: 0 0 4px; }
+  p.sub { text-align: center; margin: 0 0 12px; color: #4a5a75; }
+  .top { display: flex; justify-content: space-between; background: #1F3864; color: #fff; border-radius: 12px; padding: 10px 16px; font-weight: bold; margin-bottom: 14px; }
+  .card { background: #FFFBF4; border-radius: 18px; padding: 24px; box-shadow: 0 8px 22px rgba(0,0,0,0.15); }
+  .tag { display: inline-block; font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 999px; color: #fff; margin-bottom: 8px; }
+  .easy { background: #3aa76d; }
+  .mid { background: #E8836B; }
+  .q { font-size: 1.1rem; line-height: 1.5; margin: 6px 0 10px; }
+  .clue { background: #fff; border-left: 5px solid #f2b84b; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; line-height: 1.5; font-size: 0.95rem; }
+  .opt { background: #fff; border: 2px solid #e2e2e2; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; }
+  .opt:hover { border-color: #E8836B; }
+  .opt.right { background: #d9f2e3; border-color: #3aa76d; }
+  .opt.wrong { background: #fbdada; border-color: #d1504a; }
+  .opt.gone { opacity: 0.35; pointer-events: none; }
+  .line { min-height: 58px; border: 2px dashed #E8836B; border-radius: 12px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #fff; margin-bottom: 12px; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; min-height: 44px; }
+  .tile { background: #1F3864; color: #fff; padding: 9px 14px; border-radius: 10px; cursor: pointer; user-select: none; }
+  .tile.in { background: #E8836B; }
+  input { width: 100%; font-size: 1.1rem; padding: 12px 14px; border: 2px solid #e2e2e2; border-radius: 10px; outline: none; margin: 6px 0; }
+  input:focus { border-color: #E8836B; }
+  .pattern { font-family: monospace; font-size: 1.3rem; letter-spacing: 3px; text-align: center; margin: 6px 0; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+  button { background: #1F3864; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  button.alt { background: #fff; color: #1F3864; border: 2px solid #1F3864; }
+  .fb { text-align: center; font-weight: bold; min-height: 2.8em; margin-top: 10px; line-height: 1.4; }
+  .good { color: #3aa76d; }
+  .bad { color: #d1504a; }
+  .hidden { display: none !important; }
+  .center { text-align: center; }
+  .stars { font-size: 2.4rem; margin: 8px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Eco Detective</h1>
+  <p class="sub">Solve 10 case files with grammar and vocabulary. Easy and intermediate cases.</p>
+  <div class="top"><span id="caseName">Ready?</span><span id="score">Points: 0</span></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+var CASES = [
+  { lvl: "easy", type: "mc", q: "Which question has the correct word order?", clue: "In wh- questions, the auxiliary goes before the subject.", opts: ["How you can reduce your carbon footprint?", "How can you reduce your carbon footprint?", "How you reduce can your carbon footprint?"], right: 1, why: "Question word + auxiliary + subject + verb: How can you reduce...?" },
+  { lvl: "easy", type: "type", q: "Complete the question with one word: ______ you ever used renewable energy?", clue: "It is a Present Perfect question about life experience.", answers: ["have"], why: "Present Perfect question: Have + subject + ever + past participle." },
+  { lvl: "easy", type: "mc", q: "Which question is correct? You want to know WHAT is the cause of air pollution.", clue: "What is the subject of the sentence, so there is no do or does.", opts: ["What does cause air pollution?", "What causes air pollution?", "What cause air pollution?"], right: 1, why: "Subject question: What + verb. The verb takes -s with a singular subject." },
+  { lvl: "easy", type: "type", q: "Type the missing words: I'm trying to ______ plastic, so I use a reusable bag.", clue: "A phrasal verb with three words that means use less.", answers: ["cut down on"], why: "Cut down on means use or do less of something." },
+  { lvl: "easy", type: "mc", q: "Which sentence has the correct word order (review)?", clue: "Subject + Verb + Object + Time.", opts: ["On Mondays put I off my emails.", "I put off my emails on Mondays.", "I on Mondays my emails put off."], right: 1, why: "Statements follow Subject + Verb + Object + Time." },
+  { lvl: "mid", type: "build", q: "Build the question.", clue: "Wh- question with should. Starts with Why.", words: ["Why", "should", "we", "care about", "sustainability"], mark: "?", why: "Question word + auxiliary + subject + verb phrase." },
+  { lvl: "mid", type: "build", q: "Build the indirect question.", clue: "After the question word we use normal statement order. No is before the subject.", words: ["Do you know", "why", "air pollution", "is", "a problem"], mark: "?", why: "Indirect question: introduction + question word + subject + verb." },
+  { lvl: "mid", type: "mc", q: "Find the mistake and choose the corrected sentence: Could you tell me where is the ecosystem of this lake?", clue: "In indirect questions the verb goes after the subject.", opts: ["Could you tell me where is the ecosystem of this lake?", "Could you tell me where the ecosystem of this lake is?", "Could you tell me where does the ecosystem of this lake is?"], right: 1, why: "After where, use statement order: where the ecosystem is." },
+  { lvl: "mid", type: "build", q: "Build the subject question.", clue: "What is the subject, so there is no do or does.", words: ["What", "helps", "reduce", "your carbon footprint"], mark: "?", why: "Subject question: What + verb + rest." },
+  { lvl: "mid", type: "type", q: "Complete the indirect question with ONE word: Could you tell me ______ renewable energy is cheaper?", clue: "This is a yes/no indirect question. There are two possible words.", answers: ["if", "whether"], why: "Yes/no indirect questions use if or whether." }
+];
+var cur = 0, score = 0, locked = false, caseScore = 0, answer = [], tiles = [];
+
+function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; }
+function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i -= 1) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+function norm(s) { return s.toLowerCase().replace(/[?.!,]/g, '').replace(/\s+/g, ' ').trim(); }
+function setTop() { document.getElementById('caseName').textContent = cur < CASES.length ? 'Case ' + (cur + 1) + ' of ' + CASES.length : 'Case closed'; document.getElementById('score').textContent = 'Points: ' + score; }
+function maxPts() { var m = 0; CASES.forEach(function (c) { m += c.lvl === 'easy' ? 1 : 2; }); return m; }
+
+function begin() { cur = 0; score = 0; renderIntro(); }
+
+function renderIntro() {
+  var c = document.getElementById('card'); c.innerHTML = ''; setTop();
+  var d = el('div', 'center');
+  d.appendChild(el('div', 'stars', '\u{1F50D}'));
+  d.appendChild(el('h2', '', 'Welcome, detective'));
+  d.appendChild(el('p', '', 'Five easy cases (1 point each) and five intermediate cases (2 points each). Every case has a free clue. You can also ask for a hint, but a hint costs 1 point. Wrong answers do not end the case, you can try again.'));
+  var b = el('button', '', 'Open the first case'); b.onclick = function () { cur = 0; renderCase(); };
+  d.appendChild(b); c.appendChild(d);
+}
+
+function finishCase(msg, cls, pts) {
+  locked = true; score += pts; setTop();
+  var fb = document.querySelector('.fb'); fb.textContent = msg; fb.className = 'fb ' + cls;
+  document.querySelectorAll('.act').forEach(function (b) { b.className = 'act hidden'; });
+  var n = document.getElementById('nextBtn'); n.className = ''; n.textContent = cur === CASES.length - 1 ? 'Close the files' : 'Next case';
+}
+
+function renderCase() {
+  if (cur >= CASES.length) { renderEnd(); return; }
+  var k = CASES[cur]; var c = document.getElementById('card'); c.innerHTML = ''; locked = false; setTop();
+  var base = k.lvl === 'easy' ? 1 : 2; caseScore = base;
+  c.appendChild(el('span', 'tag ' + (k.lvl === 'easy' ? 'easy' : 'mid'), k.lvl === 'easy' ? 'Easy (1 point)' : 'Intermediate (2 points)'));
+  c.appendChild(el('div', 'q', k.q));
+  c.appendChild(el('div', 'clue', 'Clue: ' + k.clue));
+  var fb = el('div', 'fb'); var bar = el('div', 'bar');
+  var next = el('button', 'hidden', 'Next case'); next.id = 'nextBtn';
+  next.onclick = function () { cur += 1; renderCase(); };
+  function act(label, alt, fn) { var b = el('button', 'act' + (alt ? ' alt' : ''), label); b.className = 'act' + (alt ? ' alt' : ''); b.onclick = fn; bar.appendChild(b); return b; }
+  function penalty() { if (caseScore > 0) caseScore -= 1; }
+
+  if (k.type === 'mc') {
+    var boxes = [];
+    k.opts.forEach(function (o, i) {
+      var b = el('div', 'opt', o);
+      b.onclick = function () {
+        if (locked || b.className.indexOf('gone') !== -1) return;
+        if (i === k.right) { b.className = 'opt right'; finishCase('Case solved! ' + k.why, 'good', caseScore); }
+        else { b.className = 'opt wrong'; fb.textContent = 'Not this one. Read the clue and try again.'; fb.className = 'fb bad'; }
+      };
+      boxes.push(b); c.appendChild(b);
+    });
+    c.appendChild(fb);
+    act('Hint (-1 point)', true, function () {
+      var wrongs = boxes.filter(function (b, i) { return i !== k.right && b.className.indexOf('gone') === -1; });
+      if (wrongs.length > 1) { wrongs[0].className = 'opt gone'; penalty(); fb.textContent = 'One wrong answer removed.'; fb.className = 'fb'; }
+    });
+  } else if (k.type === 'type') {
+    var inp = el('input'); inp.type = 'text'; inp.placeholder = 'Type your answer'; inp.autocomplete = 'off';
+    var pat = el('div', 'pattern', ''); var shown = 0;
+    c.appendChild(pat); c.appendChild(inp); c.appendChild(fb);
+    function check() {
+      if (locked) return;
+      if (k.answers.indexOf(norm(inp.value)) !== -1) finishCase('Case solved! ' + k.why, 'good', caseScore);
+      else { fb.textContent = 'Not yet. Try again or use a hint.'; fb.className = 'fb bad'; }
+    }
+    inp.onkeydown = function (e) { if (e.key === 'Enter') check(); };
+    act('Check', false, check);
+    act('Hint (-1 point)', true, function () {
+      var a = k.answers[0]; if (shown < a.length) { shown += 1; penalty(); }
+      var out = ''; for (var i = 0; i < a.length; i += 1) { out += a.charAt(i) === ' ' ? '   ' : (i < shown ? a.charAt(i).toUpperCase() + ' ' : '_ '); }
+      pat.textContent = out;
+    });
+    setTimeout(function () { inp.focus(); }, 50);
+  } else {
+    answer = []; tiles = shuffle(k.words.map(function (w, i) { return { w: w, id: i }; }));
+    var line = el('div', 'line'); var pool = el('div', 'tiles');
+    function draw() {
+      line.innerHTML = ''; pool.innerHTML = '';
+      answer.forEach(function (t, pos) { var e = el('div', 'tile in', t.w); e.onclick = function () { if (locked) return; answer.splice(pos, 1); draw(); }; line.appendChild(e); });
+      line.appendChild(el('span', '', k.mark));
+      tiles.forEach(function (t) { if (answer.indexOf(t) !== -1) return; var e = el('div', 'tile', t.w); e.onclick = function () { if (locked) return; answer.push(t); draw(); }; pool.appendChild(e); });
+    }
+    draw(); c.appendChild(line); c.appendChild(pool); c.appendChild(fb);
+    act('Check', false, function () {
+      if (locked) return;
+      var ok = answer.length === k.words.length && answer.every(function (t, i) { return t.id === i; });
+      if (ok) finishCase('Case solved! ' + k.why, 'good', caseScore);
+      else { fb.textContent = 'Not quite. Check the order and try again.'; fb.className = 'fb bad'; }
+    });
+    act('Undo', true, function () { if (!locked) { answer.pop(); draw(); } });
+    act('Hint (-1 point)', true, function () {
+      if (locked) return;
+      var i = 0; while (i < answer.length && answer[i].id === i) i += 1;
+      answer = answer.slice(0, i);
+      var t = tiles.filter(function (x) { return x.id === i; })[0];
+      if (t) { answer.push(t); penalty(); draw(); }
+    });
+  }
+  bar.appendChild(next); c.appendChild(bar);
+}
+
+function renderEnd() {
+  var c = document.getElementById('card'); c.innerHTML = ''; setTop();
+  var m = maxPts(); var p = score / m;
+  var rank = p >= 0.85 ? 'Chief Eco Detective' : (p >= 0.6 ? 'Senior Detective' : 'Junior Detective');
+  var stars = p >= 0.85 ? '⭐⭐⭐' : (p >= 0.6 ? '⭐⭐' : '⭐');
+  var d = el('div', 'center');
+  d.appendChild(el('div', 'stars', stars));
+  d.appendChild(el('h2', '', rank));
+  d.appendChild(el('p', '', 'You earned ' + score + ' out of ' + m + ' points.'));
+  d.appendChild(el('p', '', 'Great detectives read the clues, think about the pattern and keep trying. That is exactly how you learn.'));
+  var b = el('button', '', 'Play again'); b.onclick = begin; d.appendChild(b); c.appendChild(d);
+}
+begin();
+</script>
+</body>
+</html>
