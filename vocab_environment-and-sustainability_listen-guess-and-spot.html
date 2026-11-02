@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco Challenge: Listen, Guess and Spot</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(160deg, #3d3568, #5aa9a8 60%, #CDEAE0); min-height: 100vh; padding: 22px; color: #1F3864; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 1.6rem; margin: 0 0 4px; color: #fff; }
+  p.sub { text-align: center; margin: 0 0 12px; color: #eaf6f2; }
+  .top { display: flex; justify-content: space-between; background: rgba(255,255,255,0.2); color: #fff; border-radius: 12px; padding: 10px 16px; font-weight: bold; margin-bottom: 14px; }
+  .card { background: #FFFBF4; border-radius: 18px; padding: 24px; box-shadow: 0 8px 22px rgba(0,0,0,0.25); }
+  .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #E8836B; font-weight: bold; margin-bottom: 8px; }
+  .q { font-size: 1.1rem; line-height: 1.5; margin-bottom: 14px; }
+  .big { font-size: 3rem; text-align: center; margin: 6px 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .opt { background: #fff; border: 2px solid #e2e2e2; border-radius: 12px; padding: 14px; text-align: center; cursor: pointer; font-size: 1.02rem; }
+  .opt:hover { border-color: #E8836B; }
+  .opt.right { background: #d9f2e3; border-color: #3aa76d; }
+  .opt.wrong { background: #fbdada; border-color: #d1504a; }
+  .clue { background: #fff; border-left: 5px solid #E8836B; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; line-height: 1.5; }
+  input { width: 100%; font-size: 1.1rem; padding: 12px 14px; border: 2px solid #e2e2e2; border-radius: 10px; outline: none; margin: 8px 0; }
+  input:focus { border-color: #E8836B; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+  button { background: #1F3864; color: #fff; border: none; padding: 11px 22px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  button.alt { background: #fff; color: #1F3864; border: 2px solid #1F3864; }
+  .fb { text-align: center; font-weight: bold; min-height: 2.6em; margin-top: 10px; line-height: 1.4; }
+  .good { color: #3aa76d; }
+  .bad { color: #d1504a; }
+  .hidden { display: none !important; }
+  .center { text-align: center; }
+  .stars { font-size: 2.4rem; margin: 8px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Eco Challenge</h1>
+  <p class="sub">Listen, guess and spot: three rounds with the environment words</p>
+  <div class="top"><span id="roundName">Ready?</span><span id="score">Score: 0</span></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+var WORDS = [
+  { w: "sustainability", def: "Using resources in a way that does not damage the future.", sent: "A company that thinks about future generations cares about ______." },
+  { w: "carbon footprint", def: "The amount of carbon dioxide your activities produce.", sent: "Flying a lot increases your ______." },
+  { w: "renewable energy", def: "Energy from the sun, wind and water that never runs out.", sent: "Solar panels give us ______." },
+  { w: "pollution", def: "Harmful substances in the air, water or land.", sent: "Traffic causes a lot of ______ in big cities." },
+  { w: "ecosystem", def: "A community of living things and the environment they live in.", sent: "A forest, a lake or a coral reef is a complex ______." },
+  { w: "cut down on", def: "A phrasal verb: to use or do less of something.", sent: "I'm trying to ______ plastic, so I use a reusable bag." }
+];
+var STATEMENTS = [
+  { t: "Renewable energy comes from sources that run out quickly.", a: false, why: "Renewable energy comes from the sun, wind and water, which do not run out." },
+  { t: "An ecosystem includes plants, animals and the place where they live.", a: true, why: "An ecosystem is a community of living things and their environment." },
+  { t: "If you cut down on plastic, you use more plastic.", a: false, why: "Cut down on means use less." },
+  { t: "Air pollution can be bad for your health.", a: true, why: "Pollution means harmful substances in the air, water or land." },
+  { t: "Sustainability means thinking about future generations.", a: true, why: "Sustainability is using resources without damaging the future." },
+  { t: "Your carbon footprint measures how much money you spend.", a: false, why: "It measures the carbon dioxide your activities produce." },
+  { t: "Flying a lot makes your carbon footprint bigger.", a: true, why: "Planes produce a lot of carbon dioxide." },
+  { t: "A forest is an example of an ecosystem.", a: true, why: "A forest has plants, animals, soil and water that depend on each other." }
+];
+var round = 0, idx = 0, score = 0, items = [], clueLevel = 1, locked = false, tries = 0;
+
+function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i -= 1) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+function norm(s) { return s.toLowerCase().replace(/\s+/g, ' ').trim(); }
+function say(t) { try { var u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch (e) {} }
+function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; }
+function setTop(name) { document.getElementById('roundName').textContent = name; document.getElementById('score').textContent = 'Score: ' + score; }
+
+function start() { round = 0; idx = 0; score = 0; renderIntro(); }
+
+function renderIntro() {
+  var c = document.getElementById('card'); c.innerHTML = ''; setTop('Ready?');
+  var d = el('div', 'center');
+  d.appendChild(el('div', 'big', '\u{1F33F}'));
+  d.appendChild(el('h2', '', 'Three rounds, one goal: win the Eco Hero badge'));
+  d.appendChild(el('p', '', 'Round 1: Listen and match. Round 2: Clue detective. Round 3: True or false.'));
+  var b = el('button', '', 'Start'); b.onclick = function () { round = 1; idx = 0; items = shuffle(WORDS); renderQ(); };
+  d.appendChild(b); c.appendChild(d);
+}
+
+function nextStep() {
+  idx += 1;
+  if (round === 1 && idx >= WORDS.length) { round = 2; idx = 0; items = shuffle(WORDS); }
+  else if (round === 2 && idx >= WORDS.length) { round = 3; idx = 0; items = shuffle(STATEMENTS); }
+  else if (round === 3 && idx >= STATEMENTS.length) { renderEnd(); return; }
+  renderQ();
+}
+
+function renderQ() { if (round === 1) renderListen(); else if (round === 2) renderClue(); else renderTF(); }
+
+function renderListen() {
+  var c = document.getElementById('card'); c.innerHTML = ''; locked = false;
+  setTop('Round 1: Listen and match (' + (idx + 1) + '/' + WORDS.length + ')');
+  var cur = items[idx];
+  var others = shuffle(WORDS.filter(function (x) { return x.w !== cur.w; })).slice(0, 3);
+  var opts = shuffle(others.concat([cur]));
+  c.appendChild(el('div', 'label', 'Listen carefully'));
+  c.appendChild(el('div', 'q', 'Press the speaker. Which word did you hear?'));
+  var play = el('button', 'alt', '\u{1F50A} Play the word'); play.onclick = function () { say(cur.w); };
+  var pc = el('div', 'center'); pc.appendChild(play); c.appendChild(pc);
+  var g = el('div', 'grid'); g.style.marginTop = '14px';
+  var fb = el('div', 'fb'); var nx = el('button', 'hidden', 'Next');
+  nx.onclick = nextStep;
+  opts.forEach(function (o) {
+    var b = el('div', 'opt', o.w);
+    b.onclick = function () {
+      if (locked) return;
+      if (o.w === cur.w) { locked = true; score += 1; b.className = 'opt right'; fb.textContent = 'Yes! ' + cur.w; fb.className = 'fb good'; nx.className = ''; document.getElementById('score').textContent = 'Score: ' + score; }
+      else { b.className = 'opt wrong'; fb.textContent = 'Not this one. Listen again and try another.'; fb.className = 'fb bad'; }
+    };
+    g.appendChild(b);
+  });
+  c.appendChild(g); c.appendChild(fb);
+  var bar = el('div', 'bar'); bar.appendChild(nx); c.appendChild(bar);
+  setTimeout(function () { say(cur.w); }, 300);
+}
+
+function renderClue() {
+  var c = document.getElementById('card'); c.innerHTML = ''; locked = false; clueLevel = 1; tries = 0;
+  setTop('Round 2: Clue detective (' + (idx + 1) + '/' + WORDS.length + ')');
+  var cur = items[idx];
+  c.appendChild(el('div', 'label', 'Guess the word. Fewer clues means more points'));
+  var clues = el('div', ''); c.appendChild(clues);
+  function showClues() {
+    clues.innerHTML = '';
+    clues.appendChild(el('div', 'clue', 'Clue 1: ' + cur.def));
+    if (clueLevel >= 2) clues.appendChild(el('div', 'clue', 'Clue 2: ' + cur.sent));
+    if (clueLevel >= 3) clues.appendChild(el('div', 'clue', 'Clue 3: It starts with "' + cur.w.charAt(0).toUpperCase() + '" and has ' + cur.w.replace(/ /g, '').length + ' letters.'));
+  }
+  showClues();
+  var inp = el('input'); inp.type = 'text'; inp.placeholder = 'Type your answer'; inp.autocomplete = 'off'; c.appendChild(inp);
+  var fb = el('div', 'fb'); c.appendChild(fb);
+  var bar = el('div', 'bar'); c.appendChild(bar);
+  var ok = el('button', '', 'Check');
+  var more = el('button', 'alt', 'Give me a clue');
+  var skip = el('button', 'alt', 'Show the answer');
+  var nx = el('button', 'hidden', 'Next'); nx.onclick = nextStep;
+  function finish(msg, cls) { locked = true; fb.textContent = msg; fb.className = 'fb ' + cls; ok.className = 'hidden'; more.className = 'hidden'; skip.className = 'hidden'; nx.className = ''; inp.disabled = true; document.getElementById('score').textContent = 'Score: ' + score; }
+  function check() {
+    if (locked) return;
+    if (norm(inp.value) === cur.w) { var pts = 4 - clueLevel; score += pts; finish('Correct! ' + cur.w + '. You earned ' + pts + (pts === 1 ? ' point.' : ' points.'), 'good'); say(cur.w); }
+    else { fb.textContent = 'Not yet. Try again or ask for a clue.'; fb.className = 'fb bad'; }
+  }
+  ok.onclick = check;
+  inp.onkeydown = function (e) { if (e.key === 'Enter') check(); };
+  more.onclick = function () { if (clueLevel < 3) { clueLevel += 1; showClues(); if (clueLevel === 3) more.className = 'hidden'; } };
+  skip.onclick = function () { finish('The answer is: ' + cur.w + '. No points this time, but now you know it.', 'bad'); };
+  bar.appendChild(ok); bar.appendChild(more); bar.appendChild(skip); bar.appendChild(nx);
+  inp.focus();
+}
+
+function renderTF() {
+  var c = document.getElementById('card'); c.innerHTML = ''; locked = false;
+  setTop('Round 3: True or false (' + (idx + 1) + '/' + STATEMENTS.length + ')');
+  var cur = items[idx];
+  c.appendChild(el('div', 'label', 'Does this make sense?'));
+  c.appendChild(el('div', 'q', cur.t));
+  var g = el('div', 'grid');
+  var fb = el('div', 'fb'); var nx = el('button', 'hidden', idx === STATEMENTS.length - 1 ? 'See my result' : 'Next'); nx.onclick = nextStep;
+  [true, false].forEach(function (v) {
+    var b = el('div', 'opt', v ? 'True' : 'False');
+    b.onclick = function () {
+      if (locked) return; locked = true;
+      if (v === cur.a) { score += 1; b.className = 'opt right'; fb.textContent = 'Correct! ' + cur.why; fb.className = 'fb good'; }
+      else { b.className = 'opt wrong'; fb.textContent = 'Not quite. ' + cur.why; fb.className = 'fb bad'; }
+      nx.className = ''; document.getElementById('score').textContent = 'Score: ' + score;
+    };
+    g.appendChild(b);
+  });
+  c.appendChild(g); c.appendChild(fb);
+  var bar = el('div', 'bar'); bar.appendChild(nx); c.appendChild(bar);
+}
+
+function renderEnd() {
+  var c = document.getElementById('card'); c.innerHTML = ''; setTop('Finished');
+  var max = WORDS.length + WORDS.length * 3 + STATEMENTS.length;
+  var pct = score / max;
+  var stars = pct >= 0.85 ? '⭐⭐⭐' : (pct >= 0.6 ? '⭐⭐' : '⭐');
+  var title = pct >= 0.85 ? 'Eco Hero!' : (pct >= 0.6 ? 'Green Explorer' : 'Seed Planter');
+  var d = el('div', 'center');
+  d.appendChild(el('div', 'stars', stars));
+  d.appendChild(el('h2', '', title));
+  d.appendChild(el('p', '', 'You scored ' + score + ' out of ' + max + '.'));
+  d.appendChild(el('p', '', 'Every word you listen to, type and use is a word you can speak.'));
+  var b = el('button', '', 'Play again'); b.onclick = start; d.appendChild(b);
+  c.appendChild(d);
+}
+start();
+</script>
+</body>
+</html>
