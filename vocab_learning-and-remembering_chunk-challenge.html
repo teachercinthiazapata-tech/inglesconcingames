@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning and Remembering: Chunk Challenge</title>
+<style>
+  :root{--peach:#FFD8C2;--mint:#C8EFE0;--coral:#F27B6B;--navy:#1F3A5F;--cream:#FFF8F2;--green:#2E9E6B;--red:#D9534F;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:var(--cream);color:var(--navy);}
+  .hidden{display:none !important;}
+  header{background:var(--navy);color:#fff;padding:18px 16px;text-align:center;}
+  header h1{margin:0;font-size:1.5rem;}
+  header p{margin:6px 0 0;opacity:.85;font-size:.95rem;}
+  main{max-width:820px;margin:0 auto;padding:16px;}
+  .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(31,58,95,.1);margin-bottom:16px;}
+  .score{display:flex;justify-content:space-between;font-weight:600;margin-bottom:10px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .col{display:flex;flex-direction:column;gap:8px;}
+  .tile{border:2px solid var(--navy);background:#fff;border-radius:12px;padding:10px;cursor:pointer;font-size:.98rem;text-align:left;color:var(--navy);}
+  .tile.chunk{background:var(--peach);font-weight:600;}
+  .tile.sel{outline:4px solid var(--coral);}
+  .tile.done{background:var(--mint);border-color:var(--green);cursor:default;opacity:.75;}
+  .tile.wrong{animation:shake .35s;border-color:var(--red);}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .sentence{font-size:1.15rem;line-height:1.5;margin:6px 0 14px;}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .opt{border:2px solid var(--navy);background:var(--peach);border-radius:12px;padding:12px;font-size:1rem;cursor:pointer;color:var(--navy);font-weight:600;}
+  .opt.ok{background:var(--mint);border-color:var(--green);}
+  .opt.no{background:#FBE0DE;border-color:var(--red);}
+  .feedback{min-height:24px;font-weight:600;margin-top:10px;}
+  .btn{background:var(--coral);color:#fff;border:none;border-radius:999px;padding:12px 22px;font-size:1rem;cursor:pointer;font-weight:600;}
+  .btn.secondary{background:var(--navy);}
+  .center{text-align:center;}
+  .tip{font-size:.92rem;opacity:.85;}
+  footer{text-align:center;font-size:.85rem;opacity:.7;padding:16px;}
+  @media (max-width:560px){.grid,.options{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Chunk Challenge</h1>
+  <p>Learning and remembering: expressions to make English stick</p>
+</header>
+<main>
+  <section id="start" class="card center">
+    <h2>Two rounds</h2>
+    <p><strong>Round 1, Match:</strong> tap an expression, then tap its meaning.</p>
+    <p><strong>Round 2, Complete:</strong> choose the expression that completes each sentence. Read it out loud when it is correct.</p>
+    <button class="btn" onclick="startRound1()">Start</button>
+  </section>
+
+  <section id="round1" class="card hidden">
+    <div class="score"><span>Round 1: Match</span><span id="r1score">0 / 8</span></div>
+    <p class="tip">Tap an expression, then its meaning. Tap the same expression again to unselect it.</p>
+    <div class="grid">
+      <div class="col" id="chunks"></div>
+      <div class="col" id="meanings"></div>
+    </div>
+    <div class="feedback" id="r1fb"></div>
+    <div class="center hidden" id="r1next"><button class="btn" onclick="startRound2()">Go to Round 2</button></div>
+  </section>
+
+  <section id="round2" class="card hidden">
+    <div class="score"><span id="r2count">Sentence 1 / 8</span><span id="r2score">Points: 0</span></div>
+    <div class="sentence" id="sentence"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="r2fb"></div>
+    <div class="center hidden" id="r2next"><button class="btn secondary" onclick="nextSentence()">Next</button></div>
+  </section>
+
+  <section id="end" class="card center hidden">
+    <h2 id="badge"></h2>
+    <p id="final"></p>
+    <p class="tip">Slow and steady wins the race. Play again on Day 3 and Day 7.</p>
+    <button class="btn" onclick="location.reload()">Play again</button>
+  </section>
+</main>
+<footer>Inglés con Cin</footer>
+
+<script>
+const pairs = [
+  ["it makes sense","it is logical and easy to understand"],
+  ["break it down","divide something big into smaller parts"],
+  ["in one go","all at the same time, without stopping"],
+  ["stick","stay in your memory"],
+  ["overwhelming","too much to deal with"],
+  ["cram","study a lot just before an exam"],
+  ["give it a try","try something to see if it works"],
+  ["hold on to","keep something and not lose it"]
+];
+const sentences = [
+  {s:"This chapter is too long. Let's ______ into three parts.", a:"break it down", o:["break it down","cram","give it a try","hold on to"]},
+  {s:"I studied all night before the exam. I ______ everything, and the next day it was gone.", a:"crammed", o:["crammed","stuck","made sense","broke it down"]},
+  {s:"Your plan is logical. It really ______.", a:"makes sense", o:["makes sense","sticks","holds on","gives it a try"]},
+  {s:"I read 40 pages ______, without a break.", a:"in one go", o:["in one go","break it down","overwhelming","make sense"]},
+  {s:"I never tried a memory palace, but I'm going to ______.", a:"give it a try", o:["give it a try","cram","hold on to","stick"]},
+  {s:"Five new words a day is better. That way, the words really ______.", a:"stick", o:["stick","cram","break down","overwhelm"]},
+  {s:"Three deadlines in one week! It feels ______.", a:"overwhelming", o:["overwhelming","overwhelmed","make sense","in one go"]},
+  {s:"Write the expression in your Structure Bank and you will ______ it.", a:"hold on to", o:["hold on to","break down","cram","make sense"]}
+];
+let selected=null, matched=0, r1errors=0, idx=0, points=0, firstTry=true;
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function speak(t){try{const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}
+
+function startRound1(){
+  document.getElementById("start").classList.add("hidden");
+  document.getElementById("round1").classList.remove("hidden");
+  const c=document.getElementById("chunks"), m=document.getElementById("meanings");
+  shuffle(pairs).forEach(p=>{const b=document.createElement("button");b.className="tile chunk";b.textContent=p[0];b.dataset.k=p[0];b.onclick=()=>pickChunk(b);c.appendChild(b);});
+  shuffle(pairs).forEach(p=>{const b=document.createElement("button");b.className="tile";b.textContent=p[1];b.dataset.k=p[0];b.onclick=()=>pickMeaning(b);m.appendChild(b);});
+}
+function pickChunk(b){
+  if(b.classList.contains("done"))return;
+  if(selected===b){b.classList.remove("sel");selected=null;return;}
+  if(selected)selected.classList.remove("sel");
+  selected=b;b.classList.add("sel");speak(b.textContent);
+}
+function pickMeaning(b){
+  const fb=document.getElementById("r1fb");
+  if(b.classList.contains("done"))return;
+  if(!selected){fb.textContent="First tap an expression on the left.";return;}
+  if(b.dataset.k===selected.dataset.k){
+    selected.classList.remove("sel");selected.classList.add("done");b.classList.add("done");
+    matched++;fb.textContent="Correct! Say it out loud: "+selected.textContent;fb.style.color="var(--green)";selected=null;
+    document.getElementById("r1score").textContent=matched+" / 8";
+    if(matched===8){fb.textContent="Round 1 complete!";document.getElementById("r1next").classList.remove("hidden");}
+  }else{
+    r1errors++;b.classList.add("wrong");setTimeout(()=>b.classList.remove("wrong"),400);
+    fb.textContent="Not this one. Try again.";fb.style.color="var(--red)";
+  }
+}
+function startRound2(){
+  document.getElementById("round1").classList.add("hidden");
+  document.getElementById("round2").classList.remove("hidden");
+  showSentence();
+}
+function showSentence(){
+  firstTry=true;
+  const q=sentences[idx];
+  document.getElementById("r2count").textContent="Sentence "+(idx+1)+" / 8";
+  document.getElementById("sentence").textContent=q.s;
+  document.getElementById("r2fb").textContent="";
+  document.getElementById("r2next").classList.add("hidden");
+  const o=document.getElementById("options");o.innerHTML="";
+  shuffle(q.o).forEach(t=>{const b=document.createElement("button");b.className="opt";b.textContent=t;b.onclick=()=>answer(b,t);o.appendChild(b);});
+}
+function answer(b,t){
+  const q=sentences[idx], fb=document.getElementById("r2fb");
+  if(!document.getElementById("r2next").classList.contains("hidden"))return;
+  if(t===q.a){
+    b.classList.add("ok");if(firstTry)points++;
+    const full=q.s.replace("______",q.a);
+    document.getElementById("sentence").textContent=full;
+    fb.textContent="Correct! Now read the sentence out loud.";fb.style.color="var(--green)";speak(full);
+    document.getElementById("r2score").textContent="Points: "+points;
+    document.getElementById("r2next").classList.remove("hidden");
+  }else{
+    firstTry=false;b.classList.add("no");b.disabled=true;
+    fb.textContent="Not quite. Try again.";fb.style.color="var(--red)";
+  }
+}
+function nextSentence(){
+  idx++;
+  if(idx<sentences.length){showSentence();return;}
+  document.getElementById("round2").classList.add("hidden");
+  document.getElementById("end").classList.remove("hidden");
+  const badge = points>=7?"Memory Master ★★★":points>=5?"Chunk Collector ★★":"Seed Planter ★";
+  document.getElementById("badge").textContent=badge;
+  document.getElementById("final").textContent="Round 2: "+points+" / 8 correct on the first try. Round 1 mistakes: "+r1errors+".";
+}
+</script>
+</body>
+</html>

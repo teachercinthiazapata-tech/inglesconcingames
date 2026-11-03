@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The More, The Better: Match and Fix</title>
+<style>
+  :root{--peach:#FFD8C2;--mint:#C8EFE0;--coral:#F27B6B;--navy:#1F3A5F;--cream:#FFF8F2;--green:#2E9E6B;--red:#D9534F;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:var(--cream);color:var(--navy);}
+  .hidden{display:none !important;}
+  header{background:var(--navy);color:#fff;padding:18px 16px;text-align:center;}
+  header h1{margin:0;font-size:1.5rem;}
+  header p{margin:6px 0 0;opacity:.85;font-size:.95rem;}
+  main{max-width:780px;margin:0 auto;padding:16px;}
+  .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(31,58,95,.1);margin-bottom:16px;}
+  .rule{background:var(--mint);border-radius:12px;padding:12px;font-weight:600;text-align:center;margin-bottom:12px;}
+  .score{display:flex;justify-content:space-between;font-weight:600;margin-bottom:10px;}
+  .prompt{font-size:1.2rem;margin:6px 0 14px;line-height:1.5;}
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .opt{border:2px solid var(--navy);background:var(--peach);border-radius:12px;padding:12px;font-size:1.02rem;cursor:pointer;text-align:left;color:var(--navy);}
+  .opt.ok{background:var(--mint);border-color:var(--green);}
+  .opt.no{background:#FBE0DE;border-color:var(--red);}
+  .feedback{min-height:24px;margin-top:12px;line-height:1.4;}
+  .btn{background:var(--coral);color:#fff;border:none;border-radius:999px;padding:12px 22px;font-size:1rem;cursor:pointer;font-weight:600;}
+  .center{text-align:center;}
+  .tip{font-size:.92rem;opacity:.85;}
+  footer{text-align:center;font-size:.85rem;opacity:.7;padding:16px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>The More, The Better: Match and Fix</h1>
+  <p>Double comparatives: the + comparative, the + comparative</p>
+</header>
+<main>
+  <section id="start" class="card center">
+    <div class="rule">The more you practise, the better you get.</div>
+    <p><strong>Round 1, Match:</strong> choose the best ending for each sentence.</p>
+    <p><strong>Round 2, Fix:</strong> three sentences look similar. Only one is correct.</p>
+    <button class="btn" onclick="begin()">Start</button>
+  </section>
+
+  <section id="game" class="card hidden">
+    <div class="score"><span id="label"></span><span id="pts">Points: 0</span></div>
+    <div class="prompt" id="prompt"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="fb"></div>
+    <div class="center hidden" id="nextWrap" style="margin-top:12px"><button class="btn" onclick="next()">Next</button></div>
+  </section>
+
+  <section id="end" class="card center hidden">
+    <h2 id="badge"></h2>
+    <p id="final"></p>
+    <p class="tip">Now make three sentences about your own life: The more I..., the...</p>
+    <button class="btn" onclick="location.reload()">Play again</button>
+  </section>
+</main>
+<footer>Inglés con Cin</footer>
+
+<script>
+const items = [
+  {r:1,p:"The more you practise, ...",a:"the better you get.",o:["the better you get.","better you get.","the more better you get."],
+   why:"THE + comparative, then subject + verb. Better is the comparative of good."},
+  {r:1,p:"The earlier you start, ...",a:"the more time you have.",o:["the more time you have.","the less time you have.","more time you have."],
+   why:"Starting early gives you more time. Remember THE in both parts."},
+  {r:1,p:"The more you cram, ...",a:"the less you remember.",o:["the less you remember.","the more you remember.","the less remember you."],
+   why:"The podcast says cramming does not work. Less is the comparative of little. Word order: subject + verb (you remember)."},
+  {r:1,p:"The weirder the connection, ...",a:"the more likely you'll remember it.",o:["the more likely you'll remember it.","the less likely you'll remember it.","more likely you remember it."],
+   why:"From the podcast: strange images are easier to remember."},
+  {r:1,p:"The more personal the information feels, ...",a:"the better we hold on to it.",o:["the better we hold on to it.","the worse we hold on to it.","the best we hold on to it."],
+   why:"From the podcast: personal information sticks. Better is a comparative; best is a superlative, not used here."},
+  {r:1,p:"The longer the contract, ...",a:"the more time I need to review it.",o:["the more time I need to review it.","the less time I need to review it.","the more time need I to review it."],
+   why:"A long document needs more time. Normal order: subject + verb (I need)."},
+  {r:2,p:"Which sentence is correct?",a:"The more you read, the more you learn.",o:["The more you read, the more you learn.","More you read, more you learn.","The more you read, more you learn."],
+   why:"English needs THE in both parts. Spanish says 'cuanto más..., más...', but English says 'the more..., the more...'."},
+  {r:2,p:"Which sentence is correct?",a:"The more I practise, the better I speak.",o:["The more I practise, the better I speak.","The more I practise, the more better I speak.","The more I practise, the best I speak."],
+   why:"Better is already a comparative, so we don't add more. Best is a superlative."},
+  {r:2,p:"Which sentence is correct?",a:"The sooner, the better.",o:["The sooner, the better.","The soon, the good.","More sooner, more better."],
+   why:"A fixed expression with two comparatives: sooner and better."},
+  {r:2,p:"Which sentence is correct?",a:"The more tired I am, the less I remember.",o:["The more tired I am, the less I remember.","The tireder I am, the less I remember.","The more tired I am, the less remember I."],
+   why:"Tired normally takes more (more tired). After the comparative, normal order: I remember."},
+  {r:2,p:"Which sentence is correct?",a:"The easier the explanation, the faster I understand.",o:["The easier the explanation, the faster I understand.","The more easy the explanation, the faster I understand.","The easier the explanation, the more fast I understand."],
+   why:"Short adjectives take -er: easy, easier; fast, faster."}
+];
+let i=0, pts=0, first=true, answered=false;
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];}return a;}
+function begin(){document.getElementById("start").classList.add("hidden");document.getElementById("game").classList.remove("hidden");show();}
+function show(){
+  const it=items[i]; first=true; answered=false;
+  const n1=items.filter(x=>x.r===1).length;
+  document.getElementById("label").textContent = it.r===1 ? "Round 1: Match ("+(i+1)+" / "+n1+")" : "Round 2: Fix ("+(i-n1+1)+" / "+(items.length-n1)+")";
+  document.getElementById("prompt").textContent=it.p;
+  document.getElementById("fb").textContent="";
+  document.getElementById("nextWrap").classList.add("hidden");
+  const o=document.getElementById("options"); o.innerHTML="";
+  shuffle(it.o).forEach(t=>{const b=document.createElement("button");b.className="opt";b.textContent=t;b.onclick=()=>choose(b,t);o.appendChild(b);});
+}
+function choose(b,t){
+  if(answered)return;
+  const it=items[i], fb=document.getElementById("fb");
+  if(t===it.a){
+    answered=true;b.classList.add("ok");if(first)pts++;
+    document.getElementById("pts").textContent="Points: "+pts;
+    fb.innerHTML="<strong style='color:var(--green)'>Correct!</strong> "+it.why+" Say the full sentence out loud.";
+    document.getElementById("nextWrap").classList.remove("hidden");
+  }else{
+    first=false;b.classList.add("no");b.disabled=true;
+    fb.innerHTML="<strong style='color:var(--red)'>Not quite.</strong> Check THE, the comparative and the word order. Try again.";
+  }
+}
+function next(){
+  i++;
+  if(i<items.length){show();return;}
+  document.getElementById("game").classList.add("hidden");
+  document.getElementById("end").classList.remove("hidden");
+  const total=items.length;
+  document.getElementById("badge").textContent = pts>=10?"Grammar Star ★★★":pts>=7?"Pattern Builder ★★":"Getting There ★";
+  document.getElementById("final").textContent="You got "+pts+" / "+total+" on the first try. The more you play, the better you get!";
+}
+</script>
+</body>
+</html>
