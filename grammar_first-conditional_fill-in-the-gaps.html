@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First Conditional: Fill in the Gaps</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card { background: #fff; border-radius: 24px; max-width: 680px; width: 100%; padding: 34px 30px; box-shadow: 0 12px 40px rgba(60,40,100,0.18); }
+  h1 { text-align: center; font-size: 24px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 14px; }
+  .progress { display: flex; justify-content: center; gap: 7px; margin-bottom: 16px; flex-wrap: wrap; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #e2d9f5; transition: background 0.3s; }
+  .dot.active { background: #9b7bd8; }
+  .dot.done { background: #6fcf97; }
+  .intro { text-align: center; color: #4a3b6b; line-height: 1.6; }
+  .intro .big { font-size: 52px; margin: 6px 0; }
+  .intro p { margin-bottom: 14px; }
+  .recipe { background: #f5f2fc; border-radius: 14px; padding: 14px; margin: 0 auto 16px; color: #4a3b6b; font-size: 15px; line-height: 1.8; }
+  .recipe b.c { color: #2f6fb3; }
+  .recipe b.r { color: #b3562f; }
+  .tag { text-align: center; font-size: 13px; color: #9b8fb8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 700; }
+  .instruction { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 12px; }
+  .sentence { background: #f5f2fc; border-radius: 14px; padding: 22px 18px; color: #4a3b6b; font-size: 18px; line-height: 2.6; text-align: center; margin-bottom: 14px; }
+  .gap { display: inline-block; white-space: nowrap; }
+  .gap input { width: 120px; padding: 7px 8px; border: 2px solid #d8cff0; border-radius: 10px; font-size: 16px; text-align: center; color: #4a3b6b; }
+  .gap input:focus { outline: none; border-color: #9b7bd8; }
+  .gap input.good { border-color: #6fcf97; background: #d4f4e2; }
+  .gap input.bad { border-color: #e79a9a; background: #fbe2e2; }
+  .gap .verb { font-size: 14px; color: #9b8fb8; font-weight: 700; margin-left: 4px; }
+  .hint { background: #fff8e6; border: 2px dashed #f2d98a; border-radius: 12px; padding: 10px 14px; text-align: center; color: #5b4b1a; font-size: 14px; margin-bottom: 12px; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { flex: 1; }
+  .btn { display: block; width: 100%; background: #6fcf97; color: white; border: none; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #b9e5cb; cursor: default; }
+  .btn.secondary { background: #efe8fb; color: #5b3fa0; }
+  .btn.secondary:hover { background: #ddd0f7; }
+  .btn.secondary:disabled { background: #f3eefb; color: #b8aad6; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 12px 0; padding: 12px; border-radius: 12px; line-height: 1.5; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .stars { font-size: 30px; margin: 10px 0; letter-spacing: 3px; }
+  .score-screen .big-score { font-size: 44px; font-weight: 800; color: #5b3fa0; margin: 8px 0; }
+  .footer { text-align: center; color: #9b8fb8; font-size: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Fill in the Gaps</h1>
+  <div class="subtitle">First Conditional Practice</div>
+
+  <div id="introScreen" class="intro">
+    <div class="big">&#9997;&#65039;</div>
+    <div class="recipe">
+      <b class="c">If + present simple</b> (condition), <b class="r">will + base verb</b> (result).<br>
+      Example: If you send the documents, we will start the process.
+    </div>
+    <p>Write the verb in brackets in the correct form.<br>There are <b>10 sentences</b>. Each one has two gaps.</p>
+    <p style="font-size:14px;color:#7a6f95;">No timer. If you make a mistake, just try again. Use Clue if you need help.</p>
+    <button class="btn" onclick="startGame()">Start</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div class="progress" id="progress"></div>
+    <div class="tag" id="tag"></div>
+    <div class="instruction">Write the verbs in the correct form.</div>
+    <div class="sentence" id="sentence"></div>
+    <div class="hint hidden" id="hint"></div>
+    <div class="btn-row">
+      <button class="btn secondary" id="clueBtn" onclick="giveClue()">Clue</button>
+      <button class="btn" id="checkBtn" onclick="checkAnswers()">Check</button>
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>All done! &#127881;</h1>
+    <div class="stars" id="stars"></div>
+    <div class="big-score" id="scoreCount">0 / 10</div>
+    <p id="finalMsg" style="color:#6b5f8a; margin-bottom: 18px;"></p>
+    <button class="btn" onclick="startGame()">Play Again</button>
+  </div>
+  <div class="footer">Inglés con Cin</div>
+</div>
+
+<script>
+/* Each gap: verb in brackets, accepted answers (lowercase, apostrophes normalized) */
+const items = [
+  { parts: ["If you ", 0, " the office, they ", 1, " the phone."],
+    gaps: [{ verb: "call", ok: ["call"] }, { verb: "answer", ok: ["will answer", "'ll answer"] }],
+    why: "Condition: present simple (call). Result: will + base verb (will answer)." },
+  { parts: ["If it ", 0, " tomorrow, we ", 1, " at home."],
+    gaps: [{ verb: "rain", ok: ["rains"] }, { verb: "stay", ok: ["will stay", "'ll stay"] }],
+    why: "It is third person singular, so rains (with s). Result: will stay." },
+  { parts: ["If the documents ", 0, " ready, the lawyer ", 1, " them today."],
+    gaps: [{ verb: "be", ok: ["are"] }, { verb: "sign", ok: ["will sign", "'ll sign"] }],
+    why: "Documents is plural, so are. Result: will sign." },
+  { parts: ["We ", 0, " you an email if you ", 1, " us your address."],
+    gaps: [{ verb: "send", ok: ["will send", "'ll send"] }, { verb: "give", ok: ["give"] }],
+    why: "Here the result comes first: will send. After if, the present simple: give." },
+  { parts: ["If the client ", 0, " the appointment, we ", 1, " it."],
+    gaps: [{ verb: "not confirm", ok: ["does not confirm", "doesn't confirm", "doesnt confirm"] }, { verb: "cancel", ok: ["will cancel", "'ll cancel"] }],
+    why: "Negative present simple, third person: does not confirm. Result: will cancel." },
+  { parts: ["The client ", 0, " happy if the process ", 1, " fast."],
+    gaps: [{ verb: "be", ok: ["will be", "'ll be"] }, { verb: "be", ok: ["is"] }],
+    why: "Result first: will be. After if, the process is (present simple, third person)." },
+  { parts: ["If you ", 0, " every day, you ", 1, " more English."],
+    gaps: [{ verb: "study", ok: ["study"] }, { verb: "learn", ok: ["will learn", "'ll learn"] }],
+    why: "Condition: study (you takes no s). Result: will learn." },
+  { parts: ["If she ", 0, " late, the meeting ", 1, " on time."],
+    gaps: [{ verb: "arrive", ok: ["arrives"] }, { verb: "not start", ok: ["will not start", "won't start", "wont start"] }],
+    why: "She takes an s: arrives. Negative result: will not (won't) start." },
+  { parts: ["If you ", 0, " the email, you ", 1, " the appointment."],
+    gaps: [{ verb: "receive", ok: ["receive"] }, { verb: "confirm", ok: ["will confirm", "'ll confirm"] }],
+    why: "Condition: receive (present simple). Result: will confirm." },
+  { parts: ["If the permit ", 0, " next week, I ", 1, " the office."],
+    gaps: [{ verb: "not arrive", ok: ["does not arrive", "doesn't arrive", "doesnt arrive"] }, { verb: "call", ok: ["will call", "'ll call"] }],
+    why: "Negative present simple, third person: does not arrive. Result: will call." }
+];
+
+let current = 0;
+let firstTry = 0;
+let wrongAttempted = false;
+let clueLevel = 0;
+
+function norm(s) {
+  return s.trim().toLowerCase().replace(/[‘’´`]/g, "'").replace(/\s+/g, " ");
+}
+
+function startGame() {
+  current = 0;
+  firstTry = 0;
+  document.getElementById("introScreen").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  renderItem();
+}
+
+function buildProgress() {
+  const el = document.getElementById("progress");
+  el.innerHTML = "";
+  for (let i = 0; i < items.length; i++) {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === current ? " active" : i < current ? " done" : "");
+    el.appendChild(d);
+  }
+}
+function showFeedback(kind, text) {
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(kind);
+  fb.textContent = text;
+}
+function clearFeedback() {
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  fb.classList.remove("correct", "wrong");
+}
+
+function renderItem() {
+  wrongAttempted = false;
+  clueLevel = 0;
+  clearFeedback();
+  buildProgress();
+  document.getElementById("hint").classList.add("hidden");
+  document.getElementById("clueBtn").disabled = false;
+  document.getElementById("checkBtn").disabled = false;
+  document.getElementById("tag").textContent = "Sentence " + (current + 1) + " of " + items.length;
+  const it = items[current];
+  const box = document.getElementById("sentence");
+  box.innerHTML = "";
+  it.parts.forEach(p => {
+    if (typeof p === "string") {
+      box.appendChild(document.createTextNode(p));
+    } else {
+      const g = document.createElement("span");
+      g.className = "gap";
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.id = "gap" + p;
+      inp.autocomplete = "off";
+      inp.addEventListener("keydown", function(e) { if (e.key === "Enter") checkAnswers(); });
+      const v = document.createElement("span");
+      v.className = "verb";
+      v.textContent = "(" + it.gaps[p].verb + ")";
+      g.appendChild(inp);
+      g.appendChild(v);
+      box.appendChild(g);
+    }
+  });
+  document.getElementById("gap0").focus();
+}
+
+function giveClue() {
+  const it = items[current];
+  const hint = document.getElementById("hint");
+  clueLevel++;
+  hint.classList.remove("hidden");
+  if (clueLevel === 1) {
+    hint.textContent = "Remember: the condition uses the present simple. The result uses will + base verb. We never use will after if.";
+  } else {
+    hint.textContent = "First letters: " + it.gaps.map(g => g.ok[0].replace(/^'/, "").charAt(0).toUpperCase() + "...").join("   and   ");
+  }
+}
+
+function checkAnswers() {
+  const it = items[current];
+  if (document.getElementById("checkBtn").disabled) return;
+  let all = true;
+  it.gaps.forEach((g, i) => {
+    const inp = document.getElementById("gap" + i);
+    inp.classList.remove("good", "bad");
+    if (g.ok.indexOf(norm(inp.value)) !== -1) inp.classList.add("good");
+    else { inp.classList.add("bad"); all = false; }
+  });
+  if (all) {
+    it.gaps.forEach((g, i) => document.getElementById("gap" + i).disabled = true);
+    document.getElementById("checkBtn").disabled = true;
+    document.getElementById("clueBtn").disabled = true;
+    if (!wrongAttempted) firstTry++;
+    showFeedback("correct", "Correct! " + it.why);
+    setTimeout(nextItem, 3200);
+  } else {
+    wrongAttempted = true;
+    showFeedback("wrong", "Not quite. Fix the red gaps and try again. Use Clue if you need help.");
+  }
+}
+
+function nextItem() {
+  current++;
+  if (current >= items.length) showFinish();
+  else renderItem();
+}
+
+function showFinish() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  let stars = "";
+  for (let i = 0; i < items.length; i++) stars += i < firstTry ? "⭐" : "☆";
+  document.getElementById("stars").textContent = stars;
+  document.getElementById("scoreCount").textContent = firstTry + " / " + items.length;
+  let msg;
+  if (firstTry === items.length) msg = "Perfect! Every sentence was right on the first try.";
+  else if (firstTry >= 7) msg = "Great job! Play again to collect every star.";
+  else msg = "Well done! Play again to collect more stars.";
+  document.getElementById("finalMsg").textContent = msg;
+}
+</script>
+</body>
+</html>
