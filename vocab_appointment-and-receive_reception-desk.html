@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reception Desk: Appointment and Receive</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card { background: #fff; border-radius: 24px; max-width: 660px; width: 100%; padding: 32px 30px; box-shadow: 0 12px 40px rgba(60,40,100,0.18); }
+  h1 { text-align: center; font-size: 24px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 14px; }
+  .progress { display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #e2d9f5; transition: background 0.3s; }
+  .dot.active { background: #9b7bd8; }
+  .dot.done { background: #6fcf97; }
+  .intro { text-align: center; color: #4a3b6b; line-height: 1.6; }
+  .intro .big { font-size: 56px; margin: 6px 0; }
+  .intro p { margin-bottom: 14px; }
+  .tag { text-align: center; font-size: 13px; color: #9b8fb8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 700; }
+  .prompt-box { background: #f5f2fc; border-radius: 14px; padding: 18px; text-align: center; color: #4a3b6b; font-size: 17px; line-height: 1.6; margin-bottom: 14px; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .option-btn { background: #efe8fb; border: 2px solid #e2d9f5; border-radius: 12px; padding: 13px 16px; font-size: 15px; color: #4a3b6b; cursor: pointer; text-align: left; }
+  .option-btn:hover { background: #e2d3f9; }
+  .option-btn.correct { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .option-btn.wrong { background: #fbe2e2; border-color: #e79a9a; color: #a13a3a; }
+  .option-btn:disabled { cursor: default; }
+  .two-btn { display: flex; gap: 12px; margin-bottom: 14px; }
+  .two-btn .option-btn { flex: 1; text-align: center; font-weight: 700; font-size: 16px; }
+  table.cal { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 13px; }
+  table.cal th { background: #e2d9f5; color: #4a3b6b; padding: 8px 4px; }
+  table.cal td { border: 1px solid #e2d9f5; padding: 0; }
+  table.cal td.time { background: #f5f2fc; text-align: center; font-weight: 700; color: #7a6f95; padding: 8px 4px; }
+  .slot { width: 100%; height: 38px; background: #fff; border: none; cursor: pointer; font-size: 18px; }
+  .slot:hover { background: #efe8fb; }
+  .slot.good { background: #d4f4e2; }
+  .slot.bad { background: #fbe2e2; }
+  .keyboard { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 14px; }
+  .key { width: 38px; height: 40px; border-radius: 8px; border: 2px solid #e2d9f5; background: #efe8fb; color: #4a3b6b; font-weight: 700; cursor: pointer; }
+  .key:hover { background: #e2d3f9; }
+  .key.hit { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .key.miss { background: #eee; border-color: #ddd; color: #aaa; }
+  .key:disabled { cursor: default; }
+  .letters { text-align: center; font-size: 30px; letter-spacing: 8px; color: #5b3fa0; font-weight: 800; margin: 6px 0 14px; min-height: 40px; }
+  .sel-row { background: #f5f2fc; border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; color: #4a3b6b; font-size: 16px; line-height: 2; }
+  .sel-row select { font-size: 15px; padding: 5px 8px; border-radius: 8px; border: 2px solid #d8cff0; color: #4a3b6b; }
+  .sel-row select.good { border-color: #6fcf97; background: #d4f4e2; }
+  .sel-row select.bad { border-color: #e79a9a; background: #fbe2e2; }
+  .say-card { background: #fff8e6; border: 2px dashed #f2d98a; border-radius: 14px; padding: 18px; text-align: center; color: #5b4b1a; font-size: 18px; margin-bottom: 14px; }
+  .models { background: #f5f2fc; border-radius: 14px; padding: 14px; text-align: center; color: #4a3b6b; margin-bottom: 14px; line-height: 1.7; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { flex: 1; }
+  .btn { display: block; width: 100%; background: #6fcf97; color: white; border: none; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #b9e5cb; cursor: default; }
+  .btn.secondary { background: #efe8fb; color: #5b3fa0; }
+  .btn.secondary:hover { background: #ddd0f7; }
+  .btn.secondary:disabled { background: #f3eefb; color: #b8aad6; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 12px 0; padding: 12px; border-radius: 12px; line-height: 1.5; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .stars { font-size: 36px; margin: 10px 0; letter-spacing: 4px; }
+  .score-screen .big-score { font-size: 44px; font-weight: 800; color: #5b3fa0; margin: 8px 0; }
+  .footer { text-align: center; color: #9b8fb8; font-size: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Reception Desk</h1>
+  <div class="subtitle">Vocabulary Review: appointment and to receive</div>
+
+  <div id="introScreen" class="intro">
+    <div class="big">&#128197;</div>
+    <p>Welcome to the reception desk of a law firm.<br>Complete <b>6 tasks</b> to finish your shift!</p>
+    <p style="font-size:14px;color:#7a6f95;">No timer. If you make a mistake, just try again.</p>
+    <button class="btn" onclick="startGame()">Start the Shift</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div class="progress" id="progress"></div>
+    <div class="tag" id="tag"></div>
+    <div class="prompt-box" id="promptBox"></div>
+    <div id="mechanicArea"></div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>Shift complete! &#127881;</h1>
+    <div class="stars" id="stars"></div>
+    <div class="big-score" id="scoreCount">0 / 5</div>
+    <p id="finalMsg" style="color:#6b5f8a; margin-bottom: 18px;"></p>
+    <button class="btn" onclick="startGame()">Play Again</button>
+  </div>
+  <div class="footer">Inglés con Cin</div>
+</div>
+
+<script>
+const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const times = ["9:00 AM", "10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM"];
+
+const tasks = [
+  {
+    mechanic: "calendar", tag: "Task 1: Book it!",
+    prompt: "Read the message. Click the correct day and time on the calendar.",
+    items: [
+      { msg: "Mr. Kim wants an appointment on Wednesday at 10:00 AM.", day: "Wed", time: "10:00 AM" },
+      { msg: "Please book an appointment for Ms. Silva on Friday at 2:00 PM.", day: "Fri", time: "2:00 PM" }
+    ],
+    tip: "An appointment is a meeting at a fixed day and time."
+  },
+  {
+    mechanic: "sort", tag: "Task 2: Inbox or Outbox?",
+    prompt: "Is the document coming IN to the office (Inbox) or going OUT (Outbox)?",
+    cards: [
+      { text: "We received your documents.", answer: "inbox" },
+      { text: "I sent the application yesterday.", answer: "outbox" },
+      { text: "You will receive an email tomorrow.", answer: "inbox" },
+      { text: "Please send us your passport.", answer: "outbox" },
+      { text: "The client received a letter.", answer: "inbox" },
+      { text: "She sent a message to the firm.", answer: "outbox" }
+    ],
+    labels: ["Inbox (receive)", "Outbox (send)"],
+    keys: ["inbox", "outbox"],
+    tip: "To receive means to get something. To send is the opposite."
+  },
+  {
+    mechanic: "form", tag: "Task 3: The right form",
+    prompt: "Choose the correct form of the verb to receive.",
+    items: [
+      { sentence: "Yesterday I ___ an email from the court.", options: ["receive", "received", "receives"], answer: "received" },
+      { sentence: "You will ___ a letter next week.", options: ["receive", "received", "receives"], answer: "receive" },
+      { sentence: "She always ___ many emails.", options: ["receive", "received", "receives"], answer: "receives" },
+      { sentence: "We ___ your documents last Monday.", options: ["receive", "received", "receives"], answer: "received" }
+    ],
+    tip: "After will, we use the base verb. For past actions, we use received. With he or she in the present, we add s."
+  },
+  {
+    mechanic: "hangman", tag: "Task 4: Guess the word",
+    prompt: "",
+    words: [
+      { word: "APPOINTMENT", clue: "A planned meeting at a fixed day and time." },
+      { word: "RECEIVE", clue: "To get something that someone gives or sends." }
+    ],
+    tip: "Great spelling!"
+  },
+  {
+    mechanic: "partners", tag: "Task 5: Word partners",
+    prompt: "Complete each sentence with the best word from the bank. Use each word once.",
+    items: [
+      { before: "I want to ", after: " an appointment with the lawyer.", answer: "make" },
+      { before: "Please ", after: " your appointment by email.", answer: "confirm" },
+      { before: "You will ", after: " your permit by mail.", answer: "receive" },
+      { before: "She is waiting for ", after: " from the office.", answer: "approval" },
+      { before: "There will be a ", after: " if you miss the deadline.", answer: "delay" }
+    ],
+    bank: ["make", "confirm", "receive", "approval", "delay"],
+    tip: "Make an appointment, confirm an appointment, receive a permit."
+  },
+  {
+    mechanic: "say", tag: "Task 6: Say it out loud!",
+    prompt: "Say each sentence out loud. Then click the button.",
+    cards: [
+      { ask: "Use the word APPOINTMENT in a sentence.", models: ["I have an appointment on Friday.", "I need to confirm my appointment."] },
+      { ask: "Use the word RECEIVE in a sentence.", models: ["Yesterday I received an email.", "I will receive my package tomorrow."] }
+    ],
+    tip: "Speaking helps you remember new words!"
+  }
+];
+
+const scoredCount = 5; // task 6 is speaking only
+let current = 0;
+let firstTry = 0;
+let wrongAttempted = false;
+let sub = 0;
+let hmState = null;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  current = 0;
+  firstTry = 0;
+  document.getElementById("introScreen").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  renderTask();
+}
+
+function buildProgress() {
+  const el = document.getElementById("progress");
+  el.innerHTML = "";
+  for (let i = 0; i < tasks.length; i++) {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === current ? " active" : i < current ? " done" : "");
+    el.appendChild(d);
+  }
+}
+function showFeedback(kind, text) {
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(kind);
+  fb.textContent = text;
+}
+function clearFeedback() {
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  fb.classList.remove("correct", "wrong");
+}
+function taskDone(msg, scored) {
+  if (scored !== false && !wrongAttempted) firstTry++;
+  showFeedback("correct", msg);
+  setTimeout(nextTask, 2300);
+}
+function wrongMsg(msg) {
+  wrongAttempted = true;
+  showFeedback("wrong", msg);
+}
+
+function renderTask() {
+  wrongAttempted = false;
+  sub = 0;
+  clearFeedback();
+  buildProgress();
+  const t = tasks[current];
+  document.getElementById("tag").textContent = t.tag;
+  document.getElementById("promptBox").textContent = t.prompt;
+  document.getElementById("promptBox").classList.toggle("hidden", !t.prompt);
+  const area = document.getElementById("mechanicArea");
+  area.innerHTML = "";
+  if (t.mechanic === "calendar") renderCalendar(area, t);
+  else if (t.mechanic === "sort") renderSort(area, t);
+  else if (t.mechanic === "form") renderForm(area, t);
+  else if (t.mechanic === "hangman") renderHangman(area, t);
+  else if (t.mechanic === "partners") renderPartners(area, t);
+  else if (t.mechanic === "say") renderSay(area, t);
+}
+
+/* Task 1: calendar */
+function renderCalendar(area, t) {
+  area.innerHTML = '<div class="prompt-box" id="calMsg" style="background:#fff;border:2px solid #e2d9f5;font-weight:600;"></div><table class="cal" id="cal"></table>';
+  document.getElementById("calMsg").textContent = t.items[sub].msg;
+  let html = "<tr><th></th>" + days.map(d => "<th>" + d + "</th>").join("") + "</tr>";
+  times.forEach(tm => {
+    html += "<tr><td class='time'>" + tm + "</td>" + days.map(d => "<td><button class='slot' data-d='" + d + "' data-t='" + tm + "' onclick='pickSlot(this)'></button></td>").join("") + "</tr>";
+  });
+  document.getElementById("cal").innerHTML = html;
+}
+function pickSlot(btn) {
+  const t = tasks[current];
+  const it = t.items[sub];
+  if (btn.dataset.d === it.day && btn.dataset.t === it.time) {
+    btn.classList.add("good");
+    btn.textContent = "📅";
+    sub++;
+    if (sub >= t.items.length) {
+      document.querySelectorAll(".slot").forEach(b => b.disabled = true);
+      taskDone("Booked! " + t.tip);
+    } else {
+      showFeedback("correct", "Booked! Next message.");
+      setTimeout(function() {
+        clearFeedback();
+        document.getElementById("calMsg").textContent = t.items[sub].msg;
+        document.querySelectorAll(".slot").forEach(b => { b.classList.remove("good"); b.textContent = ""; });
+      }, 1500);
+    }
+  } else {
+    btn.classList.add("bad");
+    setTimeout(function() { btn.classList.remove("bad"); }, 500);
+    wrongMsg("Not that slot. Read the day and the time again.");
+  }
+}
+
+/* Task 2: sort */
+function renderSort(area, t) {
+  t.order = shuffle(t.cards);
+  area.innerHTML = '<div class="prompt-box" id="sortCard" style="background:#fff;border:2px solid #e2d9f5;font-size:19px;font-weight:600;"></div>' +
+    '<div class="two-btn"><button class="option-btn" id="s0" onclick="sortPick(0)"></button><button class="option-btn" id="s1" onclick="sortPick(1)"></button></div>';
+  document.getElementById("s0").textContent = t.labels[0];
+  document.getElementById("s1").textContent = t.labels[1];
+  showSortCard();
+}
+function showSortCard() {
+  const t = tasks[current];
+  document.getElementById("sortCard").textContent = t.order[sub].text + "   (" + (sub + 1) + "/" + t.order.length + ")";
+}
+function sortPick(i) {
+  const t = tasks[current];
+  if (t.order[sub].answer === t.keys[i]) {
+    sub++;
+    clearFeedback();
+    if (sub >= t.order.length) {
+      document.getElementById("s0").disabled = true;
+      document.getElementById("s1").disabled = true;
+      taskDone("All sorted! " + t.tip);
+    } else showSortCard();
+  } else wrongMsg("Not quite. Look at the verb: received or sent?");
+}
+
+/* Task 3: form */
+function renderForm(area, t) {
+  area.innerHTML = '<div class="prompt-box" id="formSentence" style="background:#fff;border:2px solid #e2d9f5;font-size:19px;font-weight:600;"></div><div class="options" id="optionsArea"></div>';
+  showForm();
+}
+function showForm() {
+  const t = tasks[current];
+  const it = t.items[sub];
+  document.getElementById("formSentence").textContent = (sub + 1) + "/" + t.items.length + ".  " + it.sentence;
+  const oa = document.getElementById("optionsArea");
+  oa.innerHTML = "";
+  shuffle(it.options).forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "option-btn"; b.textContent = opt;
+    b.onclick = function() {
+      if (opt === it.answer) {
+        oa.querySelectorAll(".option-btn").forEach(x => x.disabled = true);
+        b.classList.add("correct");
+        sub++;
+        if (sub >= t.items.length) taskDone("Perfect! " + t.tip);
+        else { showFeedback("correct", "Correct!"); setTimeout(function() { clearFeedback(); showForm(); }, 1200); }
+      } else {
+        b.classList.add("wrong"); b.disabled = true;
+        wrongMsg("Not quite. Think about the time of the sentence.");
+      }
+    };
+    oa.appendChild(b);
+  });
+}
+
+/* Task 4: hangman style */
+function renderHangman(area, t) {
+  area.innerHTML = '<div class="prompt-box" id="hmClue" style="background:#fff;border:2px solid #e2d9f5;"></div>' +
+    '<div class="letters" id="hmLetters"></div><div class="keyboard" id="kb"></div>' +
+    '<button class="btn secondary" id="hmClueBtn" onclick="hmGiveClue()">Clue: show a letter</button>';
+  setupHangman();
+}
+function setupHangman() {
+  const t = tasks[current];
+  const w = t.words[sub];
+  hmState = { word: w.word, shown: w.word.split("").map(() => false) };
+  document.getElementById("hmClue").textContent = "(" + (sub + 1) + "/" + t.words.length + ")  " + w.clue;
+  const kb = document.getElementById("kb");
+  kb.innerHTML = "";
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(ch => {
+    const k = document.createElement("button");
+    k.className = "key"; k.textContent = ch; k.id = "key" + ch;
+    k.onclick = function() { hmGuess(ch); };
+    kb.appendChild(k);
+  });
+  hmDraw();
+}
+function hmDraw() {
+  document.getElementById("hmLetters").textContent = hmState.word.split("").map((c, i) => hmState.shown[i] ? c : "_").join(" ");
+}
+function hmGuess(ch) {
+  const st = hmState;
+  const key = document.getElementById("key" + ch);
+  if (st.word.indexOf(ch) !== -1) {
+    st.word.split("").forEach((c, i) => { if (c === ch) st.shown[i] = true; });
+    key.classList.add("hit"); key.disabled = true;
+    clearFeedback();
+    hmDraw();
+    hmCheckDone();
+  } else {
+    key.classList.add("miss"); key.disabled = true;
+    wrongMsg("That letter is not in the word. Try another one.");
+  }
+}
+function hmGiveClue() {
+  const st = hmState;
+  const idx = st.shown.indexOf(false);
+  if (idx === -1) return;
+  hmGuess(st.word[idx]);
+}
+function hmCheckDone() {
+  const t = tasks[current];
+  if (hmState.shown.every(x => x)) {
+    sub++;
+    if (sub >= t.words.length) {
+      document.querySelectorAll(".key").forEach(k => k.disabled = true);
+      document.getElementById("hmClueBtn").disabled = true;
+      taskDone("Yes! The words are APPOINTMENT and RECEIVE. " + t.tip);
+    } else {
+      showFeedback("correct", "Yes! The word is " + hmState.word + ". Next word.");
+      setTimeout(function() { clearFeedback(); setupHangman(); }, 1600);
+    }
+  }
+}
+
+/* Task 5: word partners */
+function renderPartners(area, t) {
+  let html = '<div class="models" style="font-weight:700;">Word bank: ' + shuffle(t.bank).join("  |  ") + '</div>';
+  t.items.forEach((it, i) => {
+    html += '<div class="sel-row">' + it.before + '<select id="p' + i + '"><option value="">...</option>' +
+      shuffle(t.bank).map(w => '<option value="' + w + '">' + w + '</option>').join("") + '</select>' + it.after + '</div>';
+  });
+  html += '<button class="btn" id="pCheck" onclick="checkPartners()">Check</button>';
+  area.innerHTML = html;
+}
+function checkPartners() {
+  const t = tasks[current];
+  let ok = true;
+  t.items.forEach((it, i) => {
+    const s = document.getElementById("p" + i);
+    s.classList.remove("good", "bad");
+    if (s.value === it.answer) s.classList.add("good");
+    else { s.classList.add("bad"); ok = false; }
+  });
+  if (ok) { document.getElementById("pCheck").disabled = true; taskDone("All partners found! " + t.tip); }
+  else wrongMsg("Fix the red ones. Use each word only once.");
+}
+
+/* Task 6: say it out loud */
+function renderSay(area, t) {
+  area.innerHTML = '<div class="say-card" id="sayAsk"></div><div class="models hidden" id="sayModels"></div><button class="btn" id="sayBtn" onclick="sayDone()">I said it!</button>';
+  showSay();
+}
+function showSay() {
+  const t = tasks[current];
+  document.getElementById("sayAsk").textContent = t.cards[sub].ask;
+  document.getElementById("sayModels").classList.add("hidden");
+  document.getElementById("sayBtn").textContent = "I said it!";
+  document.getElementById("sayBtn").dataset.stage = "ask";
+}
+function sayDone() {
+  const t = tasks[current];
+  const btn = document.getElementById("sayBtn");
+  if (btn.dataset.stage === "ask") {
+    const m = t.cards[sub].models;
+    const box = document.getElementById("sayModels");
+    box.innerHTML = "Examples:<br>" + m.join("<br>");
+    box.classList.remove("hidden");
+    btn.dataset.stage = "next";
+    btn.textContent = sub + 1 >= t.cards.length ? "Finish" : "Next word";
+  } else {
+    sub++;
+    if (sub >= t.cards.length) { btn.disabled = true; taskDone(t.tip, false); }
+    else showSay();
+  }
+}
+
+function nextTask() {
+  current++;
+  if (current >= tasks.length) showFinish();
+  else renderTask();
+}
+
+function showFinish() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  let stars = "";
+  for (let i = 0; i < scoredCount; i++) stars += i < firstTry ? "⭐" : "☆";
+  document.getElementById("stars").textContent = stars;
+  document.getElementById("scoreCount").textContent = firstTry + " / " + scoredCount;
+  let msg;
+  if (firstTry === scoredCount) msg = "Perfect shift! Every task was right on the first try.";
+  else if (firstTry >= 3) msg = "Great shift! Play again to collect every star.";
+  else msg = "Shift complete! Play again to collect more stars.";
+  document.getElementById("finalMsg").textContent = msg;
+}
+</script>
+</body>
+</html>

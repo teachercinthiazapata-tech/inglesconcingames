@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First Conditional: Condition and Result</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card { background: #fff; border-radius: 24px; max-width: 660px; width: 100%; padding: 32px 30px; box-shadow: 0 12px 40px rgba(60,40,100,0.18); }
+  h1 { text-align: center; font-size: 24px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 14px; }
+  .progress { display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #e2d9f5; transition: background 0.3s; }
+  .dot.active { background: #9b7bd8; }
+  .dot.done { background: #6fcf97; }
+  .intro { text-align: center; color: #4a3b6b; line-height: 1.6; }
+  .intro .big { font-size: 56px; margin: 6px 0; }
+  .intro p { margin-bottom: 14px; }
+  .recipe { background: #f5f2fc; border-radius: 14px; padding: 14px; margin: 0 auto 16px; color: #4a3b6b; font-size: 15px; line-height: 1.8; }
+  .recipe b.c { color: #2f6fb3; }
+  .recipe b.r { color: #b3562f; }
+  .tag { text-align: center; font-size: 13px; color: #9b8fb8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 700; }
+  .prompt-box { background: #f5f2fc; border-radius: 14px; padding: 18px; text-align: center; color: #4a3b6b; font-size: 17px; line-height: 1.6; margin-bottom: 14px; }
+  .sentence { background: #fff; border: 2px solid #e2d9f5; border-radius: 14px; padding: 18px; text-align: center; color: #4a3b6b; font-size: 19px; line-height: 1.7; margin-bottom: 14px; font-weight: 600; }
+  .hl { background: #fff1a8; border-radius: 6px; padding: 2px 6px; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .option-btn { background: #efe8fb; border: 2px solid #e2d9f5; border-radius: 12px; padding: 13px 16px; font-size: 15px; color: #4a3b6b; cursor: pointer; text-align: left; }
+  .option-btn:hover { background: #e2d3f9; }
+  .option-btn.correct { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .option-btn.wrong { background: #fbe2e2; border-color: #e79a9a; color: #a13a3a; }
+  .option-btn:disabled { cursor: default; }
+  .two-btn { display: flex; gap: 12px; margin-bottom: 14px; }
+  .two-btn .option-btn { flex: 1; text-align: center; font-weight: 700; font-size: 16px; }
+  .type-input { width: 100%; padding: 13px 14px; border: 2px solid #e2d9f5; border-radius: 12px; font-size: 16px; margin-bottom: 12px; text-align: center; }
+  .type-input:focus { outline: none; border-color: #9b7bd8; }
+  .match-cols { display: flex; gap: 14px; margin-bottom: 14px; }
+  .match-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .match-item { background: #efe8fb; border: 2px solid #e2d9f5; border-radius: 10px; padding: 10px; text-align: center; font-size: 14px; color: #4a3b6b; cursor: pointer; }
+  .match-item:hover { background: #e2d3f9; }
+  .match-item.sel { border-color: #9b7bd8; background: #e2d3f9; }
+  .match-item.done { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; cursor: default; }
+  .match-item.bad { background: #fbe2e2; border-color: #e79a9a; }
+  .tile-pool, .tile-answer { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 46px; margin-bottom: 14px; padding: 10px; border-radius: 12px; }
+  .tile-pool { background: #f5f2fc; }
+  .tile-answer { background: #fff; border: 2px dashed #d8cff0; }
+  .tile { background: #9b7bd8; color: white; padding: 8px 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; user-select: none; }
+  .tile:hover { background: #8a68c9; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { flex: 1; }
+  .btn { display: block; width: 100%; background: #6fcf97; color: white; border: none; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #b9e5cb; cursor: default; }
+  .btn.secondary { background: #efe8fb; color: #5b3fa0; }
+  .btn.secondary:hover { background: #ddd0f7; }
+  .btn.secondary:disabled { background: #f3eefb; color: #b8aad6; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 12px 0; padding: 12px; border-radius: 12px; line-height: 1.5; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .stars { font-size: 36px; margin: 10px 0; letter-spacing: 4px; }
+  .score-screen .big-score { font-size: 44px; font-weight: 800; color: #5b3fa0; margin: 8px 0; }
+  .footer { text-align: center; color: #9b8fb8; font-size: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Condition and Result</h1>
+  <div class="subtitle">First Conditional Review</div>
+
+  <div id="introScreen" class="intro">
+    <div class="big">&#129513;</div>
+    <div class="recipe">
+      <b class="c">If + present simple</b> (condition), <b class="r">will + base verb</b> (result).<br>
+      Example: If you send the documents, we will start the process.
+    </div>
+    <p>Complete <b>6 quick rounds</b> to review the first conditional.</p>
+    <p style="font-size:14px;color:#7a6f95;">No timer. If you make a mistake, just try again.</p>
+    <button class="btn" onclick="startGame()">Start</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div class="progress" id="progress"></div>
+    <div class="tag" id="tag"></div>
+    <div class="prompt-box" id="promptBox"></div>
+    <div id="mechanicArea"></div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>Review complete! &#127881;</h1>
+    <div class="stars" id="stars"></div>
+    <div class="big-score" id="scoreCount">0 / 6</div>
+    <p id="finalMsg" style="color:#6b5f8a; margin-bottom: 18px;"></p>
+    <button class="btn" onclick="startGame()">Play Again</button>
+  </div>
+  <div class="footer">Inglés con Cin</div>
+</div>
+
+<script>
+const rounds = [
+  {
+    mechanic: "cr", tag: "Round 1: Condition or result?",
+    prompt: "Look at the highlighted part. Is it the condition (if...) or the result (will...)?",
+    items: [
+      { before: "", hl: "If you send the documents,", after: " we will start the process.", answer: "condition" },
+      { before: "If it rains, ", hl: "I will stay at home.", after: "", answer: "result" },
+      { before: "", hl: "If the client calls,", after: " we will answer.", answer: "condition" },
+      { before: "If you miss the deadline, ", hl: "there will be a delay.", after: "", answer: "result" }
+    ],
+    tip: "The condition has if. The result has will."
+  },
+  {
+    mechanic: "typeword", tag: "Round 2: Complete with IF",
+    prompt: "Type the missing word.",
+    items: [
+      { before: "", after: " you send the documents, we will start the process.", answer: "if" },
+      { before: "", after: " it rains, I will stay at home.", answer: "if" },
+      { before: "We will call you ", after: " the application is approved.", answer: "if" }
+    ],
+    tip: "We use if to start the condition."
+  },
+  {
+    mechanic: "choice", tag: "Round 3: Complete with WILL",
+    prompt: "Choose the missing word.",
+    items: [
+      { sentence: "If it rains, I ___ stay at home.", options: ["will", "am", "do"], answer: "will" },
+      { sentence: "If you call, we ___ answer.", options: ["are", "will", "have"], answer: "will" },
+      { sentence: "If you send the documents, we ___ start the process.", options: ["do", "can't", "will"], answer: "will" }
+    ],
+    tip: "In the result part we use will."
+  },
+  {
+    mechanic: "choice", tag: "Round 4: Complete with the base verb",
+    prompt: "Choose the correct verb after will.",
+    items: [
+      { sentence: "If you call, we will ___.", options: ["answer", "answers", "answering"], answer: "answer" },
+      { sentence: "If it rains, I will ___ at home.", options: ["stays", "stay", "staying"], answer: "stay" },
+      { sentence: "If the client confirms, we will ___ the appointment.", options: ["keeps", "keeping", "keep"], answer: "keep" }
+    ],
+    tip: "After will, we always use the base verb, with no s and no ing."
+  },
+  {
+    mechanic: "match", tag: "Round 5: Match the halves",
+    prompt: "Match each condition with its result. Click one on the left and one on the right.",
+    pairs: [
+      ["If you send the documents,", "we will start the process."],
+      ["If it rains,", "I will stay at home."],
+      ["If you call us,", "we will answer."],
+      ["If the application is approved,", "you will receive a permit."],
+      ["If you miss the deadline,", "there will be a delay."]
+    ],
+    tip: "Each condition has a logical result."
+  },
+  {
+    mechanic: "build", tag: "Round 6: Build the sentence",
+    prompt: "Tap the words in the correct order.",
+    items: [
+      { pieces: ["If", "you", "call", "I", "will", "answer"] },
+      { pieces: ["If", "you", "study", "you", "will", "learn"] }
+    ],
+    tip: "If + present simple, will + base verb."
+  }
+];
+
+let current = 0;
+let firstTry = 0;
+let wrongAttempted = false;
+let sub = 0;
+let selLeft = null;
+let matched = 0;
+let pool = [];
+let placed = [];
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function startGame() {
+  current = 0;
+  firstTry = 0;
+  document.getElementById("introScreen").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  renderRound();
+}
+function buildProgress() {
+  const el = document.getElementById("progress");
+  el.innerHTML = "";
+  for (let i = 0; i < rounds.length; i++) {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === current ? " active" : i < current ? " done" : "");
+    el.appendChild(d);
+  }
+}
+function showFeedback(kind, text) {
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(kind);
+  fb.textContent = text;
+}
+function clearFeedback() {
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  fb.classList.remove("correct", "wrong");
+}
+function roundDone(msg) {
+  if (!wrongAttempted) firstTry++;
+  showFeedback("correct", msg);
+  setTimeout(nextRound, 2300);
+}
+function wrongMsg(msg) {
+  wrongAttempted = true;
+  showFeedback("wrong", msg);
+}
+
+function renderRound() {
+  wrongAttempted = false;
+  sub = 0;
+  selLeft = null;
+  matched = 0;
+  clearFeedback();
+  buildProgress();
+  const r = rounds[current];
+  document.getElementById("tag").textContent = r.tag;
+  document.getElementById("promptBox").textContent = r.prompt;
+  const area = document.getElementById("mechanicArea");
+  area.innerHTML = "";
+  if (r.mechanic === "cr") renderCR(area);
+  else if (r.mechanic === "typeword") renderTypeWord(area);
+  else if (r.mechanic === "choice") renderChoice(area);
+  else if (r.mechanic === "match") renderMatch(area);
+  else if (r.mechanic === "build") renderBuild(area);
+}
+
+/* Round 1 */
+function renderCR(area) {
+  area.innerHTML = '<div class="sentence" id="crSentence"></div>' +
+    '<div class="two-btn"><button class="option-btn" id="crC" onclick="crPick(\'condition\')">Condition (if...)</button>' +
+    '<button class="option-btn" id="crR" onclick="crPick(\'result\')">Result (will...)</button></div>';
+  showCR();
+}
+function showCR() {
+  const r = rounds[current];
+  const it = r.items[sub];
+  const box = document.getElementById("crSentence");
+  box.innerHTML = "";
+  box.appendChild(document.createTextNode(it.before));
+  const sp = document.createElement("span");
+  sp.className = "hl"; sp.textContent = it.hl;
+  box.appendChild(sp);
+  box.appendChild(document.createTextNode(it.after));
+}
+function crPick(v) {
+  const r = rounds[current];
+  if (r.items[sub].answer === v) {
+    sub++;
+    clearFeedback();
+    if (sub >= r.items.length) {
+      document.getElementById("crC").disabled = true;
+      document.getElementById("crR").disabled = true;
+      roundDone("Well done! " + r.tip);
+    } else showCR();
+  } else wrongMsg("Not quite. Look for if or will in the highlighted part.");
+}
+
+/* Round 2 */
+function renderTypeWord(area) {
+  area.innerHTML = '<div class="sentence" id="twSentence"></div>' +
+    '<input type="text" class="type-input" id="twInput" placeholder="Type the missing word..." autocomplete="off">' +
+    '<button class="btn" id="twCheck" onclick="checkTW()">Check</button>';
+  document.getElementById("twInput").addEventListener("keydown", function(e) { if (e.key === "Enter") checkTW(); });
+  showTW();
+}
+function showTW() {
+  const r = rounds[current];
+  const it = r.items[sub];
+  document.getElementById("twSentence").textContent = it.before + "______" + it.after;
+  const inp = document.getElementById("twInput");
+  inp.value = "";
+  inp.focus();
+}
+function checkTW() {
+  const r = rounds[current];
+  const inp = document.getElementById("twInput");
+  if (inp.disabled) return;
+  if (inp.value.trim().toLowerCase() === r.items[sub].answer) {
+    sub++;
+    clearFeedback();
+    if (sub >= r.items.length) {
+      inp.disabled = true;
+      document.getElementById("twCheck").disabled = true;
+      roundDone("Correct! " + r.tip);
+    } else showTW();
+  } else wrongMsg("Not quite. Which word starts the condition?");
+}
+
+/* Rounds 3 and 4 */
+function renderChoice(area) {
+  area.innerHTML = '<div class="sentence" id="chSentence"></div><div class="options" id="optionsArea"></div>';
+  showChoice();
+}
+function showChoice() {
+  const r = rounds[current];
+  const it = r.items[sub];
+  document.getElementById("chSentence").textContent = (sub + 1) + "/" + r.items.length + ".  " + it.sentence;
+  const oa = document.getElementById("optionsArea");
+  oa.innerHTML = "";
+  shuffle(it.options).forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "option-btn"; b.textContent = opt;
+    b.onclick = function() {
+      if (opt === it.answer) {
+        oa.querySelectorAll(".option-btn").forEach(x => x.disabled = true);
+        b.classList.add("correct");
+        sub++;
+        if (sub >= r.items.length) roundDone("Perfect! " + r.tip);
+        else { showFeedback("correct", "Correct!"); setTimeout(function() { clearFeedback(); showChoice(); }, 1100); }
+      } else {
+        b.classList.add("wrong"); b.disabled = true;
+        wrongMsg("Not quite. Try another one.");
+      }
+    };
+    oa.appendChild(b);
+  });
+}
+
+/* Round 5 */
+function renderMatch(area) {
+  const r = rounds[current];
+  area.innerHTML = '<div class="match-cols"><div class="match-col" id="colL"></div><div class="match-col" id="colR"></div></div>';
+  shuffle(r.pairs.map(p => p[0])).forEach(t => addMatchItem("colL", t, "L"));
+  shuffle(r.pairs.map(p => p[1])).forEach(t => addMatchItem("colR", t, "R"));
+}
+function addMatchItem(colId, text, side) {
+  const b = document.createElement("div");
+  b.className = "match-item"; b.textContent = text; b.dataset.side = side;
+  b.onclick = function() { pickMatch(b); };
+  document.getElementById(colId).appendChild(b);
+}
+function pickMatch(el) {
+  if (el.classList.contains("done")) return;
+  const r = rounds[current];
+  if (el.dataset.side === "L") {
+    document.querySelectorAll("#colL .match-item").forEach(x => x.classList.remove("sel"));
+    el.classList.add("sel");
+    selLeft = el;
+    return;
+  }
+  if (!selLeft) { showFeedback("wrong", "First click a condition on the left."); return; }
+  const pair = r.pairs.find(p => p[0] === selLeft.textContent);
+  if (pair && pair[1] === el.textContent) {
+    selLeft.classList.remove("sel");
+    selLeft.classList.add("done");
+    el.classList.add("done");
+    selLeft = null;
+    matched++;
+    clearFeedback();
+    if (matched === r.pairs.length) roundDone("All matched! " + r.tip);
+  } else {
+    wrongAttempted = true;
+    el.classList.add("bad");
+    setTimeout(function() { el.classList.remove("bad"); }, 600);
+    showFeedback("wrong", "That result does not fit. Try again.");
+  }
+}
+
+/* Round 6 */
+function renderBuild(area) {
+  area.innerHTML = '<div class="tile-answer" id="answerArea"></div><div class="tile-pool" id="poolArea"></div>' +
+    '<div class="btn-row"><button class="btn secondary" id="undoBtn" onclick="undoTile()">Undo</button>' +
+    '<button class="btn secondary" id="clueBtn" onclick="giveClue()">Clue</button>' +
+    '<button class="btn" id="checkBtn" onclick="checkBuild()">Check</button></div>';
+  setupBuild();
+}
+function setupBuild() {
+  const r = rounds[current];
+  const it = r.items[sub];
+  pool = shuffle(it.pieces.map((val, idx) => ({ val: val, id: idx })));
+  placed = [];
+  renderTiles();
+}
+function renderTiles() {
+  const aa = document.getElementById("answerArea");
+  const pa = document.getElementById("poolArea");
+  aa.innerHTML = ""; pa.innerHTML = "";
+  placed.forEach(t => { const el = document.createElement("div"); el.className = "tile"; el.textContent = t.val; aa.appendChild(el); });
+  pool.forEach(t => { const el = document.createElement("div"); el.className = "tile"; el.textContent = t.val; el.onclick = function() { placeTile(t.id); }; pa.appendChild(el); });
+}
+function placeTile(id) {
+  const idx = pool.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  placed.push(pool[idx]);
+  pool.splice(idx, 1);
+  renderTiles();
+}
+function undoTile() {
+  if (placed.length === 0) return;
+  pool.push(placed.pop());
+  renderTiles();
+}
+function giveClue() {
+  const it = rounds[current].items[sub];
+  if (placed.length >= it.pieces.length) return;
+  const needed = it.pieces[placed.length];
+  const idx = pool.findIndex(t => t.val === needed);
+  if (idx === -1) return;
+  placeTile(pool[idx].id);
+}
+function checkBuild() {
+  const r = rounds[current];
+  const it = r.items[sub];
+  if (placed.map(t => t.val).join(" ") === it.pieces.join(" ")) {
+    sub++;
+    if (sub >= r.items.length) {
+      document.getElementById("checkBtn").disabled = true;
+      document.getElementById("undoBtn").disabled = true;
+      document.getElementById("clueBtn").disabled = true;
+      roundDone("Great sentences! " + r.tip);
+    } else {
+      showFeedback("correct", "Correct! One more sentence.");
+      setTimeout(function() { clearFeedback(); setupBuild(); }, 1300);
+    }
+  } else wrongMsg("Not quite. Use Undo or Clue and try again.");
+}
+
+function nextRound() {
+  current++;
+  if (current >= rounds.length) showFinish();
+  else renderRound();
+}
+function showFinish() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  let stars = "";
+  for (let i = 0; i < rounds.length; i++) stars += i < firstTry ? "⭐" : "☆";
+  document.getElementById("stars").textContent = stars;
+  document.getElementById("scoreCount").textContent = firstTry + " / " + rounds.length;
+  let msg;
+  if (firstTry === rounds.length) msg = "Perfect! Every round was right on the first try.";
+  else if (firstTry >= 4) msg = "Great job! Play again to collect every star.";
+  else msg = "Review complete! Play again to collect more stars.";
+  document.getElementById("finalMsg").textContent = msg;
+}
+</script>
+</body>
+</html>
