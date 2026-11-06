@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walk With Me: Follow and Give Directions</title>
+<style>
+  :root{
+    --navy:#1F3A5F; --coral:#E07A5F; --mint:#5FB58F; --peach:#FDEEE6;
+    --cream:#FFF8F0; --grey:#C9D2DC; --green:#9CCBA5; --yell:#F2C14E;
+  }
+  *{box-sizing:border-box;}
+  .hidden{display:none !important;}
+  body{
+    margin:0; padding:18px 16px 40px;
+    font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+    background:var(--cream); color:var(--navy);
+  }
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1{font-size:1.75rem;margin:0 0 4px;text-align:center;}
+  .sub{text-align:center;color:#6b7b8c;margin:0 0 18px;font-size:1rem;}
+  .tabs{display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
+  .tab{
+    border:3px solid var(--navy); background:#fff; color:var(--navy);
+    border-radius:999px; padding:10px 20px; font-size:1rem; font-weight:bold;
+    cursor:pointer; font-family:inherit;
+  }
+  .tab.on{background:var(--navy);color:#fff;}
+  .card{
+    background:#fff; border:3px solid var(--grey); border-radius:18px;
+    padding:18px; margin-bottom:16px;
+  }
+  .taskbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;}
+  .mission{font-size:1.1rem;font-weight:bold;line-height:1.45;flex:1 1 320px;min-width:260px;}
+  .mission .small{display:block;font-weight:normal;font-size:.92rem;color:#6b7b8c;margin-top:4px;}
+  .pill{background:var(--peach);border-radius:12px;padding:10px 14px;font-size:.95rem;}
+  button{font-family:inherit;}
+  .speak{
+    border:none;background:var(--coral);color:#fff;border-radius:14px;
+    padding:12px 18px;font-size:1.05rem;font-weight:bold;cursor:pointer;
+  }
+  .ghost{
+    border:3px solid var(--grey);background:#fff;color:var(--navy);border-radius:14px;
+    padding:10px 16px;font-size:.95rem;font-weight:bold;cursor:pointer;
+  }
+  svg{width:100%;height:auto;display:block;border-radius:14px;background:var(--cream);}
+  .place{cursor:pointer;}
+  .place:hover rect{stroke:var(--coral);}
+  .controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+  .ctrl{
+    border:none;background:var(--navy);color:#fff;border-radius:16px;
+    padding:16px 22px;font-size:1.05rem;font-weight:bold;cursor:pointer;min-width:150px;
+  }
+  .ctrl:hover{background:#17304f;}
+  .ctrl.mintbtn{background:var(--mint);}
+  .msg{
+    margin-top:14px;padding:14px;border-radius:14px;font-size:1.05rem;
+    line-height:1.5;background:var(--peach);min-height:28px;
+  }
+  .msg.good{background:#E8F5EF;border:3px solid var(--mint);}
+  .msg.bad{background:#FBE9E4;border:3px solid var(--coral);}
+  .log{
+    margin-top:12px;padding:14px;border-radius:14px;background:#F4F7FA;
+    border:3px dashed var(--grey);font-size:1.1rem;min-height:30px;line-height:1.5;
+  }
+  .log .lab{display:block;font-size:.85rem;color:#6b7b8c;font-weight:bold;margin-bottom:4px;}
+  .score{text-align:center;font-size:1rem;color:#6b7b8c;margin-top:10px;}
+  .legend{font-size:.9rem;color:#6b7b8c;text-align:center;margin-top:10px;line-height:1.5;}
+  footer{text-align:center;color:#8a99a8;font-size:.85rem;margin-top:22px;}
+  @media (max-width:620px){
+    h1{font-size:1.35rem;}
+    .ctrl{min-width:120px;padding:14px 16px;font-size:.95rem;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Walk With Me</h1>
+  <p class="sub">Follow the directions, then give them. Imperatives, prepositions of place and a city map.</p>
+
+  <div class="tabs">
+    <button class="tab on" id="tab1" onclick="setRound(1)">Round 1: Listen and walk</button>
+    <button class="tab" id="tab2" onclick="setRound(2)">Round 2: Give the directions</button>
+  </div>
+
+  <div class="card">
+    <div class="taskbar">
+      <div class="mission" id="mission"></div>
+      <div id="speakBox"><button class="speak" id="speakBtn" onclick="sayRoute()">&#128266; Listen again</button></div>
+    </div>
+    <div class="log hidden" id="logBox"><span class="lab">Your directions</span><span id="logText">...</span></div>
+  </div>
+
+  <div class="card">
+    <svg id="map" viewBox="0 0 800 520" role="img" aria-label="City map with six places"></svg>
+    <div class="controls">
+      <button class="ctrl" onclick="go()">Go straight</button>
+      <button class="ctrl" onclick="turn(-1)">Turn left</button>
+      <button class="ctrl" onclick="turn(1)">Turn right</button>
+      <button class="ctrl mintbtn" onclick="reset()">Start again</button>
+    </div>
+    <div class="msg" id="msg">Press the buttons to walk. When you arrive, click the place on the map.</div>
+    <p class="legend">The orange dot is you. The white arrow shows the way you are looking.<br>Turn left and turn right do not move you. They only change the way you look.</p>
+    <div class="score" id="score"></div>
+  </div>
+
+  <footer>Inglés con Cin</footer>
+</div>
+
+<script>
+var CX = [60, 265, 470, 675];
+var CY = [110, 285, 460];
+var DIRS = [{dx:0,dy:-1},{dx:1,dy:0},{dx:0,dy:1},{dx:-1,dy:0}];
+
+var PLACES = {
+  coffee: {name:"The Coffee Shop",     c:0, r:0, fill:"#F2C14E", lines:["THE COFFEE","SHOP"]},
+  museum: {name:"The Museum",          c:1, r:0, fill:"#FFFFFF", lines:["THE","MUSEUM"]},
+  park:   {name:"Central Park",        c:2, r:0, fill:"#9CCBA5", lines:["CENTRAL","PARK"]},
+  diner:  {name:"Sunrise Diner",       c:0, r:1, fill:"#FFFFFF", lines:["SUNRISE","DINER"]},
+  subway: {name:"The Subway Station",  c:1, r:1, fill:"#FFFFFF", lines:["SUBWAY","STATION"]},
+  hotel:  {name:"Your Hotel",          c:2, r:1, fill:"#FFFFFF", lines:["YOUR","HOTEL"]}
+};
+var AVENUES = ["5th Avenue","Madison Avenue","Park Avenue","Lexington Avenue"];
+var STREETS = ["86th Street","85th Street","84th Street"];
+
+var R1 = [
+  {t:"coffee", x:0, y:1, f:0,
+   text:"Go straight one block. The coffee shop is on the corner, on your left."},
+  {t:"museum", x:0, y:2, f:0,
+   text:"Go straight two blocks. Turn right. Go straight one block. The museum is on your right."},
+  {t:"park", x:0, y:0, f:1,
+   text:"Go straight three blocks. Central Park is across from you, on your right."},
+  {t:"diner", x:3, y:2, f:3,
+   text:"Go straight three blocks. The diner is on your right."},
+  {t:"subway", x:3, y:1, f:3,
+   text:"Go straight one block. Turn left. Go straight one block. The station is on your right."},
+  {t:"hotel", x:0, y:2, f:1,
+   text:"Go straight two blocks. Turn left. Go straight one block. Turn right. Go straight one block. Your hotel is next to the station."}
+];
+
+var R2 = [
+  {t:"museum", x:0, y:1, f:0,
+   model:"Go straight one block. Turn right. Go straight one block. The museum is on your right."},
+  {t:"hotel", x:0, y:0, f:1,
+   model:"Go straight three blocks. Turn right. Go straight one block. Your hotel is on the corner."},
+  {t:"diner", x:3, y:1, f:3,
+   model:"Go straight three blocks. Turn left. Go straight one block. The diner is across from the station."},
+  {t:"park", x:0, y:2, f:0,
+   model:"Go straight two blocks. Turn right. Go straight three blocks. Central Park is on your left."},
+  {t:"subway", x:0, y:0, f:1,
+   model:"Go straight two blocks. Turn right. Go straight two blocks. The station is on your right."}
+];
+
+var round = 1, idx = 0, pos = {x:0, y:1}, face = 0, log = [], done = 0, tries = 0;
+
+function task(){ return round === 1 ? R1[idx] : R2[idx]; }
+function list(){ return round === 1 ? R1 : R2; }
+
+function corner(x, y){ return {px:CX[x], py:CY[y]}; }
+
+function touches(x, y, key){
+  var p = PLACES[key];
+  return (x === p.c || x === p.c + 1) && (y === p.r || y === p.r + 1);
+}
+
+function drawMap(){
+  var s = "";
+  s += '<rect x="30" y="80" width="675" height="410" rx="16" fill="#C9D2DC" opacity="0.30"/>';
+  var i, j;
+  for (j = 0; j < CY.length; j++){
+    s += '<line x1="' + CX[0] + '" y1="' + CY[j] + '" x2="' + CX[3] + '" y2="' + CY[j] +
+         '" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>';
+  }
+  for (i = 0; i < CX.length; i++){
+    s += '<line x1="' + CX[i] + '" y1="' + CY[0] + '" x2="' + CX[i] + '" y2="' + CY[2] +
+         '" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>';
+  }
+  for (var key in PLACES){
+    var p = PLACES[key];
+    var x1 = CX[p.c] + 18, x2 = CX[p.c + 1] - 18;
+    var y1 = CY[p.r] + 18, y2 = CY[p.r + 1] - 18;
+    var cx = (x1 + x2) / 2, cy = (y1 + y2) / 2;
+    s += '<g class="place" data-key="' + key + '" onclick="pick(\'' + key + '\')">';
+    s += '<rect x="' + x1 + '" y="' + y1 + '" width="' + (x2 - x1) + '" height="' + (y2 - y1) +
+         '" rx="12" fill="' + p.fill + '" stroke="#1F3A5F" stroke-width="3"/>';
+    s += '<text x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle" font-family="Trebuchet MS,sans-serif" font-size="21" font-weight="bold" fill="#1F3A5F">' + p.lines[0] + '</text>';
+    s += '<text x="' + cx + '" y="' + (cy + 22) + '" text-anchor="middle" font-family="Trebuchet MS,sans-serif" font-size="21" font-weight="bold" fill="#1F3A5F">' + p.lines[1] + '</text>';
+    s += '</g>';
+  }
+  for (i = 0; i < CX.length; i++){
+    s += '<text x="' + CX[i] + '" y="62" text-anchor="middle" font-family="Trebuchet MS,sans-serif" font-size="15" fill="#1F3A5F">' + AVENUES[i] + '</text>';
+  }
+  for (j = 0; j < CY.length; j++){
+    s += '<text x="716" y="' + (CY[j] + 5) + '" font-family="Trebuchet MS,sans-serif" font-size="15" fill="#1F3A5F">' + STREETS[j] + '</text>';
+  }
+  var c = corner(pos.x, pos.y);
+  s += '<g transform="translate(' + c.px + ',' + c.py + ') rotate(' + (face * 90) + ')">';
+  s += '<circle cx="0" cy="0" r="19" fill="#E07A5F" stroke="#FFFFFF" stroke-width="5"/>';
+  s += '<path d="M0 -11 L8 6 L0 2 L-8 6 Z" fill="#FFFFFF"/>';
+  s += '</g>';
+  document.getElementById("map").innerHTML = s;
+}
+
+function show(text, kind){
+  var m = document.getElementById("msg");
+  m.className = "msg" + (kind ? " " + kind : "");
+  m.innerHTML = text;
+}
+
+function paintTask(){
+  var t = task();
+  var mi = document.getElementById("mission");
+  var startLine = "You are on the corner of " + AVENUES[t.x] + " and " + STREETS[t.y] + ".";
+  if (round === 1){
+    mi.innerHTML = "Mission " + (idx + 1) + " of " + R1.length + ": follow my directions." +
+      '<span class="small">' + startLine + " Listen, walk, and then click the place you arrive at.</span>";
+    document.getElementById("speakBox").classList.remove("hidden");
+    document.getElementById("logBox").classList.add("hidden");
+  } else {
+    mi.innerHTML = "Mission " + (idx + 1) + " of " + R2.length + ": take me to <strong>" + PLACES[t.t].name + "</strong>." +
+      '<span class="small">' + startLine + " Build your directions with the buttons, then click the place.</span>";
+    document.getElementById("speakBox").classList.add("hidden");
+    document.getElementById("logBox").classList.remove("hidden");
+  }
+  document.getElementById("score").textContent = "Places found: " + done + " of " + list().length;
+  reset();
+  if (round === 1) sayRoute();
+}
+
+function reset(){
+  var t = task();
+  pos = {x:t.x, y:t.y};
+  face = t.f;
+  log = [];
+  paintLog();
+  drawMap();
+  show(round === 1 ? "Listen and walk. When you arrive, click the place on the map."
+                   : "Walk to the place. Every button you press is written below.", "");
+}
+
+function paintLog(){
+  document.getElementById("logText").textContent = log.length ? log.join(" ") : "...";
+}
+
+function go(){
+  var d = DIRS[face];
+  var nx = pos.x + d.dx, ny = pos.y + d.dy;
+  if (nx < 0 || nx > 3 || ny < 0 || ny > 2){
+    show("You cannot go that way. There is no street there. Turn first.", "bad");
+    return;
+  }
+  pos.x = nx; pos.y = ny;
+  log.push("Go straight.");
+  paintLog();
+  drawMap();
+  show("You are on the corner of " + AVENUES[pos.x] + " and " + STREETS[pos.y] + ".", "");
+}
+
+function turn(dir){
+  face = (face + dir + 4) % 4;
+  log.push(dir === 1 ? "Turn right." : "Turn left.");
+  paintLog();
+  drawMap();
+  show("You turn " + (dir === 1 ? "right" : "left") + ". You do not move. Now go straight.", "");
+}
+
+function pick(key){
+  var t = task();
+  tries++;
+  if (key === t.t && touches(pos.x, pos.y, t.t)){
+    done++;
+    var extra = "";
+    if (round === 2){
+      extra = "<br><br>You said: <strong>" + (log.length ? log.join(" ") : "nothing yet") + "</strong>" +
+              "<br>Now say it like this: <strong>" + t.model + "</strong>";
+    } else {
+      extra = "<br><br>The directions were: <strong>" + t.text + "</strong>";
+    }
+    show("Yes! You are at " + PLACES[t.t].name + "." + extra, "good");
+    document.getElementById("score").textContent = "Places found: " + done + " of " + list().length;
+    setTimeout(next, 2600);
+    return;
+  }
+  if (key === t.t){
+    show("That is the right place, but you are not there yet. Look at the orange dot.", "bad");
+    return;
+  }
+  if (touches(pos.x, pos.y, key)){
+    if (round === 1) show("You are next to " + PLACES[key].name + ", but that is not the place in my directions. Listen again.", "bad");
+    else show("That is " + PLACES[key].name + ". I asked for " + PLACES[t.t].name + ".", "bad");
+    return;
+  }
+  show("Not that one. That is " + PLACES[key].name + ", and you are not there.", "bad");
+}
+
+function next(){
+  if (idx < list().length - 1){
+    idx++;
+    paintTask();
+  } else {
+    show("You found all of them. " + (round === 1
+      ? "Now try Round 2 and give the directions yourself."
+      : "Excellent work. You can give directions in New York."), "good");
+  }
+}
+
+function sayRoute(){
+  if (round !== 1) return;
+  try {
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(task().text);
+    u.lang = "en-US";
+    u.rate = 0.82;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+function setRound(n){
+  round = n;
+  idx = 0; done = 0;
+  document.getElementById("tab1").className = "tab" + (n === 1 ? " on" : "");
+  document.getElementById("tab2").className = "tab" + (n === 2 ? " on" : "");
+  paintTask();
+}
+
+paintTask();
+</script>
+</body>
+</html>
