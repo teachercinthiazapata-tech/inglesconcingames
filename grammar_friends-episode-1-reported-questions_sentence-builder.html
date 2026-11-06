@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friends Episode 1: Reported Questions Sentence Builder</title>
+<style>
+  * { box-sizing: border-box; }
+  .hidden { display: none !important; }
+  body {
+    margin: 0; font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #FFF8E7, #FDEFC9);
+    color: #2C3E50; min-height: 100vh; padding: 24px 16px 32px 16px;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; text-align: center; }
+  .subtitle { color: #E8A33D; font-weight: 700; letter-spacing: 1px; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 4px; }
+  h1 { font-size: 1.55rem; margin: 0 0 4px 0; }
+  .series-tag { font-size: 0.8rem; font-style: italic; color: #6b6a63; margin-bottom: 12px; }
+  .instructions { font-size: 0.95rem; color: #5a5a52; line-height: 1.5; margin: 0 auto 14px auto; max-width: 540px; }
+  .progress { font-size: 0.9rem; font-weight: 700; margin-bottom: 14px; }
+  .direct { background: #FFFFFF; border: 2px solid #E8A33D; border-radius: 14px; padding: 16px; margin-bottom: 14px; font-size: 1.05rem; line-height: 1.5; }
+  .direct .label { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #E8A33D; margin-bottom: 6px; }
+  .build-area { background: #FFFFFF; border: 2px dashed #2C3E50; border-radius: 14px; padding: 14px; min-height: 88px; text-align: left; margin-bottom: 12px; }
+  .leadin { font-weight: 700; margin-bottom: 8px; }
+  .built { display: flex; flex-wrap: wrap; gap: 8px; min-height: 40px; }
+  .bank { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px; min-height: 44px; }
+  .word {
+    background: #FFF8E7; color: #2C3E50; border: 2px solid #E8A33D; border-radius: 10px;
+    padding: 8px 14px; font-size: 1rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .word:hover { background: #E8A33D; color: #FFF8E7; }
+  .built .word { background: #2C3E50; color: #FFF8E7; border-color: #2C3E50; }
+  .built .word:hover { background: #E8734A; border-color: #E8734A; }
+  .actions { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; }
+  .btn { background: #2C3E50; color: #FFF8E7; border: none; padding: 11px 26px; font-size: 0.95rem; font-weight: 700; border-radius: 30px; cursor: pointer; font-family: inherit; }
+  .btn:hover:not(:disabled) { background: #E8A33D; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.secondary { background: none; color: #2C3E50; border: 2px solid #2C3E50; }
+  .btn.secondary:hover:not(:disabled) { background: #2C3E50; color: #FFF8E7; }
+  .feedback { border-radius: 12px; padding: 12px 16px; font-size: 0.95rem; line-height: 1.45; margin-bottom: 12px; text-align: left; }
+  .feedback.correct { background: #E8F5E9; border: 2px solid #4CAF50; }
+  .feedback.wrong { background: #FDECEA; border: 2px solid #E74C3C; }
+  .win { background: #E8F5E9; border: 2px solid #4CAF50; border-radius: 14px; padding: 20px; margin-bottom: 14px; }
+  .win h2 { margin: 0 0 12px 0; font-size: 1.2rem; }
+  .credit { margin-top: 16px; font-size: 0.7rem; color: #b3b2a8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="subtitle">Grammar Practice</div>
+  <h1>Reported Questions: Sentence Builder</h1>
+  <div class="series-tag">Based on the TV series "Friends", Episode 1</div>
+  <p class="instructions">Click the words in the word bank, in order, to finish the reported question. Click a word in your sentence to remove it. Some words are extra, so choose carefully!</p>
+  <div class="progress">Sentences built: <span id="done">0</span> / <span id="total">6</span></div>
+
+  <div id="game">
+    <div class="direct"><span class="label">Direct question</span><span id="direct"></span></div>
+    <div class="build-area">
+      <div class="leadin" id="leadin"></div>
+      <div class="built" id="built"></div>
+    </div>
+    <div class="bank" id="bank"></div>
+    <div class="actions">
+      <button class="btn" id="check-btn">Check</button>
+      <button class="btn secondary" id="clear-btn">Clear</button>
+      <button class="btn hidden" id="next-btn">Next</button>
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div class="win hidden" id="win">
+    <h2>Great work! You built all 6 reported questions!</h2>
+    <button class="btn" id="again-btn">Play again</button>
+  </div>
+  <p class="credit">By @inglesconcin.ok</p>
+</div>
+
+<script>
+  const items = [
+    { direct: 'Monica asked Rachel, "Why did you leave the wedding?"',
+      lead: "Monica asked Rachel", answers: ["why she had left the wedding"],
+      words: ["why","she","had","left","the","wedding","did"],
+      why: "The question word (why) stays. \"Did you leave\" becomes \"she had left\" (one step back), and we use statement word order, so no \"did\"." },
+    { direct: 'Monica asked Rachel, "Do you want to stay with me?"',
+      lead: "Monica asked Rachel", answers: ["if she wanted to stay with her","whether she wanted to stay with her"],
+      words: ["if","whether","she","wanted","to","stay","with","her","do"],
+      why: "Yes/no questions use \"if\" or \"whether\". \"Do you want\" becomes \"she wanted\", and \"me\" becomes \"her\" because the speaker changes." },
+    { direct: 'Rachel asked Monica, "Where are you going?"',
+      lead: "Rachel asked Monica", answers: ["where she was going"],
+      words: ["where","she","was","going","are"],
+      why: "The question word (where) stays. \"Are you going\" becomes \"she was going\", with statement word order (not \"where was she going\")." },
+    { direct: 'Chandler asked Ross, "Are you okay?"',
+      lead: "Chandler asked Ross", answers: ["if he was okay","whether he was okay"],
+      words: ["if","whether","he","was","okay","were"],
+      why: "\"Are you\" becomes \"he was\" (present to past, and \"you\" becomes \"he\"). We need \"if\" or \"whether\" for a yes/no question." },
+    { direct: 'Phoebe asked Rachel, "Have you ever worked in a coffee shop?"',
+      lead: "Phoebe asked Rachel", answers: ["if she had ever worked in a coffee shop","whether she had ever worked in a coffee shop"],
+      words: ["if","whether","she","had","ever","worked","in","a","coffee","shop","have"],
+      why: "Present perfect (\"have you ever worked\") becomes past perfect (\"she had ever worked\"), with statement word order and \"if\" or \"whether\"." },
+    { direct: 'Ross asked Rachel, "What are you doing here?"',
+      lead: "Ross asked Rachel", answers: ["what she was doing there"],
+      words: ["what","she","was","doing","there","here","are"],
+      why: "\"Are you doing\" becomes \"she was doing\", and \"here\" becomes \"there\" because the place changes in the report." }
+  ];
+
+  const directEl = document.getElementById('direct');
+  const leadEl = document.getElementById('leadin');
+  const builtEl = document.getElementById('built');
+  const bankEl = document.getElementById('bank');
+  const checkBtn = document.getElementById('check-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const feedbackEl = document.getElementById('feedback');
+  const doneEl = document.getElementById('done');
+  const winEl = document.getElementById('win');
+  const gameEl = document.getElementById('game');
+  const againBtn = document.getElementById('again-btn');
+  document.getElementById('total').textContent = items.length;
+
+  let current = 0, solved = 0, locked = false;
+  let bank = [], built = [];
+
+  function shuffle(a) {
+    const arr = a.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function loadItem() {
+    const it = items[current];
+    directEl.textContent = it.direct;
+    leadEl.textContent = it.lead + "...";
+    bank = shuffle(it.words.map((w, i) => ({ id: i, text: w })));
+    built = [];
+    locked = false;
+    feedbackEl.className = 'feedback hidden';
+    checkBtn.classList.remove('hidden');
+    clearBtn.classList.remove('hidden');
+    nextBtn.classList.add('hidden');
+    render();
+  }
+
+  function render() {
+    bankEl.innerHTML = '';
+    builtEl.innerHTML = '';
+    bank.forEach(w => {
+      const b = document.createElement('button');
+      b.className = 'word'; b.textContent = w.text;
+      b.addEventListener('click', () => {
+        if (locked) return;
+        bank = bank.filter(x => x.id !== w.id);
+        built.push(w);
+        render();
+      });
+      bankEl.appendChild(b);
+    });
+    built.forEach(w => {
+      const b = document.createElement('button');
+      b.className = 'word'; b.textContent = w.text;
+      b.addEventListener('click', () => {
+        if (locked) return;
+        built = built.filter(x => x.id !== w.id);
+        bank.push(w);
+        render();
+      });
+      builtEl.appendChild(b);
+    });
+  }
+
+  checkBtn.addEventListener('click', () => {
+    if (locked) return;
+    const it = items[current];
+    const sentence = built.map(w => w.text).join(' ').toLowerCase();
+    if (built.length === 0) {
+      feedbackEl.className = 'feedback wrong';
+      feedbackEl.textContent = 'Click some words first to build your sentence.';
+      return;
+    }
+    if (it.answers.includes(sentence)) {
+      locked = true;
+      solved++;
+      doneEl.textContent = solved;
+      feedbackEl.className = 'feedback correct';
+      feedbackEl.textContent = 'Correct! ' + it.lead + ' ' + sentence + '. ' + it.why;
+      checkBtn.classList.add('hidden');
+      clearBtn.classList.add('hidden');
+      nextBtn.classList.remove('hidden');
+      nextBtn.textContent = (current === items.length - 1) ? 'Finish' : 'Next';
+    } else {
+      feedbackEl.className = 'feedback wrong';
+      feedbackEl.textContent = 'Not quite. Remember: statement word order, one step back in time, and check the pronouns. Try again!';
+    }
+  });
+
+  clearBtn.addEventListener('click', () => {
+    if (locked) return;
+    bank = bank.concat(built);
+    built = [];
+    feedbackEl.className = 'feedback hidden';
+    render();
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (current === items.length - 1) {
+      gameEl.classList.add('hidden');
+      winEl.classList.remove('hidden');
+    } else {
+      current++;
+      loadItem();
+    }
+  });
+
+  againBtn.addEventListener('click', () => {
+    current = 0; solved = 0;
+    doneEl.textContent = '0';
+    winEl.classList.add('hidden');
+    gameEl.classList.remove('hidden');
+    loadItem();
+  });
+
+  loadItem();
+</script>
+</body>
+</html>
