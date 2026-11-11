@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yoga Instructions Builder: Imperatives</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #CDEAE0, #F6D9C4); min-height: 100vh; padding: 22px; color: #1F3864; }
+  .wrap { max-width: 740px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 1.5rem; margin: 0 0 4px; }
+  p.sub { text-align: center; margin: 0 0 14px; color: #4a5a75; }
+  .hint { background: #fff; border-radius: 12px; padding: 10px 14px; font-size: 0.9rem; margin-bottom: 14px; line-height: 1.5; }
+  .card { background: #FFFBF4; border-radius: 16px; padding: 22px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+  .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #E8836B; font-weight: bold; margin-bottom: 8px; }
+  .meaning { background: #fff; border-left: 5px solid #f2b84b; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; line-height: 1.5; }
+  .line { min-height: 62px; border: 2px dashed #E8836B; border-radius: 12px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #fff; margin-bottom: 14px; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; min-height: 48px; }
+  .tile { background: #1F3864; color: #fff; padding: 9px 14px; border-radius: 10px; cursor: pointer; user-select: none; font-size: 1rem; }
+  .tile.in { background: #E8836B; }
+  .mark { font-size: 1.3rem; font-weight: bold; }
+  .feedback { font-weight: bold; min-height: 2.6em; line-height: 1.4; margin-bottom: 10px; }
+  .good { color: #3aa76d; }
+  .bad { color: #d1504a; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  button { background: #1F3864; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  button.alt { background: #fff; color: #1F3864; border: 2px solid #1F3864; }
+  .hidden { display: none !important; }
+  .final { text-align: center; }
+  .final .score { font-size: 2rem; font-weight: bold; color: #E8836B; margin: 12px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Yoga Instructions Builder</h1>
+  <p class="sub">Put the words in order to build each instruction</p>
+  <div class="hint">Reminder: an instruction starts with the base verb. No subject. For negative instructions use <b>Don't</b> + verb.</div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+var items = [
+  { words: ["Breathe in", "through", "your nose"], mark: ".", meaning: "Inhale using your nose.", why: "Instruction: base verb first (Breathe in), no subject." },
+  { words: ["Bend", "your knees", "slightly"], mark: ".", meaning: "Make your knees a little bent.", why: "Verb + object + adverb. The adverb slightly goes at the end." },
+  { words: ["Keep", "your back", "straight"], mark: ".", meaning: "Do not round your back.", why: "Keep + object + adjective: keep your back straight." },
+  { words: ["Don't", "hold", "your breath"], mark: ".", meaning: "Continue breathing normally.", why: "Negative instruction: Don't + base verb." },
+  { words: ["Reach", "your arms", "above", "your head"], mark: ".", meaning: "Lift your arms up high.", why: "Verb + object + preposition of position (above) + place." },
+  { words: ["Hold", "the stretch", "for", "five breaths"], mark: ".", meaning: "Stay in the position for five breaths.", why: "Hold + object + for + time." },
+  { words: ["Step", "your right foot", "between", "your hands"], mark: ".", meaning: "Move your right foot to the space between your hands.", why: "Preposition between shows the position of the foot." },
+  { words: ["Relax", "your shoulders", "and", "look", "forward"], mark: ".", meaning: "Let your shoulders drop and look in front of you.", why: "Two instructions joined with and, each starting with a base verb." }
+];
+var idx = 0, score = 0, answer = [], checked = false, attempts = 0, tilesOrder = [];
+
+function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i -= 1) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+
+function start() { tilesOrder = shuffle(items[idx].words.map(function (w, i) { return { w: w, id: i }; })); answer = []; checked = false; attempts = 0; render(''); }
+
+function render(msg, cls) {
+  var card = document.getElementById('card'); card.innerHTML = '';
+  if (idx >= items.length) {
+    var d = document.createElement('div'); d.className = 'final';
+    d.innerHTML = '<h2>Well done!</h2><div class="score">' + score + ' / ' + items.length + '</div><p>Now you can build the same kind of instructions that your yoga teacher says. Listen for the verb first.</p>';
+    var b = document.createElement('button'); b.textContent = 'Play again'; b.onclick = function () { idx = 0; score = 0; start(); };
+    d.appendChild(b); card.appendChild(d); return;
+  }
+  var lab = document.createElement('div'); lab.className = 'label'; lab.textContent = 'Instruction ' + (idx + 1) + ' of ' + items.length;
+  var mean = document.createElement('div'); mean.className = 'meaning'; mean.textContent = 'Clue: ' + items[idx].meaning;
+  var line = document.createElement('div'); line.className = 'line';
+  answer.forEach(function (t, pos) {
+    var e = document.createElement('div'); e.className = 'tile in'; e.textContent = t.w;
+    e.onclick = function () { if (checked) return; answer.splice(pos, 1); render(''); };
+    line.appendChild(e);
+  });
+  var m = document.createElement('span'); m.className = 'mark'; m.textContent = items[idx].mark; line.appendChild(m);
+  var tiles = document.createElement('div'); tiles.className = 'tiles';
+  tilesOrder.forEach(function (t) {
+    if (answer.indexOf(t) !== -1) return;
+    var e = document.createElement('div'); e.className = 'tile'; e.textContent = t.w;
+    e.onclick = function () { if (checked) return; answer.push(t); render(''); };
+    tiles.appendChild(e);
+  });
+  var fb = document.createElement('div'); fb.className = 'feedback ' + (cls || ''); fb.textContent = msg || '';
+  var bar = document.createElement('div'); bar.className = 'bar';
+  var undo = document.createElement('button'); undo.className = 'alt'; undo.textContent = 'Undo';
+  undo.onclick = function () { if (checked) return; answer.pop(); render(''); };
+  var check = document.createElement('button'); check.textContent = 'Check'; check.className = checked ? 'hidden' : '';
+  check.onclick = function () {
+    var ok = answer.length === items[idx].words.length && answer.every(function (t, i) { return t.id === i; });
+    if (ok) { checked = true; if (attempts === 0) score += 1; render('Correct! ' + items[idx].why, 'good'); }
+    else { attempts += 1; render('Not quite. Check the order and try again. Hint: ' + items[idx].why, 'bad'); }
+  };
+  var show = document.createElement('button'); show.textContent = 'Show answer'; show.className = (!checked && attempts >= 2) ? 'alt' : 'hidden';
+  show.onclick = function () { checked = true; render('Correct order: ' + items[idx].words.join(' ') + items[idx].mark + ' ' + items[idx].why, 'bad'); };
+  var next = document.createElement('button'); next.textContent = idx === items.length - 1 ? 'See score' : 'Next'; next.className = checked ? '' : 'hidden';
+  next.onclick = function () { idx += 1; if (idx < items.length) start(); else render(''); };
+  bar.appendChild(undo); bar.appendChild(check); bar.appendChild(show); bar.appendChild(next);
+  card.appendChild(lab); card.appendChild(mean); card.appendChild(line); card.appendChild(tiles); card.appendChild(fb); card.appendChild(bar);
+}
+start();
+</script>
+</body>
+</html>
