@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First Conditional: Fix the Sentence</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card { background: #fff; border-radius: 24px; max-width: 680px; width: 100%; padding: 32px 28px; box-shadow: 0 12px 40px rgba(60,40,100,0.18); }
+  h1 { text-align: center; font-size: 24px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 14px; }
+  .progress { display: flex; justify-content: center; gap: 7px; margin-bottom: 16px; flex-wrap: wrap; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #e2d9f5; transition: background 0.3s; }
+  .dot.active { background: #9b7bd8; }
+  .dot.done { background: #6fcf97; }
+  .intro { text-align: center; color: #4a3b6b; line-height: 1.6; }
+  .intro .big { font-size: 52px; margin: 6px 0; }
+  .intro p { margin-bottom: 14px; }
+  .recipe { background: #f5f2fc; border-radius: 14px; padding: 14px; margin: 0 auto 16px; color: #4a3b6b; font-size: 15px; line-height: 1.8; }
+  .recipe b.c { color: #2f6fb3; }
+  .recipe b.r { color: #b3562f; }
+  .tag { text-align: center; font-size: 13px; color: #9b8fb8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700; }
+  .instruction { text-align: center; color: #4a3b6b; font-weight: 600; margin-bottom: 12px; }
+  .sentence-box { background: #f5f2fc; border-radius: 14px; padding: 20px 14px; text-align: center; margin-bottom: 14px; line-height: 2.6; }
+  .word { display: inline-block; margin: 0 3px; padding: 4px 10px; border-radius: 10px; background: #fff; border: 2px solid #e2d9f5; color: #4a3b6b; font-size: 18px; cursor: pointer; }
+  .word:hover { background: #efe8fb; }
+  .word.wrong { background: #fbe2e2; border-color: #e79a9a; }
+  .word.found { background: #fff1a8; border-color: #f2d98a; }
+  .word.fixed { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .word.locked { cursor: default; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .option-btn { background: #efe8fb; border: 2px solid #e2d9f5; border-radius: 12px; padding: 13px 16px; font-size: 16px; color: #4a3b6b; cursor: pointer; text-align: center; font-weight: 600; }
+  .option-btn:hover { background: #e2d3f9; }
+  .option-btn.correct { background: #d4f4e2; border-color: #6fcf97; color: #1e6b45; }
+  .option-btn.wrong { background: #fbe2e2; border-color: #e79a9a; color: #a13a3a; }
+  .option-btn:disabled { cursor: default; }
+  .btn { display: block; width: 100%; background: #6fcf97; color: white; border: none; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .btn:hover { background: #5cbf85; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 10px 0; padding: 12px; border-radius: 12px; line-height: 1.5; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .stars { font-size: 30px; margin: 10px 0; letter-spacing: 3px; }
+  .score-screen .big-score { font-size: 44px; font-weight: 800; color: #5b3fa0; margin: 8px 0; }
+  .footer { text-align: center; color: #9b8fb8; font-size: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Fix the Sentence</h1>
+  <div class="subtitle">First Conditional Review</div>
+
+  <div id="introScreen" class="intro">
+    <div class="big">&#128295;</div>
+    <div class="recipe">
+      <b class="c">If + present simple</b> (condition), <b class="r">will + base verb</b> (result).<br>
+      Example: If you send the documents, we will start the process.
+    </div>
+    <p>Each sentence has <b>one mistake</b>. Be the teacher!<br>
+    <b>Step 1:</b> click the wrong word.<br>
+    <b>Step 2:</b> choose the correct fix.</p>
+    <p style="font-size:14px;color:#7a6f95;">8 sentences. No timer. If you make a mistake, just try again.</p>
+    <button class="btn" onclick="startGame()">Start</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div class="progress" id="progress"></div>
+    <div class="tag" id="tag"></div>
+    <div class="instruction" id="instruction"></div>
+    <div class="sentence-box" id="sentenceBox"></div>
+    <div class="options hidden" id="optionsArea"></div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>Great teacher! &#127881;</h1>
+    <div class="stars" id="stars"></div>
+    <div class="big-score" id="scoreCount">0 / 8</div>
+    <p id="finalMsg" style="color:#6b5f8a; margin-bottom: 18px;"></p>
+    <button class="btn" onclick="startGame()">Play Again</button>
+  </div>
+  <div class="footer">Inglés con Cin</div>
+</div>
+
+<script>
+/* wrong = index of the wrong word; fix = correct replacement ("" means remove the word) */
+const items = [
+  { words: ["If", "you", "will", "send", "the", "documents,", "we", "will", "start", "the", "process."],
+    wrong: 2, fix: "", options: ["Remove this word", "can", "do"],
+    why: "After if, we do not use will. We use the present simple: If you send." },
+  { words: ["If", "you", "sent", "the", "documents,", "we", "will", "start", "the", "process."],
+    wrong: 2, fix: "send", options: ["send", "sending", "will send"],
+    why: "The condition uses the present simple: send." },
+  { words: ["If", "it", "rains,", "I", "stay", "at", "home."],
+    wrong: 4, fix: "will stay", options: ["will stay", "stayed", "staying"],
+    why: "The result needs will + base verb: I will stay." },
+  { words: ["If", "the", "application", "are", "approved,", "you", "will", "receive", "a", "letter."],
+    wrong: 3, fix: "is", options: ["is", "were", "be"],
+    why: "Application is singular, so we use is." },
+  { words: ["If", "you", "miss", "the", "deadline,", "there", "will", "being", "a", "delay."],
+    wrong: 7, fix: "be", options: ["be", "is", "been"],
+    why: "After will, we always use the base verb: there will be." },
+  { words: ["If", "she", "arrive", "late,", "we", "will", "wait."],
+    wrong: 2, fix: "arrives", options: ["arrives", "arriving", "will arrive"],
+    why: "With she, the present simple takes an s: she arrives." },
+  { words: ["If", "you", "do", "not", "confirm,", "we", "will", "cancels", "the", "appointment."],
+    wrong: 7, fix: "cancel", options: ["cancel", "canceling", "cancelled"],
+    why: "After will, we use the base verb with no s: will cancel." },
+  { words: ["If", "you", "receives", "the", "email,", "please", "answer", "it."],
+    wrong: 2, fix: "receive", options: ["receive", "received", "receiving"],
+    why: "With you, the present simple has no s: you receive." }
+];
+
+let current = 0;
+let firstTry = 0;
+let wrongAttempted = false;
+let stage = 1;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function startGame() {
+  current = 0;
+  firstTry = 0;
+  document.getElementById("introScreen").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  renderItem();
+}
+function buildProgress() {
+  const el = document.getElementById("progress");
+  el.innerHTML = "";
+  for (let i = 0; i < items.length; i++) {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === current ? " active" : i < current ? " done" : "");
+    el.appendChild(d);
+  }
+}
+function showFeedback(kind, text) {
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(kind);
+  fb.textContent = text;
+}
+function clearFeedback() {
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  fb.classList.remove("correct", "wrong");
+}
+
+function renderItem() {
+  wrongAttempted = false;
+  stage = 1;
+  clearFeedback();
+  buildProgress();
+  const it = items[current];
+  document.getElementById("tag").textContent = "Sentence " + (current + 1) + " of " + items.length;
+  document.getElementById("instruction").textContent = "Step 1: click the wrong word.";
+  document.getElementById("optionsArea").classList.add("hidden");
+  const box = document.getElementById("sentenceBox");
+  box.innerHTML = "";
+  it.words.forEach((w, i) => {
+    const s = document.createElement("span");
+    s.className = "word";
+    s.id = "w" + i;
+    s.textContent = w;
+    s.onclick = function() { pickWord(i); };
+    box.appendChild(s);
+  });
+}
+
+function pickWord(i) {
+  if (stage !== 1) return;
+  const it = items[current];
+  const el = document.getElementById("w" + i);
+  if (i === it.wrong) {
+    el.classList.add("found");
+    stage = 2;
+    clearFeedback();
+    document.querySelectorAll(".word").forEach(x => x.classList.add("locked"));
+    document.getElementById("instruction").textContent = "Step 2: choose the correct fix.";
+    const oa = document.getElementById("optionsArea");
+    oa.classList.remove("hidden");
+    oa.innerHTML = "";
+    shuffle(it.options).forEach(opt => {
+      const b = document.createElement("button");
+      b.className = "option-btn";
+      b.textContent = opt;
+      b.onclick = function() { pickFix(opt, b); };
+      oa.appendChild(b);
+    });
+  } else {
+    el.classList.add("wrong");
+    setTimeout(function() { el.classList.remove("wrong"); }, 700);
+    wrongAttempted = true;
+    showFeedback("wrong", "That word is fine. Look for the mistake in the verb.");
+  }
+}
+
+function pickFix(opt, btn) {
+  const it = items[current];
+  const correctText = it.fix === "" ? "Remove this word" : it.fix;
+  if (opt === correctText) {
+    document.querySelectorAll("#optionsArea .option-btn").forEach(b => b.disabled = true);
+    btn.classList.add("correct");
+    const el = document.getElementById("w" + it.wrong);
+    if (it.fix === "") el.style.display = "none";
+    else { el.textContent = it.fix; el.classList.remove("found"); el.classList.add("fixed"); }
+    if (!wrongAttempted) firstTry++;
+    document.getElementById("instruction").textContent = "Fixed!";
+    showFeedback("correct", "Correct! " + it.why);
+    setTimeout(nextItem, 3400);
+  } else {
+    btn.classList.add("wrong");
+    btn.disabled = true;
+    wrongAttempted = true;
+    showFeedback("wrong", "Not quite. Try another fix.");
+  }
+}
+
+function nextItem() {
+  current++;
+  if (current >= items.length) showFinish();
+  else renderItem();
+}
+function showFinish() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  document.getElementById("stars").textContent = "⭐".repeat(firstTry) + "☆".repeat(items.length - firstTry);
+  document.getElementById("scoreCount").textContent = firstTry + " / " + items.length;
+  let msg;
+  if (firstTry === items.length) msg = "Perfect! You found and fixed every mistake on the first try.";
+  else if (firstTry >= 6) msg = "Great job! Play again to collect every star.";
+  else msg = "Well done! Play again and see if you can fix them all on the first try.";
+  document.getElementById("finalMsg").textContent = msg;
+}
+</script>
+</body>
+</html>

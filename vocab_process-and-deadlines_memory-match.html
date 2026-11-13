@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Match: Process and Deadlines</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card { background: #fff; border-radius: 24px; max-width: 700px; width: 100%; padding: 30px 26px; box-shadow: 0 12px 40px rgba(60,40,100,0.18); }
+  h1 { text-align: center; font-size: 24px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 14px; }
+  .intro { text-align: center; color: #4a3b6b; line-height: 1.6; }
+  .intro .big { font-size: 52px; margin: 6px 0; }
+  .intro p { margin-bottom: 14px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: #7a6f95; font-weight: 700; font-size: 14px; }
+  .level-tag { color: #5b3fa0; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .tile { min-height: 92px; border-radius: 14px; border: 3px solid #e2d9f5; background: #9b7bd8; color: #fff; font-size: 30px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; padding: 6px; line-height: 1.25; transition: background 0.2s, transform 0.2s; }
+  .tile:hover { background: #8a68c9; }
+  .tile.open { background: #fff; color: #4a3b6b; font-size: 13px; font-weight: 700; border-color: #9b7bd8; transform: scale(1.03); }
+  .tile.matched { background: #d4f4e2; color: #1e6b45; border-color: #6fcf97; font-size: 13px; font-weight: 700; cursor: default; }
+  .tile.peek { background: #fff8e6; color: #5b4b1a; font-size: 13px; font-weight: 700; border-color: #f2d98a; }
+  .tile .lbl { display: block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: 800; margin-bottom: 4px; opacity: 0.85; }
+  .tile.k-term.open, .tile.k-term.peek, .tile.k-term.matched { background: #dbeafe; color: #1e4f8a; border-color: #2f6fb3; }
+  .tile.k-meaning.open, .tile.k-meaning.peek, .tile.k-meaning.matched { background: #ffedd5; color: #8a4a12; border-color: #e08a3c; }
+  .tile.matched { box-shadow: 0 0 0 3px #6fcf97; }
+  .legend { display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; }
+  .chip.term { background: #dbeafe; color: #1e4f8a; border: 2px solid #2f6fb3; }
+  .chip.meaning { background: #ffedd5; color: #8a4a12; border: 2px solid #e08a3c; }
+  .tile:disabled { cursor: default; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { flex: 1; }
+  .btn { display: block; width: 100%; background: #6fcf97; color: white; border: none; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #b9e5cb; cursor: default; }
+  .btn.secondary { background: #efe8fb; color: #5b3fa0; }
+  .btn.secondary:hover { background: #ddd0f7; }
+  .btn.secondary:disabled { background: #f3eefb; color: #b8aad6; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 8px 0 12px; padding: 12px; border-radius: 12px; line-height: 1.5; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .stars { font-size: 34px; margin: 10px 0; letter-spacing: 4px; }
+  .score-screen .big-score { font-size: 44px; font-weight: 800; color: #5b3fa0; margin: 8px 0; }
+  .footer { text-align: center; color: #9b8fb8; font-size: 12px; margin-top: 16px; }
+  @media (max-width: 520px) { .tile.open, .tile.matched, .tile.peek { font-size: 11px; } .tile { min-height: 80px; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Memory Match</h1>
+  <div class="subtitle">Process and Deadlines Vocabulary</div>
+
+  <div id="introScreen" class="intro">
+    <div class="big">&#127183;</div>
+    <p>Flip two cards at a time and find the pairs!<br>
+    <b>Level 1:</b> word or phrase (blue) and definition (orange).<br>
+    <b>Level 2:</b> sentence with a gap (orange) and the missing word (blue).</p>
+    <p style="font-size:14px;color:#7a6f95;">No timer. Use Clue if you need help.<br>Fewer attempts means more stars.</p>
+    <button class="btn" onclick="startGame()">Start</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div class="topbar"><span class="level-tag" id="levelTag"></span><span id="pairsInfo"></span><span id="attemptInfo"></span></div>
+    <div class="legend" id="legend"></div>
+    <div class="grid" id="grid"></div>
+    <div class="feedback hidden" id="feedback"></div>
+    <div class="btn-row">
+      <button class="btn secondary" id="clueBtn" onclick="giveClue()">Clue</button>
+      <button class="btn hidden" id="nextBtn" onclick="nextLevel()">Next level</button>
+    </div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>Great memory! &#127881;</h1>
+    <div class="stars" id="stars"></div>
+    <div class="big-score" id="scoreCount">0 / 6</div>
+    <p id="finalMsg" style="color:#6b5f8a; margin-bottom: 18px;"></p>
+    <button class="btn" onclick="startGame()">Play Again</button>
+  </div>
+  <div class="footer">Inglés con Cin</div>
+</div>
+
+<script>
+const levels = [
+  { name: "Level 1: Word and meaning", kinds: ["term", "meaning"], meaningLabel: "DEFINITION", pairs: [
+    ["step", "one part of a process"],
+    ["approval", "an official yes"],
+    ["delay", "when something happens later than planned"],
+    ["to confirm", "to say that something is correct"],
+    ["to receive", "to get something"],
+    ["appointment", "a meeting at a fixed day and time"],
+    ["deadline", "the last day to finish something"],
+    ["to handle", "to deal with something"]
+  ] },
+  { name: "Level 2: Sentence and word", kinds: ["meaning", "term"], meaningLabel: "SENTENCE", pairs: [
+    ["Please ____ your appointment by email.", "confirm"],
+    ["You will ____ an email tomorrow.", "receive"],
+    ["We are waiting for the ____ of your application.", "approval"],
+    ["If you miss the ____, there will be a delay.", "deadline"],
+    ["The first ____ is to send your documents.", "step"],
+    ["I have an ____ with the lawyer on Friday.", "appointment"],
+    ["There will be a ____ if the documents are incomplete.", "delay"],
+    ["Sofia can ____ client questions in two languages.", "handle"]
+  ] }
+];
+
+let levelIdx = 0;
+let deck = [];
+let flipped = [];
+let lock = false;
+let attempts = 0;
+let matchedPairs = 0;
+let totalStars = 0;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  levelIdx = 0;
+  totalStars = 0;
+  document.getElementById("introScreen").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  setupLevel();
+}
+
+function setupLevel() {
+  const lv = levels[levelIdx];
+  deck = [];
+  lv.pairs.forEach((p, i) => {
+    deck.push({ id: i + "a", pair: i, text: p[0], kind: lv.kinds[0] });
+    deck.push({ id: i + "b", pair: i, text: p[1], kind: lv.kinds[1] });
+  });
+  const lg = document.getElementById("legend");
+  lg.innerHTML = '<span class="chip term">WORD or PHRASE</span><span class="chip meaning">' + lv.meaningLabel + '</span>';
+  deck = shuffle(deck);
+  flipped = [];
+  lock = false;
+  attempts = 0;
+  matchedPairs = 0;
+  document.getElementById("levelTag").textContent = lv.name;
+  document.getElementById("nextBtn").classList.add("hidden");
+  document.getElementById("clueBtn").classList.remove("hidden");
+  document.getElementById("clueBtn").disabled = false;
+  clearFeedback();
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  deck.forEach(c => {
+    const b = document.createElement("button");
+    b.className = "tile";
+    b.id = "tile-" + c.id;
+    b.textContent = "?";
+    b.onclick = function() { flip(c.id); };
+    grid.appendChild(b);
+  });
+  updateInfo();
+}
+
+function updateInfo() {
+  document.getElementById("pairsInfo").textContent = "Pairs: " + matchedPairs + " / " + levels[levelIdx].pairs.length;
+  document.getElementById("attemptInfo").textContent = "Attempts: " + attempts;
+}
+function showFeedback(kind, text) {
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(kind);
+  fb.textContent = text;
+}
+function clearFeedback() {
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  fb.classList.remove("correct", "wrong");
+}
+
+function labelFor(card) {
+  if (card.kind === "term") return card.text.trim().indexOf(" ") === -1 ? "WORD" : "PHRASE";
+  return levels[levelIdx].meaningLabel;
+}
+function showFace(el, card) {
+  el.textContent = "";
+  el.classList.add("k-" + card.kind);
+  const l = document.createElement("span");
+  l.className = "lbl";
+  l.textContent = labelFor(card);
+  const t = document.createElement("span");
+  t.textContent = card.text;
+  el.appendChild(l);
+  el.appendChild(t);
+}
+function hideFace(el, card) {
+  el.classList.remove("k-" + card.kind);
+  el.textContent = "?";
+}
+
+function flip(id) {
+  if (lock) return;
+  const el = document.getElementById("tile-" + id);
+  if (el.classList.contains("open") || el.classList.contains("matched")) return;
+  const card = deck.find(c => c.id === id);
+  el.classList.add("open");
+  showFace(el, card);
+  flipped.push(card);
+  if (flipped.length === 2) {
+    attempts++;
+    updateInfo();
+    const a = flipped[0], b = flipped[1];
+    if (a.pair === b.pair) {
+      [a, b].forEach(c => {
+        const t = document.getElementById("tile-" + c.id);
+        t.classList.remove("open");
+        t.classList.add("matched");
+        t.disabled = true;
+      });
+      flipped = [];
+      matchedPairs++;
+      updateInfo();
+      clearFeedback();
+      if (matchedPairs === levels[levelIdx].pairs.length) levelDone();
+    } else {
+      lock = true;
+      showFeedback("wrong", "Not a pair. Try again!");
+      setTimeout(function() {
+        [a, b].forEach(c => {
+          const t = document.getElementById("tile-" + c.id);
+          t.classList.remove("open");
+          hideFace(t, c);
+        });
+        flipped = [];
+        lock = false;
+        clearFeedback();
+      }, 1300);
+    }
+  }
+}
+
+function giveClue() {
+  if (lock || flipped.length > 0) return;
+  const open = deck.filter(c => !document.getElementById("tile-" + c.id).classList.contains("matched"));
+  if (open.length === 0) return;
+  const pairId = open[0].pair;
+  const two = open.filter(c => c.pair === pairId);
+  lock = true;
+  attempts++;
+  updateInfo();
+  two.forEach(c => {
+    const t = document.getElementById("tile-" + c.id);
+    t.classList.add("peek");
+    showFace(t, c);
+  });
+  setTimeout(function() {
+    two.forEach(c => {
+      const t = document.getElementById("tile-" + c.id);
+      t.classList.remove("peek");
+      hideFace(t, c);
+    });
+    lock = false;
+  }, 1800);
+}
+
+function levelDone() {
+  const n = levels[levelIdx].pairs.length;
+  let stars = attempts <= n + 4 ? 3 : attempts <= n * 2 ? 2 : 1;
+  totalStars += stars;
+  document.getElementById("clueBtn").classList.add("hidden");
+  showFeedback("correct", "Level complete in " + attempts + " attempts! " + "⭐".repeat(stars));
+  document.getElementById("nextBtn").classList.remove("hidden");
+  document.getElementById("nextBtn").textContent = levelIdx + 1 >= levels.length ? "See my score" : "Next level";
+}
+
+function nextLevel() {
+  levelIdx++;
+  if (levelIdx >= levels.length) showFinish();
+  else setupLevel();
+}
+
+function showFinish() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  const max = levels.length * 3;
+  document.getElementById("stars").textContent = "⭐".repeat(totalStars) + "☆".repeat(max - totalStars);
+  document.getElementById("scoreCount").textContent = totalStars + " / " + max;
+  let msg;
+  if (totalStars === max) msg = "Perfect memory! You remember all the words.";
+  else if (totalStars >= 4) msg = "Great job! Play again to collect every star.";
+  else msg = "Well done! Play again and try with fewer attempts.";
+  document.getElementById("finalMsg").textContent = msg;
+}
+</script>
+</body>
+</html>
