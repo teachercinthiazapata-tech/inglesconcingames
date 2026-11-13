@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family Dinners and Everyday Expressions: Memory Match</title>
+<style>
+  :root{--navy:#1B2A4A;--orange:#B5651D;--gold:#8A5A00;--green:#2E7D32;--red:#C0392B;}
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#FBF7F0 0%,#F0E6D6 100%);margin:0;padding:20px;color:#222;}
+  .wrap{max-width:820px;margin:0 auto;}
+  h1{color:var(--navy);text-align:center;margin:0 0 4px;font-size:25px;}
+  .subtitle{text-align:center;color:var(--gold);font-style:italic;margin-bottom:12px;}
+  .instructions{background:#fff;border-left:5px solid var(--orange);padding:12px 18px;border-radius:8px;margin-bottom:16px;font-size:15px;}
+  .hidden{display:none !important;}
+  .stats{display:flex;justify-content:center;gap:24px;font-weight:700;color:var(--navy);margin-bottom:14px;}
+  .stats span{color:var(--orange);}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .card{min-height:92px;border-radius:12px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;font-size:14.5px;font-weight:600;border:2px solid var(--navy);background:var(--navy);color:var(--navy);}
+  .card.back{background:var(--navy);color:var(--navy);}
+  .card.back::after{content:"?";color:#fff;font-size:30px;font-weight:700;}
+  .card{flex-direction:column;gap:4px;}
+  .card .tag{font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;}
+  .card .emoji{font-size:24px;line-height:1;}
+  .card.expr.up{background:#EDE7F6;border-color:#6A4FB3;color:#3B2A7A;}
+  .card.expr.up .tag{color:#6A4FB3;}
+  .card.meaning.up{background:#FFF1DC;border-color:#B5651D;color:#7A4300;}
+  .card.meaning.up .tag{color:#B5651D;}
+  .card.up.matched{border-color:var(--green);border-width:3px;cursor:default;}
+  .card.up.wrong{background:#fdecea;border-color:var(--red);color:var(--red);}
+  .card.up.wrong .tag{color:var(--red);}
+  .feedback{margin-top:14px;padding:12px 16px;border-radius:8px;background:#f0f4fa;color:var(--navy);text-align:center;font-weight:600;min-height:46px;}
+  .btns{text-align:center;margin-top:14px;}
+  button{background:var(--orange);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:15px;cursor:pointer;}
+  button:hover{background:var(--gold);}
+  #win{text-align:center;background:#fff;border-radius:14px;padding:24px;box-shadow:0 6px 18px rgba(0,0,0,.12);margin-top:16px;}
+  #win h2{color:var(--green);}
+  footer{margin-top:22px;text-align:center;font-size:13px;color:#888;}
+  @media(max-width:560px){.grid{grid-template-columns:repeat(3,1fr);}.card{font-size:13px;min-height:84px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Family Dinners and Everyday Expressions</h1>
+  <div class="subtitle">Memory Match</div>
+  <div class="instructions">Flip two cards. Match each expression with its meaning. Matched pairs stay open. Try to finish with as few moves as you can.</div>
+  <div class="stats">Moves: <span id="moves">0</span> &nbsp; Pairs found: <span id="found">0</span> / 8</div>
+  <div class="grid" id="grid"></div>
+  <div class="feedback" id="feedback">Flip a card to start.</div>
+  <div class="btns"><button onclick="init()">Start again</button></div>
+  <div id="win" class="hidden">
+    <h2>Well done!</h2>
+    <p id="winText"></p>
+  </div>
+  <footer>Inglés con Cin &middot; Interactive English Practice</footer>
+</div>
+<script>
+const pairs = [
+  ["to steer clear of something", "to avoid something on purpose", "\u{1F6A7}"],
+  ["to bring something up", "to start talking about a subject", "\u{1F5E3}\uFE0F"],
+  ["to take the heat off someone", "to stop people from criticizing you", "\u{1F525}"],
+  ["to be through with something", "to have finished using or doing it", "\u2705"],
+  ["to calm down", "to become less nervous or angry", "\u{1F60C}"],
+  ["to clean up", "to make a place tidy after using it", "\u{1F9F9}"],
+  ["to work out", "to end well, or to solve a problem", "\u{1F91E}"],
+  ["to be up to something", "to be doing something lately", "\u{1F440}"]
+];
+let hideTimer = null, deck = [], first = null, second = null, lock = false, moves = 0, found = 0;
+
+function shuffle(a){const c=[...a];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];}return c;}
+
+function init(){
+  deck = [];
+  pairs.forEach((p,i)=>{ deck.push({id:i, text:p[0], kind:'expression', emoji:p[2]}); deck.push({id:i, text:p[1], kind:'meaning'}); });
+  deck = shuffle(deck);
+  clearTimeout(hideTimer);
+  first = second = null; lock = false; moves = 0; found = 0;
+  document.getElementById('moves').textContent = 0;
+  document.getElementById('found').textContent = 0;
+  document.getElementById('win').classList.add('hidden');
+  document.getElementById('feedback').textContent = 'Flip a card to start.';
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  deck.forEach((c,idx)=>{
+    const el = document.createElement('div');
+    el.className = 'card back ' + (deck[idx].kind === 'expression' ? 'expr' : 'meaning');
+    el.dataset.idx = idx;
+    el.addEventListener('click', ()=>flip(el, idx));
+    grid.appendChild(el);
+  });
+}
+
+function flip(el, idx){
+  if(lock || el.classList.contains('up') || el.classList.contains('matched')) return;
+  el.classList.remove('back'); el.classList.add('up');
+  const c = deck[idx];
+  if(c.kind === 'expression'){
+    el.innerHTML = '<span class="tag">Phrasal verb</span><span class="emoji">' + c.emoji + '</span><span>' + c.text + '</span>';
+  } else {
+    el.innerHTML = '<span class="tag">Definition</span><span>' + c.text + '</span>';
+  }
+  if(first === null){ first = {el, idx}; return; }
+  second = {el, idx};
+  lock = true;
+  moves++;
+  document.getElementById('moves').textContent = moves;
+  const a = deck[first.idx], b = deck[second.idx];
+  const fb = document.getElementById('feedback');
+  if(a.id === b.id && a.kind !== b.kind){
+    first.el.classList.add('matched'); second.el.classList.add('matched');
+    found++;
+    document.getElementById('found').textContent = found;
+    const p = pairs[a.id];
+    fb.textContent = 'Match! ' + p[0] + ' = ' + p[1] + '.';
+    first = second = null; lock = false;
+    if(found === pairs.length){
+      document.getElementById('win').classList.remove('hidden');
+      document.getElementById('winText').textContent = 'You found all 8 pairs in ' + moves + ' moves.';
+    }
+  } else {
+    first.el.classList.add('wrong'); second.el.classList.add('wrong');
+    fb.textContent = 'Not a match. Remember where these cards are.';
+    hideTimer = setTimeout(hideCards, 6000);
+  }
+}
+
+function hideCards(){
+  clearTimeout(hideTimer);
+  if(!first || !second) return;
+  [first, second].forEach(s=>{
+    s.el.classList.remove('up','wrong'); s.el.classList.add('back'); s.el.innerHTML = '';
+  });
+  first = second = null; lock = false;
+  document.getElementById('feedback').textContent = 'Flip a card.';
+}
+
+init();
+</script>
+</body>
+</html>
