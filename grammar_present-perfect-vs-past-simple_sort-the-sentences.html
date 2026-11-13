@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Present Perfect vs Past Simple: Sort the Sentences</title>
+<style>
+  :root{--navy:#1B2A4A;--orange:#B5651D;--gold:#8A5A00;--green:#2E7D32;--red:#C0392B;}
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#FBF7F0 0%,#F0E6D6 100%);margin:0;padding:20px;color:#222;}
+  .wrap{max-width:640px;margin:0 auto;}
+  h1{color:var(--navy);text-align:center;margin:0 0 4px;font-size:25px;}
+  .subtitle{text-align:center;color:var(--gold);font-style:italic;margin-bottom:12px;}
+  .instructions{background:#fff;border-left:5px solid var(--orange);padding:12px 18px;border-radius:8px;margin-bottom:16px;font-size:15px;}
+  .hidden{display:none !important;}
+  .stats{text-align:center;font-weight:700;color:var(--navy);margin-bottom:12px;font-size:18px;}
+  .stats span{color:var(--orange);}
+  .panel{background:#fff;border-radius:14px;padding:22px;box-shadow:0 6px 18px rgba(0,0,0,.12);}
+  .label{font-size:13px;color:#888;text-align:center;margin-bottom:10px;}
+  .sentence{font-size:21px;color:var(--navy);text-align:center;padding:18px;background:#fff8ec;border:2px solid var(--orange);border-radius:12px;margin-bottom:16px;font-weight:600;}
+  .bins{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .bin{padding:16px;border:2px solid var(--navy);border-radius:12px;background:#fff;color:var(--navy);cursor:pointer;font-size:16px;font-weight:700;text-align:center;}
+  .bin:hover{background:#f0f4fa;}
+  .bin.good{background:#e8f5e9;border-color:var(--green);color:#1b5e20;}
+  .bin.bad{background:#fdecea;border-color:var(--red);color:var(--red);}
+  .bin.locked{pointer-events:none;}
+  .explain{margin-top:14px;padding:12px 16px;border-radius:8px;background:#f0f4fa;color:var(--navy);font-size:14.5px;}
+  .center{text-align:center;}
+  button{background:var(--orange);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:15px;cursor:pointer;margin-top:12px;}
+  button:hover{background:var(--gold);}
+  #win{text-align:center;background:#fff;border-radius:14px;padding:26px;box-shadow:0 6px 18px rgba(0,0,0,.12);}
+  #win h2{color:var(--green);}
+  footer{margin-top:22px;text-align:center;font-size:13px;color:#888;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Present Perfect vs Past Simple</h1>
+  <div class="subtitle">Sort the Sentences</div>
+  <div class="instructions">Read each sentence and choose the box where it belongs. Look at the time word first. You can try again if you choose the wrong box.</div>
+  <div class="stats">Correct on the first try: <span id="score">0</span> / 10</div>
+
+  <div class="panel" id="panel">
+    <div class="label" id="label"></div>
+    <div class="sentence" id="sentence"></div>
+    <div class="bins">
+      <div class="bin" id="binPP">Present perfect</div>
+      <div class="bin" id="binPS">Past simple</div>
+    </div>
+    <div class="explain hidden" id="explain"></div>
+    <div class="center"><button id="nextBtn" class="hidden" onclick="next()">Next</button></div>
+  </div>
+
+  <div id="win" class="hidden">
+    <h2>Great work!</h2>
+    <p id="winText"></p>
+    <button onclick="init()">Play again</button>
+  </div>
+  <footer>Inglés con Cin &middot; Interactive English Practice</footer>
+</div>
+<script>
+const items = [
+  {s:"I have already finished my homework.", a:"pp", why:"Already connects the action to now. We use have + past participle."},
+  {s:"I went to Aruba last summer.", a:"ps", why:"Last summer is a finished time, so we use the past simple."},
+  {s:"Have you ever been to Aruba?", a:"pp", why:"Ever asks about life experience, with no finished time. Present perfect."},
+  {s:"She called me yesterday.", a:"ps", why:"Yesterday is a finished time, so the past simple (called)."},
+  {s:"She hasn't called me yet.", a:"pp", why:"Yet is used in negatives and questions with the present perfect."},
+  {s:"We met in 2019.", a:"ps", why:"In 2019 is a finished time: past simple."},
+  {s:"We have known each other for ten years.", a:"pp", why:"For ten years: the situation continues now, so present perfect."},
+  {s:"He left ten minutes ago.", a:"ps", why:"Ago gives a finished time. Past simple."},
+  {s:"He has just left.", a:"pp", why:"Just means a very short time ago, and it is connected to now."},
+  {s:"I have never eaten sushi.", a:"pp", why:"Never is about life experience up to now. Present perfect."}
+];
+let order=[], idx=0, score=0, firstTry=true;
+
+function shuffle(a){const c=[...a];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];}return c;}
+
+function init(){
+  order = shuffle(items.map((_,i)=>i));
+  idx = 0; score = 0;
+  document.getElementById('score').textContent = 0;
+  document.getElementById('win').classList.add('hidden');
+  document.getElementById('panel').classList.remove('hidden');
+  load();
+}
+
+function load(){
+  firstTry = true;
+  const it = items[order[idx]];
+  document.getElementById('label').textContent = 'Sentence ' + (idx+1) + ' of ' + items.length;
+  document.getElementById('sentence').textContent = it.s;
+  document.getElementById('explain').classList.add('hidden');
+  document.getElementById('nextBtn').classList.add('hidden');
+  const bpp = document.getElementById('binPP'), bps = document.getElementById('binPS');
+  [bpp,bps].forEach(b => { b.className = 'bin'; });
+  bpp.onclick = () => pick('pp', bpp, it);
+  bps.onclick = () => pick('ps', bps, it);
+}
+
+function pick(choice, el, it){
+  if(el.classList.contains('locked')) return;
+  const ex = document.getElementById('explain');
+  if(choice === it.a){
+    el.classList.add('good');
+    document.getElementById('binPP').classList.add('locked');
+    document.getElementById('binPS').classList.add('locked');
+    if(firstTry){ score++; document.getElementById('score').textContent = score; }
+    ex.textContent = 'Correct! ' + it.why;
+    ex.classList.remove('hidden');
+    document.getElementById('nextBtn').classList.remove('hidden');
+  } else {
+    firstTry = false;
+    el.classList.add('bad');
+    el.classList.add('locked');
+    ex.textContent = 'Not quite. Look at the time word and try the other box.';
+    ex.classList.remove('hidden');
+  }
+}
+
+function next(){
+  idx++;
+  if(idx >= items.length){
+    document.getElementById('panel').classList.add('hidden');
+    document.getElementById('win').classList.remove('hidden');
+    document.getElementById('winText').textContent = 'You got ' + score + ' of ' + items.length + ' right on the first try.';
+  } else {
+    load();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
