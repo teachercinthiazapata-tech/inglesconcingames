@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Detective: Process and Deadlines</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #c9b6f0 0%, #b8c9f0 45%, #b6f0d8 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card { background: #fff; border-radius: 24px; max-width: 640px; width: 100%; padding: 30px 26px; box-shadow: 0 12px 40px rgba(60,40,100,0.18); }
+  h1 { text-align: center; font-size: 24px; color: #4a3b6b; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 14px; }
+  .progress { display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #e2d9f5; transition: background 0.3s; }
+  .dot.active { background: #9b7bd8; }
+  .dot.done { background: #6fcf97; }
+  .intro { text-align: center; color: #4a3b6b; line-height: 1.6; }
+  .intro .big { font-size: 52px; margin: 6px 0; }
+  .intro p { margin-bottom: 14px; }
+  .legend { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .chip { padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 800; color: #fff; }
+  .chip.g { background: #4caf7d; }
+  .chip.y { background: #e0a93c; }
+  .chip.x { background: #9a94ab; }
+  .tag { text-align: center; font-size: 13px; color: #9b8fb8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700; }
+  .clue-box { background: #f5f2fc; border-radius: 14px; padding: 16px; text-align: center; color: #4a3b6b; font-size: 17px; line-height: 1.6; margin-bottom: 8px; }
+  .letters-info { text-align: center; color: #7a6f95; font-size: 14px; margin-bottom: 12px; font-weight: 700; }
+  .board { display: flex; flex-direction: column; gap: 6px; align-items: center; margin-bottom: 12px; max-height: 270px; overflow-y: auto; padding: 4px; }
+  .row { display: flex; gap: 5px; }
+  .cell { width: 36px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: #fff; text-transform: uppercase; }
+  .cell.g { background: #4caf7d; }
+  .cell.y { background: #e0a93c; }
+  .cell.x { background: #9a94ab; }
+  .hint-line { text-align: center; background: #fff8e6; border: 2px dashed #f2d98a; border-radius: 12px; padding: 9px; color: #5b4b1a; font-size: 14px; margin-bottom: 10px; }
+  .type-input { width: 100%; padding: 13px 14px; border: 2px solid #e2d9f5; border-radius: 12px; font-size: 18px; margin-bottom: 10px; text-align: center; letter-spacing: 4px; text-transform: uppercase; }
+  .type-input:focus { outline: none; border-color: #9b7bd8; }
+  .keyboard { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 12px; }
+  .key { width: 32px; height: 36px; border-radius: 7px; border: none; background: #efe8fb; color: #4a3b6b; font-weight: 700; font-size: 14px; }
+  .key.g { background: #4caf7d; color: #fff; }
+  .key.y { background: #e0a93c; color: #fff; }
+  .key.x { background: #cfcad9; color: #fff; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { flex: 1; }
+  .btn { display: block; width: 100%; background: #6fcf97; color: white; border: none; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .btn:hover { background: #5cbf85; }
+  .btn:disabled { background: #b9e5cb; cursor: default; }
+  .btn.secondary { background: #efe8fb; color: #5b3fa0; }
+  .btn.secondary:hover { background: #ddd0f7; }
+  .btn.secondary:disabled { background: #f3eefb; color: #b8aad6; }
+  .feedback { text-align: center; font-size: 15px; font-weight: 600; margin: 8px 0; padding: 11px; border-radius: 12px; line-height: 1.5; }
+  .feedback.correct { background: #d4f4e2; color: #1e6b45; }
+  .feedback.wrong { background: #fbe2e2; color: #a13a3a; }
+  .hidden { display: none !important; }
+  .score-screen { text-align: center; }
+  .score-screen .stars { font-size: 34px; margin: 10px 0; letter-spacing: 4px; }
+  .score-screen .big-score { font-size: 44px; font-weight: 800; color: #5b3fa0; margin: 8px 0; }
+  .footer { text-align: center; color: #9b8fb8; font-size: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Word Detective</h1>
+  <div class="subtitle">Process and Deadlines Vocabulary</div>
+
+  <div id="introScreen" class="intro">
+    <div class="big">&#128269;</div>
+    <p>Find the <b>6 secret words</b>!<br>Read the clue, count the letters and type your guess.</p>
+    <div class="legend">
+      <span class="chip g">Green: right letter, right place</span>
+      <span class="chip y">Yellow: right letter, wrong place</span>
+      <span class="chip x">Gray: not in the word</span>
+    </div>
+    <p style="font-size:14px;color:#7a6f95;">No timer and no limit of guesses. Use Clue if you need help.<br>Solve a word in 4 guesses or fewer, without Clue, to earn a star.</p>
+    <button class="btn" onclick="startGame()">Start</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div class="progress" id="progress"></div>
+    <div class="tag" id="tag"></div>
+    <div class="clue-box" id="clueBox"></div>
+    <div class="letters-info" id="lettersInfo"></div>
+    <div class="board" id="board"></div>
+    <div class="hint-line hidden" id="hintLine"></div>
+    <input type="text" class="type-input" id="guessInput" placeholder="Type your guess..." autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="keyboard" id="keyboard"></div>
+    <div class="btn-row">
+      <button class="btn secondary" id="clueBtn" onclick="giveClue()">Clue</button>
+      <button class="btn" id="guessBtn" onclick="submitGuess()">Guess</button>
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="scoreScreen" class="score-screen hidden">
+    <h1>Case closed! &#127881;</h1>
+    <div class="stars" id="stars"></div>
+    <div class="big-score" id="scoreCount">0 / 6</div>
+    <p id="finalMsg" style="color:#6b5f8a; margin-bottom: 18px;"></p>
+    <button class="btn" onclick="startGame()">Play Again</button>
+  </div>
+  <div class="footer">Inglés con Cin</div>
+</div>
+
+<script>
+const words = [
+  { word: "delay", clue: "When something happens later than planned. Example: There will be a ____ if you miss the deadline." },
+  { word: "receive", clue: "To get something that someone sends. Example: You will ____ an email tomorrow." },
+  { word: "confirm", clue: "To say that something is correct or sure. Example: Please ____ your appointment by email." },
+  { word: "approval", clue: "An official yes. Example: We are waiting for the ____ of your application." },
+  { word: "deadline", clue: "The last day to finish something. Example: Please meet the ____ for the application." },
+  { word: "appointment", clue: "A meeting at a fixed day and time. Example: I have an ____ with the lawyer on Friday." }
+];
+
+let current = 0;
+let stars = 0;
+let guesses = 0;
+let usedClue = false;
+let solved = false;
+let clueRevealed = [];
+let keyState = {};
+
+function startGame() {
+  current = 0;
+  stars = 0;
+  document.getElementById("introScreen").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  renderWord();
+}
+
+function buildProgress() {
+  const el = document.getElementById("progress");
+  el.innerHTML = "";
+  for (let i = 0; i < words.length; i++) {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === current ? " active" : i < current ? " done" : "");
+    el.appendChild(d);
+  }
+}
+function showFeedback(kind, text) {
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden", "correct", "wrong");
+  fb.classList.add(kind);
+  fb.textContent = text;
+}
+function clearFeedback() {
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  fb.classList.remove("correct", "wrong");
+}
+
+function renderWord() {
+  const w = words[current];
+  guesses = 0;
+  usedClue = false;
+  solved = false;
+  clueRevealed = [];
+  keyState = {};
+  clearFeedback();
+  buildProgress();
+  document.getElementById("tag").textContent = "Word " + (current + 1) + " of " + words.length;
+  document.getElementById("clueBox").textContent = w.clue;
+  document.getElementById("lettersInfo").textContent = "Letters: " + w.word.length + "   ( " + w.word.split("").map(() => "_").join(" ") + " )";
+  document.getElementById("board").innerHTML = "";
+  document.getElementById("hintLine").classList.add("hidden");
+  const inp = document.getElementById("guessInput");
+  inp.value = "";
+  inp.disabled = false;
+  inp.maxLength = w.word.length;
+  inp.onkeydown = function(e) { if (e.key === "Enter") submitGuess(); };
+  document.getElementById("guessBtn").disabled = false;
+  document.getElementById("clueBtn").disabled = false;
+  drawKeyboard();
+  inp.focus();
+}
+
+function drawKeyboard() {
+  const kb = document.getElementById("keyboard");
+  kb.innerHTML = "";
+  "abcdefghijklmnopqrstuvwxyz".split("").forEach(ch => {
+    const k = document.createElement("button");
+    k.className = "key" + (keyState[ch] ? " " + keyState[ch] : "");
+    k.textContent = ch.toUpperCase();
+    k.onclick = function() {
+      const inp = document.getElementById("guessInput");
+      if (!inp.disabled && inp.value.length < words[current].word.length) inp.value += ch;
+    };
+    kb.appendChild(k);
+  });
+}
+
+function scoreGuess(guess, target) {
+  const res = new Array(guess.length).fill("x");
+  const counts = {};
+  for (let i = 0; i < target.length; i++) {
+    if (guess[i] === target[i]) res[i] = "g";
+    else counts[target[i]] = (counts[target[i]] || 0) + 1;
+  }
+  for (let i = 0; i < guess.length; i++) {
+    if (res[i] === "g") continue;
+    if (counts[guess[i]] > 0) { res[i] = "y"; counts[guess[i]]--; }
+  }
+  return res;
+}
+
+function submitGuess() {
+  if (solved) return;
+  const w = words[current];
+  const inp = document.getElementById("guessInput");
+  const g = inp.value.trim().toLowerCase();
+  if (g.length !== w.word.length) {
+    showFeedback("wrong", "The word has " + w.word.length + " letters. Try again.");
+    return;
+  }
+  if (!/^[a-z]+$/.test(g)) {
+    showFeedback("wrong", "Use only letters.");
+    return;
+  }
+  guesses++;
+  const res = scoreGuess(g, w.word);
+  const row = document.createElement("div");
+  row.className = "row";
+  res.forEach((r, i) => {
+    const c = document.createElement("div");
+    c.className = "cell " + r;
+    c.textContent = g[i];
+    row.appendChild(c);
+    const rank = { g: 3, y: 2, x: 1 };
+    if (!keyState[g[i]] || rank[r] > rank[keyState[g[i]]]) keyState[g[i]] = r;
+  });
+  document.getElementById("board").appendChild(row);
+  drawKeyboard();
+  inp.value = "";
+  if (g === w.word) {
+    solved = true;
+    inp.disabled = true;
+    document.getElementById("guessBtn").disabled = true;
+    document.getElementById("clueBtn").disabled = true;
+    const star = guesses <= 4 && !usedClue;
+    if (star) stars++;
+    showFeedback("correct", "Correct! The word is " + w.word.toUpperCase() + ". You needed " + guesses + (guesses === 1 ? " guess" : " guesses") + (star ? ". Star earned!" : "."));
+    setTimeout(nextWord, 3200);
+  } else {
+    showFeedback("wrong", "Not this one. Look at the colors and try again.");
+  }
+}
+
+function giveClue() {
+  if (solved) return;
+  const w = words[current];
+  usedClue = true;
+  const pending = [];
+  for (let i = 0; i < w.word.length; i++) if (clueRevealed.indexOf(i) === -1) pending.push(i);
+  if (pending.length === 0) return;
+  clueRevealed.push(pending[0]);
+  clueRevealed.sort((a, b) => a - b);
+  const shown = w.word.split("").map((c, i) => clueRevealed.indexOf(i) !== -1 ? c.toUpperCase() : "_").join(" ");
+  const hl = document.getElementById("hintLine");
+  hl.classList.remove("hidden");
+  hl.textContent = "Clue: " + shown;
+}
+
+function nextWord() {
+  current++;
+  if (current >= words.length) showFinish();
+  else renderWord();
+}
+
+function showFinish() {
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("scoreScreen").classList.remove("hidden");
+  document.getElementById("stars").textContent = "⭐".repeat(stars) + "☆".repeat(words.length - stars);
+  document.getElementById("scoreCount").textContent = stars + " / " + words.length;
+  let msg;
+  if (stars === words.length) msg = "Perfect detective! You found every word fast and without help.";
+  else if (stars >= 4) msg = "Great job! Play again to earn every star.";
+  else msg = "Case closed! Play again and try to solve each word in 4 guesses.";
+  document.getElementById("finalMsg").textContent = msg;
+}
+</script>
+</body>
+</html>
