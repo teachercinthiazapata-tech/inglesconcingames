@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My First Yoga Class: Story Game</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(160deg, #F6D9C4, #CDEAE0); min-height: 100vh; padding: 20px; color: #1F3864; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 1.55rem; margin: 0 0 4px; }
+  p.sub { text-align: center; margin: 0 0 12px; color: #4a5a75; }
+  .meterbox { background: #1F3864; color: #fff; border-radius: 12px; padding: 10px 16px; margin-bottom: 12px; }
+  .meterline { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 6px; }
+  .track { background: #4a5f8a; border-radius: 8px; height: 14px; overflow: hidden; }
+  .fill { background: linear-gradient(90deg, #f2b84b, #E8836B); height: 100%; width: 0%; transition: width 0.5s; }
+  .panel { background: #FFFBF4; border-radius: 16px; padding: 20px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+  .scene { font-size: 3rem; text-align: center; margin: 4px 0; }
+  .story { font-size: 1.1rem; line-height: 1.5; margin: 8px 0 10px; text-align: center; }
+  .quote { background: #fff3c4; border-left: 5px solid #f2b84b; border-radius: 8px; padding: 10px 14px; margin: 8px 0; font-style: italic; }
+  .ask { font-weight: bold; text-align: center; margin: 12px 0 10px; }
+  .choice { display: block; width: 100%; text-align: left; background: #fff; color: #1F3864; border: 2px solid #d9cdbd; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; font-size: 1rem; cursor: pointer; line-height: 1.4; }
+  .choice:hover { border-color: #E8836B; }
+  .choice.right { background: #d6f2e1; border-color: #3aa76d; }
+  .choice.wrong { background: #fbd4d1; border-color: #d1504a; }
+  .fb { font-weight: bold; min-height: 2.8em; line-height: 1.45; margin: 6px 0; text-align: center; }
+  .good { color: #3aa76d; }
+  .badtxt { color: #d1504a; }
+  .bar { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  button.act { background: #1F3864; color: #fff; border: none; padding: 10px 22px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  button.alt { background: #fff; color: #1F3864; border: 2px solid #1F3864; }
+  .hidden { display: none !important; }
+  .center { text-align: center; }
+  .note { text-align: center; font-size: 0.8rem; color: #6a7690; margin-top: 12px; }
+  .big { font-size: 2.6rem; text-align: center; margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>My First Yoga Class: Story Game</h1>
+  <p class="sub">Choose the best answer in each scene</p>
+  <div class="meterbox">
+    <div class="meterline"><span id="stage">Ready?</span><span id="conf">Confidence: 0%</span></div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+  </div>
+  <div class="panel" id="panel"></div>
+</div>
+<script>
+var SCENES = [
+  { icon: "\u{1F6AA}", story: "You arrive at the yoga studio. The class starts in ten minutes. The teacher is at the door.", quote: "", ask: "What should you do?",
+    options: [
+      { t: "Wait outside until the class starts.", ok: false, hint: "The teacher wants to meet you before class." },
+      { t: "Say hello and tell the teacher it is your first class.", ok: true },
+      { t: "Go straight to a mat at the front and say nothing.", ok: false, hint: "Beginners can talk to the teacher first. It is a good idea." }
+    ],
+    why: "Arrive early and talk to the teacher. The teacher wants to know if you have done yoga before." },
+  { icon: "\u{1F915}", story: "The teacher asks you a question. You have a sore wrist.", quote: "Do you have any injuries I should know about?", ask: "What do you say?",
+    options: [
+      { t: "I have a injury in my wrist, so I can't put weight on it.", ok: false, hint: "Check the article before injury: a or an?" },
+      { t: "I have an injury in my wrist, so I can't put weight on it.", ok: true },
+      { t: "I am injury in my wrist.", ok: false, hint: "Injury is a noun. We say I have an injury." }
+    ],
+    why: "An injury starts with a vowel sound, so we use an. We say I have an injury in my wrist." },
+  { icon: "\u{1F64C}", story: "You prefer not to be touched during the class. The teacher asks you something.", quote: "Are you happy to be adjusted during the class?", ask: "What can you say?",
+    options: [
+      { t: "I have to say yes.", ok: false, hint: "You always have the choice." },
+      { t: "I'm OK, thanks.", ok: true },
+      { t: "I must explain my reasons in detail.", ok: false, hint: "You shouldn't have to give any reasons." }
+    ],
+    why: "You can say I'm OK, thanks. You shouldn't have to give any reasons." },
+  { icon: "\u{1F9D8}", story: "You walk to your place. A friend wants to cross to the other side of the room.", quote: "", ask: "Which advice is best?",
+    options: [
+      { t: "You should walk across the other mats. It's only rubber.", ok: false, hint: "For many people a mat is personal space." },
+      { t: "You shouldn't walk on someone else's mat.", ok: true },
+      { t: "You should run quickly across the room.", ok: false, hint: "Think about space and respect." }
+    ],
+    why: "A mat is personal space. You shouldn't walk on someone else's mat." },
+  { icon: "\u{1F9F1}", story: "The pose is difficult. There is a block next to your mat, but you feel shy.", quote: "", ask: "Which advice is best?",
+    options: [
+      { t: "You shouldn't use it. You'll look like a beginner.", ok: false, hint: "Check tip 14 of the article." },
+      { t: "You should use it. Props make poses more comfortable.", ok: true },
+      { t: "You should stop the class and go home.", ok: false, hint: "That is too much for a small problem." }
+    ],
+    why: "Props are for beginners and experienced students. They make poses more comfortable and give you more space." },
+  { icon: "⚠️", story: "In a pose, you feel a hot, sharp feeling in your knee.", quote: "", ask: "What should you do?",
+    options: [
+      { t: "You should push through it.", ok: false, hint: "Sharp feelings are a signal." },
+      { t: "You should come out of the pose and speak up.", ok: true },
+      { t: "You should hold your breath.", ok: false, hint: "Breathing is important in yoga." }
+    ],
+    why: "Hot and sharp is pain, not discomfort. You should come out of the pose and tell the teacher." },
+  { icon: "\u{1F32C}️", story: "In a forward fold, you feel a nagging stretch in the back of your legs. You can breathe easily.", quote: "", ask: "What should you do?",
+    options: [
+      { t: "You should breathe and stay gently at your edge.", ok: true },
+      { t: "You should leave the class immediately.", ok: false, hint: "A nagging stretch with easy breathing is discomfort, not pain." },
+      { t: "You should pull your legs as hard as you can.", ok: false, hint: "Your edge is a comfortable limit." }
+    ],
+    why: "This is discomfort. It can change when you breathe. Stay gently at your edge and rest if you need to." },
+  { icon: "✍️", story: "Your friend writes you a message about the class. Choose the correct sentence.", quote: "", ask: "Which sentence is correct?",
+    options: [
+      { t: "You should to rest if you need to.", ok: false, hint: "After should we use the base verb, with no to." },
+      { t: "You should rest if you need to.", ok: true },
+      { t: "You not should rest if you need to.", ok: false, hint: "The negative form is shouldn't." }
+    ],
+    why: "should + base verb. We say You should rest. The negative is shouldn't." }
+];
+var idx = 0, points = 0, tries = 0, done = false, order = [];
+function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; }
+function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i -= 1) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+function say(t) { try { var u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; u.rate = 0.9; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch (e) {} }
+function setMeter(stage) {
+  var pct = Math.round(points / SCENES.length * 100);
+  document.getElementById('conf').textContent = 'Confidence: ' + pct + '%';
+  document.getElementById('fill').style.width = pct + '%';
+  document.getElementById('stage').textContent = stage;
+}
+function intro() {
+  idx = 0; points = 0; var p = document.getElementById('panel'); p.innerHTML = ''; setMeter('Ready?');
+  p.appendChild(el('div', 'big', '\u{1F9D8}'));
+  p.appendChild(el('h2', 'center', 'Your first yoga class'));
+  p.appendChild(el('p', 'center', 'You are going to your first yoga class. In each scene, choose the best answer. If you choose the wrong one, you can try again. Every first-try answer raises your Confidence Meter.'));
+  var b = el('button', 'act', 'Start'); b.onclick = scene; var bar = el('div', 'bar'); bar.appendChild(b); p.appendChild(bar);
+}
+function scene() {
+  var p = document.getElementById('panel'); p.innerHTML = '';
+  if (idx >= SCENES.length) { finish(); return; }
+  var s = SCENES[idx]; tries = 0; done = false; setMeter('Scene ' + (idx + 1) + ' of ' + SCENES.length);
+  p.appendChild(el('div', 'scene', s.icon));
+  p.appendChild(el('div', 'story', s.story));
+  if (s.quote) { p.appendChild(el('div', 'quote', '“' + s.quote + '”')); }
+  p.appendChild(el('div', 'ask', s.ask));
+  var fb = el('div', 'fb'); var box = el('div');
+  var opts = shuffle(s.options);
+  var nx = el('button', 'act hidden', idx === SCENES.length - 1 ? 'See my result' : 'Next scene');
+  var buttons = [];
+  opts.forEach(function (o) {
+    var b = el('button', 'choice', o.t); buttons.push({ b: b, o: o });
+    b.onclick = function () {
+      if (done) return;
+      if (o.ok) {
+        done = true; if (tries === 0) { points += 1; } b.className = 'choice right';
+        fb.textContent = 'Great choice! ' + s.why; fb.className = 'fb good'; nx.className = 'act'; setMeter('Scene ' + (idx + 1) + ' of ' + SCENES.length);
+      } else {
+        tries += 1; b.className = 'choice wrong'; var me = b;
+        if (tries >= 2) {
+          done = true; buttons.forEach(function (x) { if (x.o.ok) { x.b.className = 'choice right'; } });
+          fb.textContent = 'This is the best answer. ' + s.why; fb.className = 'fb badtxt'; nx.className = 'act';
+        } else {
+          fb.textContent = 'Not this one. Hint: ' + o.hint + ' Try again.'; fb.className = 'fb badtxt';
+          setTimeout(function () { if (!done) { me.className = 'choice'; } }, 900);
+        }
+      }
+    };
+    box.appendChild(b);
+  });
+  p.appendChild(box); p.appendChild(fb);
+  var bar = el('div', 'bar');
+  var listen = el('button', 'act alt', '\u{1F50A} Listen to the scene'); listen.onclick = function () { say(s.story + ' ' + (s.quote || '')); };
+  nx.onclick = function () { idx += 1; scene(); };
+  bar.appendChild(listen); bar.appendChild(nx); p.appendChild(bar);
+  p.appendChild(el('div', 'note', 'Language practice only. In a real class, listen to your body and talk to your teacher.'));
+}
+function finish() {
+  var p = document.getElementById('panel'); p.innerHTML = ''; setMeter('Finished');
+  var pct = points / SCENES.length;
+  var title = pct >= 0.85 ? 'Confident Beginner' : (pct >= 0.6 ? 'Almost Ready' : 'Warming Up');
+  p.appendChild(el('div', 'big', pct >= 0.85 ? '⭐⭐⭐' : (pct >= 0.6 ? '⭐⭐' : '⭐')));
+  p.appendChild(el('h2', 'center', title));
+  p.appendChild(el('p', 'center', 'You answered ' + points + ' of ' + SCENES.length + ' scenes on the first try.'));
+  p.appendChild(el('p', 'center', 'Remember: you are your best teacher. You should speak up when something feels wrong.'));
+  var b = el('button', 'act', 'Play again'); b.onclick = intro; var bar = el('div', 'bar'); bar.appendChild(b); p.appendChild(bar);
+}
+intro();
+</script>
+</body>
+</html>
