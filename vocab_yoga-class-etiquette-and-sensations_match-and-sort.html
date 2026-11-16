@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yoga Class Words: Match and Sort</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(160deg, #CDEAE0, #F6D9C4); min-height: 100vh; padding: 20px; color: #1F3864; }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 1.55rem; margin: 0 0 4px; }
+  p.sub { text-align: center; margin: 0 0 12px; color: #4a5a75; }
+  .top { display: flex; justify-content: space-between; background: #1F3864; color: #fff; border-radius: 12px; padding: 10px 16px; font-weight: bold; margin-bottom: 12px; }
+  .panel { background: #FFFBF4; border-radius: 16px; padding: 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .item { background: #fff; border: 2px solid #d9cdbd; border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; cursor: pointer; line-height: 1.35; min-height: 48px; }
+  .item:hover { border-color: #E8836B; }
+  .item.sel { border-color: #E8836B; background: #FDE6DC; }
+  .item.done { background: #d6f2e1; border-color: #3aa76d; cursor: default; }
+  .item.bad { background: #fbd4d1; border-color: #d1504a; }
+  .item small { display: block; color: #4a5a75; font-size: 0.85rem; }
+  .fb { font-weight: bold; min-height: 2.6em; margin: 8px 0; line-height: 1.4; }
+  .good { color: #3aa76d; }
+  .badtxt { color: #d1504a; }
+  .bar { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  button { background: #1F3864; color: #fff; border: none; padding: 10px 22px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; }
+  button.alt { background: #fff; color: #1F3864; border: 2px solid #1F3864; }
+  button.pain { background: #d1504a; }
+  button.disc { background: #3b8f9e; }
+  .hidden { display: none !important; }
+  .big { font-size: 2.4rem; text-align: center; margin: 6px 0; }
+  .sentence { font-size: 1.25rem; font-weight: bold; text-align: center; margin: 10px 0 14px; line-height: 1.4; }
+  .note { text-align: center; font-size: 0.8rem; color: #6a7690; margin-top: 12px; }
+  .center { text-align: center; }
+  @media (max-width: 560px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Yoga Class Words: Match and Sort</h1>
+  <p class="sub">Round 1: match the words. Round 2: pain or discomfort?</p>
+  <div class="top"><span id="stage">Ready?</span><span id="score">Score: 0</span></div>
+  <div class="panel" id="panel"></div>
+</div>
+<script>
+var WORDS = [
+  { w: "injury", ipa: "/ˈɪndʒəri/", m: "Damage to a part of your body, for example a hurt knee." },
+  { w: "adjustment", ipa: "/əˈdʒʌstmənt/", m: "A small change the teacher makes to your position, sometimes with their hands." },
+  { w: "to speak up", ipa: "/spiːk ʌp/", m: "To say something clearly so that people can hear you." },
+  { w: "props", ipa: "/prɑːps/", m: "Equipment for a class: blocks, belts and blankets." },
+  { w: "discomfort", ipa: "/dɪsˈkʌmfərt/", m: "A feeling that is not nice, but it is not sharp pain." },
+  { w: "sharp", ipa: "/ʃɑːrp/", m: "Sudden and strong, like a pinch." },
+  { w: "edge", ipa: "/ɛdʒ/", m: "The limit of what your body can do comfortably today." },
+  { w: "to rest", ipa: "/rɛst/", m: "To stop and relax for a moment." }
+];
+var SORT = [
+  { t: "A sudden, hot pinch in your knee.", a: "pain", why: "Sudden, hot and sharp. That is pain.", todo: "Come out of the pose and speak up." },
+  { t: "A nagging feeling in the back of your legs that gets softer when you breathe.", a: "discomfort", why: "Nagging and it changes with your breath. That is discomfort.", todo: "Keep breathing. You can use a prop or rest." },
+  { t: "A sharp feeling in your lower back when you twist.", a: "pain", why: "Sharp means pain.", todo: "Come out slowly and tell the teacher." },
+  { t: "Your shoulders feel tight in a deep stretch, but you can breathe.", a: "discomfort", why: "A strong stretch with easy breathing is discomfort.", todo: "Ease off a little if you need to." },
+  { t: "A hot, sharp feeling in your wrist.", a: "pain", why: "Hot and sharp. That is pain.", todo: "Stop and ask for another version." },
+  { t: "The feeling changes when you take a deep breath.", a: "discomfort", why: "If it changes with your breath, it is discomfort.", todo: "Stay gently and keep breathing." },
+  { t: "You feel a nagging stretch behind your knees, and you can keep breathing.", a: "discomfort", why: "Nagging and you can breathe. That is discomfort.", todo: "Bend your knees slightly if you want." },
+  { t: "Something feels wrong and it does not change when you breathe.", a: "pain", why: "If something feels wrong, listen to your body. Treat it as pain.", todo: "Stop. You are your best teacher." }
+];
+var score = 0, round = 1;
+function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; }
+function setTop(txt) { document.getElementById('stage').textContent = txt; document.getElementById('score').textContent = 'Score: ' + score; }
+function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i -= 1) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+function say(t) { try { var u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch (e) {} }
+
+function intro() {
+  score = 0; var p = document.getElementById('panel'); p.innerHTML = ''; setTop('Ready?');
+  p.appendChild(el('div', 'big', '\u{1F9D8}'));
+  p.appendChild(el('h2', 'center', 'Words from a real yoga class text'));
+  p.appendChild(el('p', 'center', 'Round 1: tap a word, then tap its meaning. Tap the word again if you change your mind. Round 2: read a feeling and decide if it is pain or discomfort.'));
+  var b = el('button', '', 'Start'); b.onclick = round1; var w = el('div', 'bar'); w.appendChild(b); p.appendChild(w);
+}
+
+function round1() {
+  round = 1; var p = document.getElementById('panel'); p.innerHTML = ''; setTop('Round 1: Match');
+  var left = shuffle(WORDS), right = shuffle(WORDS), sel = null, wrongFirst = {}, found = 0;
+  var cols = el('div', 'cols'), cl = el('div'), cr = el('div');
+  var fb = el('div', 'fb'); fb.textContent = 'Tap a word first.';
+  var leftEls = {}, rightEls = {};
+  left.forEach(function (o) {
+    var e = el('div', 'item'); e.appendChild(document.createTextNode(o.w)); e.appendChild(el('small', '', o.ipa));
+    e.onclick = function () {
+      if (e.className.indexOf('done') !== -1) return;
+      if (sel === o) { sel = null; e.className = 'item'; fb.textContent = 'Tap a word first.'; return; }
+      Object.keys(leftEls).forEach(function (k) { if (leftEls[k].className.indexOf('done') === -1) leftEls[k].className = 'item'; });
+      sel = o; e.className = 'item sel'; fb.textContent = 'Now tap the meaning.'; fb.className = 'fb'; say(o.w.replace('to ', ''));
+    };
+    leftEls[o.w] = e; cl.appendChild(e);
+  });
+  right.forEach(function (o) {
+    var e = el('div', 'item', o.m);
+    e.onclick = function () {
+      if (e.className.indexOf('done') !== -1) return;
+      if (!sel) { fb.textContent = 'Tap a word on the left first.'; fb.className = 'fb badtxt'; return; }
+      if (sel === o) {
+        found += 1; if (!wrongFirst[o.w]) { score += 1; }
+        e.className = 'item done'; leftEls[o.w].className = 'item done'; sel = null;
+        fb.textContent = 'Yes! ' + o.w + ' ' + o.ipa; fb.className = 'fb good'; setTop('Round 1: Match (' + found + '/8)');
+        if (found === WORDS.length) { setTimeout(round2, 900); }
+      } else {
+        wrongFirst[sel.w] = true; e.className = 'item bad'; var me = e;
+        setTimeout(function () { if (me.className.indexOf('done') === -1) me.className = 'item'; }, 600);
+        fb.textContent = 'Not that one. Try again.'; fb.className = 'fb badtxt';
+      }
+    };
+    rightEls[o.w] = e; cr.appendChild(e);
+  });
+  cols.appendChild(cl); cols.appendChild(cr); p.appendChild(cols); p.appendChild(fb);
+}
+
+function round2() {
+  round = 2; var order = shuffle(SORT), i = 0, tries = 0;
+  function show() {
+    var p = document.getElementById('panel'); p.innerHTML = '';
+    if (i >= order.length) { end(); return; }
+    setTop('Round 2: Pain or discomfort? (' + (i + 1) + '/' + order.length + ')'); tries = 0;
+    var q = order[i];
+    p.appendChild(el('div', 'sentence', q.t));
+    var fb = el('div', 'fb center'); p.appendChild(fb);
+    var bar = el('div', 'bar');
+    var bp = el('button', 'pain', 'Pain'), bd = el('button', 'disc', 'Discomfort');
+    var nx = el('button', 'hidden', i === order.length - 1 ? 'See my result' : 'Next');
+    function pick(ans) {
+      if (nx.className !== 'hidden') return;
+      if (ans === q.a) { if (tries === 0) { score += 1; } fb.textContent = 'Correct! ' + q.why + ' What to do: ' + q.todo; fb.className = 'fb center good'; nx.className = ''; bp.className = 'hidden'; bd.className = 'hidden'; }
+      else { tries += 1; if (tries >= 2) { fb.textContent = 'The answer is ' + q.a + '. ' + q.why + ' What to do: ' + q.todo; fb.className = 'fb center badtxt'; nx.className = ''; bp.className = 'hidden'; bd.className = 'hidden'; } else { fb.textContent = 'Think about it again. Hint: is it sudden and sharp, or nagging and it changes with your breath?'; fb.className = 'fb center badtxt'; } }
+      setTop('Round 2: Pain or discomfort? (' + (i + 1) + '/' + order.length + ')');
+    }
+    bp.onclick = function () { pick('pain'); }; bd.onclick = function () { pick('discomfort'); };
+    nx.onclick = function () { i += 1; show(); };
+    bar.appendChild(bp); bar.appendChild(bd); bar.appendChild(nx); p.appendChild(bar);
+    p.appendChild(el('div', 'note', 'Language practice only. In a real class, listen to your body and talk to your teacher.'));
+  }
+  show();
+}
+
+function end() {
+  var p = document.getElementById('panel'); p.innerHTML = ''; setTop('Finished');
+  var max = WORDS.length + SORT.length, pct = score / max;
+  var title = pct >= 0.85 ? 'Ready for any yoga class' : (pct >= 0.6 ? 'Almost there' : 'Warming up');
+  p.appendChild(el('div', 'big', pct >= 0.85 ? '⭐⭐⭐' : (pct >= 0.6 ? '⭐⭐' : '⭐')));
+  p.appendChild(el('h2', 'center', title));
+  p.appendChild(el('p', 'center', 'You scored ' + score + ' out of ' + max + '.'));
+  p.appendChild(el('p', 'center', 'Remember: you are your best teacher. If something feels wrong, speak up.'));
+  var b = el('button', '', 'Play again'); b.onclick = intro; var w = el('div', 'bar'); w.appendChild(b); p.appendChild(w);
+}
+intro();
+</script>
+</body>
+</html>
