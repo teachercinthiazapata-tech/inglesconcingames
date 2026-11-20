@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friends Phrasal Verbs: The Random Button</title>
+<style>
+  * { box-sizing: border-box; }
+  .hidden { display: none !important; }
+  body {
+    margin: 0; font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #FFF8E7, #FDEFC9);
+    color: #2C3E50; min-height: 100vh; padding: 24px 16px 32px 16px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; text-align: center; }
+  .subtitle { color: #E8A33D; font-weight: 700; letter-spacing: 1px; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 4px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px 0; }
+  .series-tag { font-size: 0.8rem; font-style: italic; color: #6b6a63; margin-bottom: 12px; }
+  .instructions { font-size: 0.95rem; color: #5a5a52; line-height: 1.5; margin: 0 auto 22px auto; max-width: 600px; }
+  .wheels { display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; margin-bottom: 22px; }
+  .wheel-block { width: 250px; }
+  .wheel-title { font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #E8A33D; margin-bottom: 12px; }
+  .wheel-area { position: relative; width: 240px; height: 240px; margin: 0 auto; }
+  .pointer {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent;
+    border-top: 20px solid #2C3E50; z-index: 5;
+  }
+  .wheel {
+    width: 240px; height: 240px; border-radius: 50%; position: relative;
+    border: 5px solid #2C3E50; box-shadow: 0 5px 14px rgba(44,62,80,0.25);
+    transition: transform 4s cubic-bezier(0.17, 0.67, 0.21, 1);
+  }
+  .seg-label {
+    position: absolute; top: 50%; left: 50%; width: 112px; height: 20px; margin-top: -10px;
+    transform-origin: left center; font-size: 0.58rem; font-weight: 700; color: #FFF8E7;
+    letter-spacing: 0.3px; text-align: right; padding-right: 10px; pointer-events: none; line-height: 20px;
+  }
+  .hub {
+    position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px;
+    border-radius: 50%; background: #FFF8E7; border: 4px solid #2C3E50; z-index: 4;
+  }
+  .btn { background: #2C3E50; color: #FFF8E7; border: none; padding: 14px 40px; font-size: 1.05rem; font-weight: 700; border-radius: 30px; cursor: pointer; font-family: inherit; }
+  .btn:hover:not(:disabled) { background: #E8A33D; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .result { margin: 24px auto 0 auto; max-width: 640px; background: #FFFFFF; border: 2px solid #E8A33D; border-radius: 16px; padding: 20px; text-align: left; box-shadow: 0 4px 14px rgba(44,62,80,0.12); }
+  .result .row { margin-bottom: 12px; line-height: 1.5; }
+  .result .row:last-child { margin-bottom: 0; }
+  .tag { display: inline-block; background: #E8A33D; color: #FFF8E7; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 10px; margin-right: 8px; }
+  .verb { font-size: 1.2rem; font-weight: 700; }
+  .small { font-size: 0.9rem; color: #5a5a52; }
+  .placeholder { color: #a9a89f; font-style: italic; text-align: center; }
+  .credit { margin-top: 18px; font-size: 0.7rem; color: #b3b2a8; }
+  @media (max-width: 560px) {
+    .wheel-block { width: 220px; }
+    .wheel-area, .wheel { width: 210px; height: 210px; }
+    .seg-label { width: 96px; font-size: 0.52rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="subtitle">Speaking Practice</div>
+  <h1>Friends Phrasal Verbs: The Random Button</h1>
+  <div class="series-tag">Based on the TV series "Friends"</div>
+  <p class="instructions">Press the button and the three wheels will spin. Wheel 1 gives you a phrasal verb. Wheel 2 tells you how long to speak. Wheel 3 gives you a small challenge. Then say your answer out loud. The "Free pass" means you can say anything with the phrasal verb.</p>
+
+  <div class="wheels">
+    <div class="wheel-block"><div class="wheel-title">1. Phrasal verb</div><div class="wheel-area"><div class="pointer"></div><div class="wheel" id="w0"></div><div class="hub"></div></div></div>
+    <div class="wheel-block"><div class="wheel-title">2. Format</div><div class="wheel-area"><div class="pointer"></div><div class="wheel" id="w1"></div><div class="hub"></div></div></div>
+    <div class="wheel-block"><div class="wheel-title">3. Challenge</div><div class="wheel-area"><div class="pointer"></div><div class="wheel" id="w2"></div><div class="hub"></div></div></div>
+  </div>
+
+  <button class="btn" id="spin-btn">Spin all three</button>
+
+  <div class="result" id="result"><p class="placeholder">Your words will appear here.</p></div>
+  <p class="credit">By @inglesconcin.ok</p>
+</div>
+
+<script>
+  const verbs = [
+    { label: "DRIFT APART", verb: "to drift apart", def: "To slowly stop being close to someone, without a big fight.", ex: "We were best friends, but we slowly drifted apart." },
+    { label: "GET THROUGH", verb: "to get through something", def: "To survive a difficult time until it is over.", ex: "I got through a hard week with the help of my friends." },
+    { label: "HANG OUT", verb: "to hang out", def: "To spend relaxed time with friends or other people.", ex: "Let's hang out at my place this weekend." },
+    { label: "CALM DOWN", verb: "to calm down", def: "To become relaxed after being angry, nervous or excited.", ex: "Calm down, everything is fine." },
+    { label: "CLEAN UP", verb: "to clean up", def: "To make a place clean and tidy.", ex: "Can you clean up the kitchen?" },
+    { label: "STEER CLEAR OF", verb: "to steer clear of something", def: "To stay away from someone or something to avoid problems.", ex: "Let's steer clear of politics at dinner." },
+    { label: "BRING UP", verb: "to bring something up", def: "To start talking about a topic.", ex: "Please don't bring up my job tonight." },
+    { label: "WORK OUT", verb: "to work out", def: "To end well, or to find a solution.", ex: "I hope everything works out." }
+  ];
+  const formats = [
+    { label: "1 SENTENCE", text: "Say one sentence." },
+    { label: "2 SENTENCES", text: "Say two sentences." },
+    { label: "A QUESTION", text: "Ask me a question with the phrasal verb." }
+  ];
+  const challenges = [
+    { label: "KEEP + -ING", text: "Use keep + verb-ing. Example: My phone keeps ringing." },
+    { label: "ALREADY / YET / JUST", text: "Use already, yet or just with the present perfect. Example: I have just arrived." },
+    { label: "SHE SAID...", text: "Start with: She said... (reported speech, one step back)." },
+    { label: "FREE PASS", text: "Free pass! Say anything with the phrasal verb." }
+  ];
+
+  const colors = ["#E8A33D", "#E8734A", "#6FBF8B", "#4A6FA5"];
+  const sets = [verbs, formats, challenges];
+  const wheels = [document.getElementById('w0'), document.getElementById('w1'), document.getElementById('w2')];
+  const spinBtn = document.getElementById('spin-btn');
+  const result = document.getElementById('result');
+  const current = [0, 0, 0];
+
+  function buildWheel(el, items) {
+    const n = items.length, seg = 360 / n, parts = [];
+    for (let i = 0; i < n; i++) parts.push(colors[i % colors.length] + " " + (i * seg) + "deg " + ((i + 1) * seg) + "deg");
+    el.style.background = "conic-gradient(" + parts.join(", ") + ")";
+    items.forEach((it, i) => {
+      const l = document.createElement('div');
+      l.className = 'seg-label';
+      l.style.transform = 'rotate(' + (i * seg + seg / 2 - 90) + 'deg)';
+      l.textContent = it.label;
+      el.appendChild(l);
+    });
+  }
+  wheels.forEach((w, i) => buildWheel(w, sets[i]));
+
+  spinBtn.addEventListener('click', () => {
+    spinBtn.disabled = true;
+    result.innerHTML = '<p class="placeholder">Spinning...</p>';
+    const picks = sets.map(s => Math.floor(Math.random() * s.length));
+    wheels.forEach((w, i) => {
+      const seg = 360 / sets[i].length;
+      const base = Math.floor(current[i] / 360) * 360;
+      const target = base + (5 + Math.floor(Math.random() * 3)) * 360 + (360 - (picks[i] * seg + seg / 2));
+      current[i] = target;
+      w.style.transform = 'rotate(' + target + 'deg)';
+    });
+    setTimeout(() => {
+      const v = verbs[picks[0]], f = formats[picks[1]], c = challenges[picks[2]];
+      result.innerHTML =
+        '<div class="row"><span class="tag">Phrasal verb</span><span class="verb">' + v.verb + '</span><div class="small">' + v.def + ' Example: ' + v.ex + '</div></div>' +
+        '<div class="row"><span class="tag">Format</span>' + f.text + '</div>' +
+        '<div class="row"><span class="tag">Challenge</span>' + c.text + '</div>';
+      spinBtn.disabled = false;
+      spinBtn.textContent = 'Spin again';
+    }, 4200);
+  });
+</script>
+</body>
+</html>
