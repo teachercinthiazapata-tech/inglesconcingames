@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friends Phrasal Verbs: Guided Practice</title>
+<style>
+  * { box-sizing: border-box; }
+  .hidden { display: none !important; }
+  body {
+    margin: 0; font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #FFF8E7, #FDEFC9);
+    color: #2C3E50; min-height: 100vh; padding: 24px 16px 32px 16px;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; text-align: center; }
+  .subtitle { color: #E8A33D; font-weight: 700; letter-spacing: 1px; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 4px; }
+  h1 { font-size: 1.55rem; margin: 0 0 4px 0; }
+  .series-tag { font-size: 0.8rem; font-style: italic; color: #6b6a63; margin-bottom: 12px; }
+  .instructions { font-size: 0.95rem; color: #5a5a52; line-height: 1.5; margin: 0 auto 18px auto; max-width: 560px; }
+  .menu-btn { display: block; width: 100%; max-width: 360px; margin: 10px auto; background: #2C3E50; color: #FFF8E7; border: none; padding: 14px; font-size: 1rem; font-weight: 700; border-radius: 14px; cursor: pointer; font-family: inherit; }
+  .menu-btn:hover { background: #E8A33D; }
+  .menu-btn small { display: block; font-weight: 400; font-size: 0.78rem; opacity: 0.85; margin-top: 2px; }
+  .bank { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 14px; }
+  .chip { background: #FFFFFF; border: 1.5px solid #E8A33D; border-radius: 14px; padding: 4px 11px; font-size: 0.78rem; font-weight: 600; }
+  .chip.done { background: #E8F5E9; border-color: #4CAF50; color: #7a9a7c; text-decoration: line-through; }
+  .progress-wrap { margin-bottom: 14px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #6b6a63; margin-bottom: 4px; }
+  .bar { height: 10px; background: #F0E6D0; border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; background: #E8A33D; width: 0%; transition: width 0.3s; }
+  .card { background: #FFFFFF; border: 2px solid #E8A33D; border-radius: 16px; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(44,62,80,0.1); }
+  .emoji { font-size: 2.4rem; line-height: 1.2; }
+  .caption { font-size: 0.85rem; font-style: italic; color: #6b6a63; margin-bottom: 10px; }
+  .label { display: block; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #E8A33D; margin: 10px 0 4px 0; }
+  .meaning { font-size: 1rem; line-height: 1.45; }
+  .sentence { font-size: 1.1rem; font-weight: 600; line-height: 1.5; }
+  .task { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #E8A33D; margin-bottom: 8px; }
+  .blanks { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 10px 0 12px 0; }
+  .word-group { display: flex; gap: 4px; }
+  .letter-box { width: 28px; height: 36px; border-bottom: 3px solid #2C3E50; font-size: 1.3rem; font-weight: 700; display: flex; align-items: flex-end; justify-content: center; color: #2C3E50; }
+  .letter-box.revealed { color: #E8734A; }
+  input[type=text] { width: 100%; max-width: 380px; padding: 11px 14px; font-size: 1.05rem; border: 2px solid #2C3E50; border-radius: 10px; font-family: inherit; text-align: center; }
+  input[type=text]:disabled { background: #F4F4F0; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 12px; }
+  .btn { background: #2C3E50; color: #FFF8E7; border: none; padding: 11px 24px; font-size: 0.95rem; font-weight: 700; border-radius: 30px; cursor: pointer; font-family: inherit; }
+  .btn:hover:not(:disabled) { background: #E8A33D; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.secondary { background: none; color: #2C3E50; border: 2px solid #2C3E50; }
+  .btn.secondary:hover:not(:disabled) { background: #2C3E50; color: #FFF8E7; }
+  .feedback { border-radius: 12px; padding: 12px 16px; font-size: 0.95rem; line-height: 1.45; text-align: left; margin-bottom: 12px; }
+  .feedback.correct { background: #E8F5E9; border: 2px solid #4CAF50; }
+  .feedback.wrong { background: #FDECEA; border: 2px solid #E74C3C; }
+  .final { background: #FFFFFF; border: 2px solid #E8A33D; border-radius: 16px; padding: 22px; text-align: left; }
+  .final h2 { text-align: center; margin: 0 0 6px 0; }
+  .final .score { text-align: center; font-size: 1.2rem; font-weight: 700; margin-bottom: 14px; }
+  .review-item { font-size: 0.92rem; line-height: 1.45; margin-bottom: 8px; }
+  .credit { margin-top: 18px; font-size: 0.7rem; color: #b3b2a8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="subtitle">Vocabulary Practice</div>
+  <h1>Friends Phrasal Verbs: Guided Practice</h1>
+  <div class="series-tag">Based on the TV series "Friends", Episodes 1 and 2</div>
+
+  <div id="menu">
+    <p class="instructions">In each question you see a picture, the meaning and a sentence with a gap. Type the missing phrasal verb. You can use the Clue button to reveal one letter at a time, and the word bank shows all the phrasal verbs for the round.</p>
+    <button class="menu-btn" data-set="ep1">Episode 1<small>8 phrasal verbs</small></button>
+    <button class="menu-btn" data-set="ep2">Episode 2<small>8 phrasal verbs</small></button>
+    <button class="menu-btn" data-set="all">Both episodes<small>16 phrasal verbs, mixed</small></button>
+  </div>
+
+  <div id="game" class="hidden">
+    <div class="bank" id="bank"></div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span id="qnum"></span><span id="score"></span></div>
+      <div class="bar"><div class="bar-fill" id="bar"></div></div>
+    </div>
+    <div class="card">
+      <div class="emoji" id="emoji"></div>
+      <div class="caption" id="caption"></div>
+      <span class="label">Meaning</span>
+      <div class="meaning" id="meaning"></div>
+      <span class="label">Sentence</span>
+      <div class="sentence" id="sentence"></div>
+    </div>
+    <div class="card">
+      <div class="task" id="task"></div>
+      <div class="blanks" id="blanks"></div>
+      <input type="text" id="answer-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type the phrasal verb here">
+      <div class="actions">
+        <button class="btn" id="check-btn">Check</button>
+        <button class="btn secondary" id="clue-btn">Clue</button>
+        <button class="btn hidden" id="next-btn">Next</button>
+      </div>
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+  </div>
+
+  <div id="final" class="hidden">
+    <div class="final">
+      <h2>Great work!</h2>
+      <div class="score" id="final-score"></div>
+      <div id="review"></div>
+      <div class="actions"><button class="btn" id="again-btn">Play again</button></div>
+    </div>
+  </div>
+  <p class="credit">By @inglesconcin.ok</p>
+</div>
+
+<script>
+  const all = [
+    { ep: 1, answer: "walk out on", emoji: "🚪🏃‍♀️", caption: "Rachel leaves in the middle of her own wedding.",
+      meaning: "To leave someone suddenly, even when they need or trust you.",
+      sentence: "Rachel decided to ______ Barry at the wedding." },
+    { ep: 1, answer: "get through", emoji: "📅😓➡️😌", caption: "A very hard week finally ends.",
+      meaning: "To survive a difficult time until it is over.",
+      sentence: "I need to ______ this hard week." },
+    { ep: 1, answer: "catch on", emoji: "🤔➡️💡", caption: "Suddenly, she understands what is happening.",
+      meaning: "To finally understand something or realize what is really going on.",
+      sentence: "It took me a while to ______, but now I understand the joke." },
+    { ep: 1, answer: "drift apart", emoji: "⛵🌊⛵", caption: "Two old friends slowly lose contact.",
+      meaning: "To slowly stop being close to someone, without a big fight.",
+      sentence: "We were best friends, but we started to ______." },
+    { ep: 1, answer: "hit on", emoji: "😏🌹", caption: "A stranger flirts with her at a café.",
+      meaning: "To flirt with someone in a direct or obvious way.",
+      sentence: "A stranger tried to ______ me at the café." },
+    { ep: 1, answer: "ask out", accepted: ["ask out", "ask her out"], emoji: "💌🍷", caption: "He invites her to dinner on Friday.",
+      meaning: "To invite someone on a date.",
+      sentence: "He wants to ______ Monica, but he is nervous." },
+    { ep: 1, answer: "get it together", emoji: "😵‍💫➡️💪", caption: "He stops panicking and organizes himself.",
+      meaning: "To calm down and organize yourself after feeling confused or out of control.",
+      sentence: "Calm down and ______ before the meeting." },
+    { ep: 1, answer: "hang out", emoji: "👯‍♀️☕", caption: "Friends relax together with no special plan.",
+      meaning: "To spend relaxed time with friends or other people.",
+      sentence: "Let's ______ at my place this weekend." },
+    { ep: 2, answer: "steer clear of", emoji: "🚧🚶‍♀️", caption: "She avoids a difficult topic at dinner.",
+      meaning: "To stay away from someone or something to avoid problems.",
+      sentence: "Let's ______ politics at dinner." },
+    { ep: 2, answer: "bring up", emoji: "💬☝️", caption: "He starts talking about a new topic.",
+      meaning: "To start talking about a topic.",
+      sentence: "Please don't ______ my job tonight." },
+    { ep: 2, answer: "take the heat off", emoji: "🔥➡️😌", caption: "Everyone stops looking at her.",
+      meaning: "To take attention or pressure away from someone.",
+      sentence: "Mark's good news helped to ______ Emma." },
+    { ep: 2, answer: "through with", accepted: ["through with", "be through with"], emoji: "🍽️✅", caption: "Everybody has finished the main course.",
+      meaning: "To have finished doing or using something.",
+      sentence: "Are you ______ the main course?" },
+    { ep: 2, answer: "calm down", emoji: "😤➡️😌", caption: "She takes a deep breath and relaxes.",
+      meaning: "To become relaxed after being angry, nervous or excited.",
+      sentence: "Take a deep breath and ______." },
+    { ep: 2, answer: "clean up", emoji: "🧹✨", caption: "She makes the whole apartment tidy.",
+      meaning: "To make a place clean and tidy.",
+      sentence: "Can you ______ the kitchen?" },
+    { ep: 2, answer: "work out", emoji: "🧩➡️👍", caption: "The problem finally has a good solution.",
+      meaning: "To end well, or to find a solution.",
+      sentence: "I hope everything will ______ in the end." },
+    { ep: 2, answer: "up to", emoji: "🤫👀", caption: "What has he been doing lately?",
+      meaning: "To be doing something, often something new or secret.",
+      sentence: "What have you been ______ lately?" }
+  ];
+
+  const $ = id => document.getElementById(id);
+  const numWords = ['one','two','three','four'];
+  let questions = [], idx = 0, score = 0, revealed = 0, answered = false, missed = [], doneSet = new Set();
+
+  function shuffle(a) { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
+  function normalize(s) { return s.toLowerCase().trim().replace(/\s+/g, ' '); }
+  function letterCount(ans) { return ans.replace(/[^a-z]/gi, '').length; }
+
+  function startSet(which) {
+    let pool = which === 'all' ? all.slice() : all.filter(q => q.ep === (which === 'ep1' ? 1 : 2));
+    questions = shuffle(pool);
+    idx = 0; score = 0; missed = []; doneSet = new Set();
+    $('menu').classList.add('hidden');
+    $('final').classList.add('hidden');
+    $('game').classList.remove('hidden');
+    buildBank();
+    loadQuestion();
+  }
+
+  function buildBank() {
+    const bank = $('bank');
+    bank.innerHTML = '';
+    shuffle(questions).forEach(q => {
+      const c = document.createElement('span');
+      c.className = 'chip'; c.id = 'chip-' + q.answer.replace(/\s+/g, '-');
+      c.textContent = q.answer;
+      bank.appendChild(c);
+    });
+  }
+
+  function renderBlanks(q) {
+    const box = $('blanks');
+    box.innerHTML = '';
+    let g = 0;
+    q.answer.split(' ').forEach(w => {
+      const grp = document.createElement('div');
+      grp.className = 'word-group';
+      for (const ch of w) {
+        const b = document.createElement('div');
+        b.className = 'letter-box';
+        if (g < revealed) { b.textContent = ch.toUpperCase(); b.classList.add('revealed'); }
+        else b.textContent = '';
+        grp.appendChild(b);
+        g++;
+      }
+      box.appendChild(grp);
+    });
+  }
+
+  function loadQuestion() {
+    const q = questions[idx];
+    answered = false; revealed = 0;
+    $('qnum').textContent = 'Question ' + (idx + 1) + ' of ' + questions.length;
+    $('score').textContent = score + ' correct';
+    $('bar').style.width = (idx / questions.length * 100) + '%';
+    $('emoji').textContent = q.emoji;
+    $('caption').textContent = q.caption;
+    $('meaning').textContent = q.meaning;
+    $('sentence').textContent = q.sentence;
+    const n = q.answer.split(' ').length;
+    $('task').textContent = 'Type the missing phrasal verb (' + numWords[n - 1] + (n === 1 ? ' word)' : ' words)');
+    $('answer-input').value = '';
+    $('answer-input').disabled = false;
+    $('check-btn').disabled = false;
+    $('clue-btn').disabled = false;
+    $('next-btn').classList.add('hidden');
+    $('feedback').className = 'feedback hidden';
+    renderBlanks(q);
+    $('answer-input').focus();
+  }
+
+  function check() {
+    if (answered) return;
+    const q = questions[idx];
+    const typed = normalize($('answer-input').value);
+    if (!typed) { showFb('wrong', 'Type your answer first, or use the Clue button.'); return; }
+    const ok = (q.accepted || [q.answer]).some(a => normalize(a) === typed);
+    if (ok) {
+      answered = true; score++;
+      revealed = letterCount(q.answer); renderBlanks(q);
+      $('answer-input').disabled = true; $('clue-btn').disabled = true; $('check-btn').disabled = true;
+      doneSet.add(q.answer);
+      const chip = $('chip-' + q.answer.replace(/\s+/g, '-')); if (chip) chip.classList.add('done');
+      $('score').textContent = score + ' correct';
+      showFb('correct', 'Correct! ' + q.sentence.replace('______', q.answer));
+    } else {
+      showFb('wrong', 'Not quite. You can try again, use a Clue, or tap Next to move on.');
+    }
+    $('next-btn').classList.remove('hidden');
+    $('next-btn').textContent = (idx === questions.length - 1) ? 'Finish' : 'Next';
+  }
+
+  function showFb(type, msg) { $('feedback').className = 'feedback ' + type; $('feedback').textContent = msg; }
+
+  function clue() {
+    if (answered) return;
+    const q = questions[idx];
+    const total = letterCount(q.answer);
+    if (revealed < total) { revealed++; renderBlanks(q); }
+    if (revealed >= total) $('clue-btn').disabled = true;
+  }
+
+  function next() {
+    const q = questions[idx];
+    if (!doneSet.has(q.answer)) missed.push(q);
+    if (idx === questions.length - 1) { finish(); return; }
+    idx++; loadQuestion();
+  }
+
+  function finish() {
+    $('game').classList.add('hidden');
+    $('final').classList.remove('hidden');
+    $('final-score').textContent = 'You got ' + score + ' of ' + questions.length + ' phrasal verbs.';
+    const r = $('review');
+    r.innerHTML = '';
+    if (missed.length === 0) { r.innerHTML = '<div class="review-item">You got every one. Excellent!</div>'; }
+    else {
+      const h = document.createElement('div'); h.className = 'review-item'; h.innerHTML = '<strong>Review these:</strong>'; r.appendChild(h);
+      missed.forEach(q => {
+        const d = document.createElement('div'); d.className = 'review-item';
+        d.innerHTML = '<strong>' + q.answer + '</strong>: ' + q.meaning;
+        r.appendChild(d);
+      });
+    }
+  }
+
+  document.querySelectorAll('.menu-btn').forEach(b => b.addEventListener('click', () => startSet(b.dataset.set)));
+  $('check-btn').addEventListener('click', check);
+  $('clue-btn').addEventListener('click', clue);
+  $('next-btn').addEventListener('click', next);
+  $('again-btn').addEventListener('click', () => { $('final').classList.add('hidden'); $('menu').classList.remove('hidden'); });
+  $('answer-input').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+</script>
+</body>
+</html>
