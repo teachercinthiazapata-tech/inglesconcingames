@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The New York Game Show</title>
+<style>
+  :root{
+    --navy:#1F3A5F; --coral:#E07A5F; --mint:#5FB58F; --peach:#FDEEE6;
+    --cream:#FFF8F0; --grey:#C9D2DC; --yell:#F2C14E;
+  }
+  *{box-sizing:border-box;}
+  .hidden{display:none !important;}
+  body{
+    margin:0; padding:18px 16px 44px;
+    font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+    background:var(--cream); color:var(--navy);
+  }
+  .wrap{max-width:900px;margin:0 auto;}
+  h1{font-size:1.8rem;margin:0 0 4px;text-align:center;}
+  .sub{text-align:center;color:#6b7b8c;margin:0 0 18px;}
+  .tabs{display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
+  .tab{
+    border:3px solid var(--navy);background:#fff;color:var(--navy);border-radius:999px;
+    padding:10px 18px;font-size:.98rem;font-weight:bold;cursor:pointer;font-family:inherit;
+  }
+  .tab.on{background:var(--navy);color:#fff;}
+  .card{background:#fff;border:3px solid var(--grey);border-radius:18px;padding:20px;margin-bottom:16px;}
+  .how{background:var(--peach);border-radius:12px;padding:12px 14px;font-size:.95rem;margin-bottom:16px;line-height:1.5;}
+  .counter{text-align:center;color:#6b7b8c;font-size:.92rem;margin-bottom:10px;}
+  .prompt{font-size:1.25rem;font-weight:bold;line-height:1.5;text-align:center;margin:6px 0 16px;}
+  .q{font-size:1.05rem;text-align:center;margin-bottom:16px;color:#4a5a6a;}
+  .opts{display:flex;flex-direction:column;gap:12px;}
+  .opt{
+    border:3px solid var(--grey);background:#fff;color:var(--navy);border-radius:14px;
+    padding:14px 16px;font-size:1.05rem;cursor:pointer;font-family:inherit;text-align:left;line-height:1.4;
+  }
+  .opt:hover:not(:disabled){border-color:var(--coral);}
+  .opt.right{background:#E8F5EF;border-color:var(--mint);}
+  .opt.wrong{background:#FBE9E4;border-color:var(--coral);}
+  .opt:disabled{cursor:default;}
+  .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
+  .btn{
+    border:none;background:var(--navy);color:#fff;border-radius:14px;
+    padding:14px 22px;font-size:1.05rem;font-weight:bold;cursor:pointer;font-family:inherit;
+  }
+  .btn.coralbtn{background:var(--coral);}
+  .btn.mintbtn{background:var(--mint);}
+  .btn:disabled{opacity:.45;cursor:default;}
+  .msg{margin-top:16px;padding:14px;border-radius:14px;background:var(--peach);font-size:1.02rem;line-height:1.5;min-height:26px;}
+  .msg.good{background:#E8F5EF;border:3px solid var(--mint);}
+  .msg.bad{background:#FBE9E4;border:3px solid var(--coral);}
+  .score{text-align:center;color:#6b7b8c;margin-top:12px;font-size:.95rem;}
+  .wheels{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:10px 0 18px;}
+  .wheel{
+    flex:1 1 220px;min-width:200px;border:3px solid var(--grey);border-radius:16px;
+    padding:16px;text-align:center;background:var(--cream);
+  }
+  .wheel .lab{font-size:.82rem;letter-spacing:1px;color:#6b7b8c;font-weight:bold;margin-bottom:8px;}
+  .wheel .val{font-size:1.12rem;font-weight:bold;line-height:1.4;min-height:62px;display:flex;align-items:center;justify-content:center;}
+  .wheel.w1{background:#FDEEE6;} .wheel.w2{background:#E8F5EF;} .wheel.w3{background:#FFF4D9;}
+  .timer{text-align:center;font-size:2.4rem;font-weight:bold;margin:10px 0;color:var(--coral);}
+  footer{text-align:center;color:#8a99a8;font-size:.85rem;margin-top:22px;}
+  @media (max-width:600px){ h1{font-size:1.4rem;} .btn{padding:12px 16px;font-size:.98rem;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The New York Game Show</h1>
+  <p class="sub">Three rounds of travel English: listening, speaking and spotting mistakes.</p>
+
+  <div class="tabs">
+    <button class="tab on" id="t1" onclick="setRound(1)">Round 1: Listen and win</button>
+    <button class="tab" id="t2" onclick="setRound(2)">Round 2: Spin and speak</button>
+    <button class="tab" id="t3" onclick="setRound(3)">Round 3: Mistake or OK</button>
+  </div>
+
+  <!-- ROUND 1 -->
+  <div id="r1">
+    <div class="card">
+      <div class="how">You hear a sentence. Listen as many times as you want. The turtle says it slowly. Use the transcript only if you really need it.</div>
+      <div class="counter" id="c1"></div>
+      <div class="row">
+        <button class="btn coralbtn" onclick="say1(false)">&#128266; Listen</button>
+        <button class="btn" onclick="say1(true)">&#128034; Slow</button>
+        <button class="btn mintbtn" id="trb" onclick="toggleTr()">Transcript</button>
+      </div>
+      <p class="prompt hidden" id="tr1"></p>
+      <p class="q" id="q1"></p>
+      <div class="opts" id="o1"></div>
+      <div class="msg" id="m1">Press Listen to start.</div>
+      <div class="score" id="s1"></div>
+    </div>
+  </div>
+
+  <!-- ROUND 2 -->
+  <div id="r2" class="hidden">
+    <div class="card">
+      <div class="how">Press the button. You get a place, a situation and a challenge. Think for thirty seconds without writing anything, then speak for about forty five seconds.</div>
+      <div class="wheels">
+        <div class="wheel w1"><div class="lab">WHERE YOU ARE</div><div class="val" id="w1">...</div></div>
+        <div class="wheel w2"><div class="lab">WHAT HAPPENS</div><div class="val" id="w2">...</div></div>
+        <div class="wheel w3"><div class="lab">YOUR CHALLENGE</div><div class="val" id="w3">...</div></div>
+      </div>
+      <div class="row">
+        <button class="btn" id="spin" onclick="spin()">Spin</button>
+        <button class="btn mintbtn" id="tbtn" onclick="startTimer()">Start 30 seconds</button>
+        <button class="btn coralbtn" id="exb" onclick="showExample()">See an example</button>
+      </div>
+      <div class="timer" id="timer">30</div>
+      <div class="msg" id="m2">Press Spin for your first card.</div>
+      <div class="msg hidden" id="ex2"></div>
+    </div>
+  </div>
+
+  <!-- ROUND 3 -->
+  <div id="r3" class="hidden">
+    <div class="card">
+      <div class="how">A tourist wrote these sentences. Some are correct and some are not. Read each one out loud first, then choose.</div>
+      <div class="counter" id="c3"></div>
+      <p class="prompt" id="p3"></p>
+      <div class="row">
+        <button class="btn mintbtn" id="okb" onclick="judge(true)">It's OK</button>
+        <button class="btn coralbtn" id="mkb" onclick="judge(false)">Mistake</button>
+      </div>
+      <div class="msg" id="m3">Read the sentence out loud, then choose.</div>
+      <div class="score" id="s3"></div>
+    </div>
+  </div>
+
+  <footer>Inglés con Cin</footer>
+</div>
+
+<script>
+var R1 = [
+  { clip:"Flight 207 to New York is now boarding at gate C14.",
+    q:"What do you do now?",
+    opts:["Go to the gate","Pick up your suitcase","Buy a ticket"], a:0,
+    why:"Boarding means the plane is ready and people are getting on. You go to the gate." },
+  { clip:"You can pick up your suitcase at baggage claim, carousel four.",
+    q:"What is at carousel four?",
+    opts:["Your suitcase","Your boarding pass","The taxis"], a:0,
+    why:"Baggage claim is the place with the moving belts where the bags come out. A carousel is one of those belts." },
+  { clip:"Breakfast is served all day.",
+    q:"Can you have pancakes at seven in the evening?",
+    opts:["Yes","No, only in the morning","Only on Sundays"], a:0,
+    why:"Served all day means you can order it at any hour. This line is on almost every diner menu in the United States." },
+  { clip:"Is that for here or to go?",
+    q:"What is the waiter asking?",
+    opts:["If you eat in the restaurant or take the food away","If you want more coffee","If you want the check"], a:0,
+    why:"For here means you eat at the table. To go means you take it with you. In England they say takeaway." },
+  { clip:"Go straight two blocks and turn left at the corner.",
+    q:"How many blocks do you walk?",
+    opts:["Two","Four","One"], a:0,
+    why:"Two blocks. In English, go straight on its own means one block, so the number matters." },
+  { clip:"The museum is across from the park.",
+    q:"Where is the museum?",
+    opts:["On the other side of the street","Beside the park","Inside the park"], a:0,
+    why:"Across from means there is a street in the middle. Next to means they touch, with nothing in between." },
+  { clip:"Take the express. It skips 86th Street.",
+    q:"Does the express stop at 86th Street?",
+    opts:["No","Yes","Only in the morning"], a:0,
+    why:"To skip a station means the train passes and does not stop. The local train stops everywhere." },
+  { clip:"The entrance is next to the coffee shop.",
+    q:"What is next to the coffee shop?",
+    opts:["The door where you go in","The way out of the park","The subway"], a:0,
+    why:"The entrance is the door you go in through. The one you go out through is the exit." },
+  { clip:"Your table is ready. Follow me, please.",
+    q:"What do you do?",
+    opts:["Walk behind the waiter","Wait outside","Pay the check"], a:0,
+    why:"Follow me means come with me, behind me. In American restaurants you wait and somebody takes you to your table." },
+  { clip:"Can I get you anything else?",
+    q:"Which answer works?",
+    opts:["No, thank you. Just the check, please.","Yes, I'm looking for a bakery.","Go straight two blocks."], a:0,
+    why:"Anything else means one more thing to eat or drink. This question usually comes at the end of the meal, so the check is a natural answer." }
+];
+
+var WHEEL1 = ["at the airport","at a diner","in the street","on the subway","at the hotel front desk","at a coffee shop"];
+var WHEEL2 = ["you are late","you are lost","you don't like your table","you have no cash","somebody asks you for help","your suitcase is not here"];
+var WHEEL3 = ["use two verbs ending in ing","don't use the word take","use on time or in time","start every sentence with a different word","use three imperatives","say I'm twice"];
+
+/* EX[place][situation] : a short model of what you could say */
+var EX = [
+  [ "Excuse me, my flight is boarding and I'm very late. Is there a faster way to gate C14?",
+    "Excuse me, I'm looking for gate C14 and I think I'm lost. Am I in the right terminal?",
+    "Excuse me, I'm having a coffee before my flight. Could I change tables? This one is next to the bathroom.",
+    "I'm sorry, I have no cash. Can I pay with my card?",
+    "Of course. Baggage claim is downstairs. Go straight and then turn left.",
+    "Excuse me, my suitcase is not here. I was on flight 207 from Buenos Aires." ],
+  [ "I'm sorry I'm late. I'm meeting a friend here. Is she already at a table?",
+    "Excuse me, I'm lost. I'm looking for the museum. Is it near here?",
+    "Excuse me, could we change tables, please? This one is next to the door and it's cold.",
+    "I'm sorry, I have no cash for the tip. Can I leave it on the card?",
+    "Yes, of course. The bathroom is at the back, next to the kitchen.",
+    "Excuse me, I had a small bag next to my table and it's not here." ],
+  [ "Excuse me, I'm late for a tour. What's the fastest way to Fifth Avenue?",
+    "Excuse me, I'm lost. I'm looking for the subway station. Is it far from here?",
+    "I'm sitting outside a cafe and my table is in the sun. Excuse me, could I move to that one?",
+    "I'm sorry, I have no cash. Is there an ATM near here?",
+    "Sure. Go straight two blocks and turn left. It's across from the park.",
+    "Excuse me, I left my suitcase here five minutes ago and now it's not here. Can you help me?" ],
+  [ "I'm late and I'm waiting for the train. Excuse me, is this the express?",
+    "Excuse me, I think I'm lost. Does this train go to 86th Street?",
+    "I don't like this seat. It's next to the door and it's very cold, so I'm moving to the other end.",
+    "I have no cash for the ticket. Excuse me, can I buy a MetroCard with a card?",
+    "Yes. Take the local, not the express. The express skips 86th Street.",
+    "My suitcase is not here. I think I left it on the train. Who can I talk to?" ],
+  [ "I'm sorry, I'm late for check in. Is my room ready?",
+    "I'm lost in this building. Excuse me, where is the entrance to the restaurant?",
+    "Excuse me, my table in the restaurant is next to the door. Could I change it?",
+    "I have no cash. Can I pay for the room with my card?",
+    "Of course. The subway station is across from the hotel entrance.",
+    "Excuse me, my suitcase is not in my room. I left it with you this morning." ],
+  [ "I'm sorry I'm late. I'm meeting a friend here. Is she sitting at the back?",
+    "Excuse me, I'm lost. Is Madison Avenue near here?",
+    "Excuse me, could I change tables? This one is next to the door and it's very cold.",
+    "I'm sorry, I have no cash. Can I pay with my card?",
+    "Yes, of course. The bathroom is next to the entrance.",
+    "Excuse me, my bag was next to my chair and now it's not here." ]
+];
+
+/* CH[situation][challenge] : the same situation, said with the challenge inside */
+var CH = [
+  [ "I'm running, and I'm trying to get there before it closes.",
+    "I'm not going to catch the bus, so I'm getting a taxi.",
+    "I'm never on time, but I think I'll arrive in time.",
+    "Sorry I'm late. My bus was very slow. Could you wait two minutes? Thank you.",
+    "Please wait for me. Don't start without me. Give me five minutes.",
+    "I'm so sorry, I'm late." ],
+  [ "I'm looking for the station, and I'm walking in circles.",
+    "I don't want a taxi. Could you show me on the map, or walk with me to the corner?",
+    "I'm lost, so I'm not going to be on time. Will I get there in time for the tour?",
+    "Excuse me. I'm lost. My hotel is somewhere near here. Could you help me? Thank you.",
+    "Show me on the map. Tell me the name of this street. Don't let me go the wrong way.",
+    "I'm lost, and I'm not sure where my hotel is." ],
+  [ "I'm sitting next to the door, and I'm freezing.",
+    "I don't want this one. Could you give us another table, please?",
+    "We arrived on time, so maybe we can wait for a better table.",
+    "Excuse me. This table is very cold. Could we move? Thank you.",
+    "Give us a minute. Show us the other table. Don't worry, we can wait.",
+    "I'm sorry, I'm a little cold at this table." ],
+  [ "I'm paying with my card, and I'm leaving the tip on it too.",
+    "I don't have cash. Could you put it on my card?",
+    "The bank closed before I arrived, so I wasn't on time. Can I pay with my card?",
+    "Excuse me. I have no cash. Could I pay with my card? Thank you.",
+    "Put it on the card, please. Add the tip. Don't worry, it works.",
+    "I'm sorry, I'm out of cash today." ],
+  [ "I'm looking at the map with you, and I'm trying to find that street.",
+    "Go two blocks and then turn left. You can catch the bus on the corner.",
+    "If you go now, you'll be there on time. You'll arrive in time for the tour.",
+    "Sure. Go straight two blocks. Then turn left. It's across from the park. Good luck.",
+    "Go straight two blocks. Turn left at the corner. Don't cross the street.",
+    "I'm not from here, but I'm happy to help." ],
+  [ "I'm waiting here, and I'm getting worried.",
+    "Nobody is bringing it. Could you check again, or call someone?",
+    "My flight arrived on time, so my suitcase should be here.",
+    "Excuse me. My suitcase is not here. Everybody else has one. Could you check the list? Thank you.",
+    "Check the list, please. Call your colleague. Don't close the desk yet.",
+    "I'm worried, and I'm not sure what to do." ]
+];
+
+var R3 = [
+  { s:"I waiting for the bus outside the hotel.", ok:false,
+    fix:"I'm waiting for the bus outside the hotel.",
+    why:"Waiting needs be in front of it. I am waiting, she is waiting, they are waiting. In Spanish the be is optional, in English it never is." },
+  { s:"The hotel is across from the station.", ok:true,
+    fix:"", why:"Correct. Across from, with a street in the middle. Nothing to change." },
+  { s:"I like swim in the morning.", ok:false,
+    fix:"I like swimming in the morning.",
+    why:"Like cannot take a bare verb. It takes the ing form or to plus verb. I like swimming, or I like to swim. Both are correct." },
+  { s:"Can you bring me the menu, please?", ok:true,
+    fix:"", why:"Correct. Bring means come here with it, which is what you want at a table." },
+  { s:"She goes the market every Saturday.", ok:false,
+    fix:"She goes to the market every Saturday.",
+    why:"Go always needs to before a place. Only three common words take no to: home, downtown, there." },
+  { s:"The train is never in time.", ok:false,
+    fix:"The train is never on time.",
+    why:"On time means at the correct hour, not late. In time means early enough for something: we arrived in time for the first song." },
+  { s:"We walked along Fifth Avenue to the museum.", ok:true,
+    fix:"", why:"Correct. Street names take no the, and along is the right word for walking next to a long street." },
+  { s:"Can you have the check, please?", ok:false,
+    fix:"Can I have the check, please?",
+    why:"Can you have means the waiter gets it. Can I have means you get it. One word changes who takes the bill home." },
+  { s:"I'm looking for the Madison Avenue.", ok:false,
+    fix:"I'm looking for Madison Avenue.",
+    why:"Street names take no the. Madison Avenue, Ocean Drive, 86th Street. But places like the station, the airport and the museum do take it." },
+  { s:"Could you take my suitcase to the taxi, please?", ok:true,
+    fix:"", why:"Correct, and this is the hard one. Take is right here, because the suitcase goes away from you, to the taxi. Bring is for things that come to you." }
+];
+
+var round = 1, i1 = 0, ok1 = 0, i3 = 0, ok3 = 0, tick = null;
+var cur = [0, 0, 0], spun = false;
+
+function el(id){ return document.getElementById(id); }
+
+function speak(text, rate){
+  try{
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US"; u.rate = rate || 0.84;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- ROUND 1 ---------- */
+function paint1(){
+  var t = R1[i1];
+  el("c1").textContent = "Question " + (i1 + 1) + " of " + R1.length;
+  el("q1").textContent = t.q;
+  el("s1").textContent = "Correct: " + ok1 + " of " + R1.length;
+  var box = el("o1");
+  box.innerHTML = "";
+  var order = shuffle(t.opts.map(function(txt, idx){ return { txt: txt, idx: idx }; }));
+  order.forEach(function(o){
+    var b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = o.txt;
+    b.onclick = function(){ answer1(b, o.idx); };
+    box.appendChild(b);
+  });
+  el("m1").className = "msg";
+  el("m1").textContent = "Listen, then choose.";
+  el("tr1").textContent = '"' + t.clip + '"';
+  el("tr1").className = "prompt hidden";
+  el("trb").textContent = "Transcript";
+  say1(false);
+}
+function say1(slow){ speak(R1[i1].clip, slow ? 0.5 : 0.84); }
+
+function toggleTr(){
+  var p = el("tr1");
+  var hidden = p.className.indexOf("hidden") !== -1;
+  p.className = hidden ? "prompt" : "prompt hidden";
+  el("trb").textContent = hidden ? "Hide transcript" : "Transcript";
+}
+
+function answer1(btn, idx){
+  var t = R1[i1];
+  var buttons = el("o1").querySelectorAll("button");
+  for (var k = 0; k < buttons.length; k++){ buttons[k].disabled = true; }
+  if (idx === t.a){
+    ok1++;
+    btn.className = "opt right";
+    el("m1").className = "msg good";
+    el("m1").innerHTML = "Yes. <strong>" + t.clip + "</strong><br>" + t.why;
+  } else {
+    btn.className = "opt wrong";
+    for (var j = 0; j < buttons.length; j++){
+      if (buttons[j].textContent === t.opts[t.a]) buttons[j].className = "opt right";
+    }
+    el("m1").className = "msg bad";
+    el("m1").innerHTML = "Not that one. <strong>" + t.clip + "</strong><br>" + t.why;
+  }
+  el("s1").textContent = "Correct: " + ok1 + " of " + R1.length;
+  if (i1 < R1.length - 1){
+    setTimeout(function(){ i1++; paint1(); }, 3400);
+  } else {
+    setTimeout(function(){
+      el("m1").className = "msg good";
+      el("m1").innerHTML = "End of Round 1. You got " + ok1 + " of " + R1.length + ". Now go to Round 2 and do the talking yourself.";
+    }, 3400);
+  }
+}
+
+function shuffle(a){
+  for (var k = a.length - 1; k > 0; k--){
+    var j = Math.floor(Math.random() * (k + 1));
+    var tmp = a[k]; a[k] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+/* ---------- ROUND 2 ---------- */
+function spin(){
+  if (tick){ clearInterval(tick); tick = null; }
+  el("timer").textContent = "30";
+  el("ex2").className = "msg hidden";
+  el("exb").textContent = "See an example";
+  var n = 0;
+  var roll = setInterval(function(){
+    cur = [
+      Math.floor(Math.random() * WHEEL1.length),
+      Math.floor(Math.random() * WHEEL2.length),
+      Math.floor(Math.random() * WHEEL3.length)
+    ];
+    el("w1").textContent = WHEEL1[cur[0]];
+    el("w2").textContent = WHEEL2[cur[1]];
+    el("w3").textContent = WHEEL3[cur[2]];
+    n++;
+    if (n > 12){
+      clearInterval(roll);
+      spun = true;
+      el("m2").className = "msg good";
+      el("m2").innerHTML = "Think for thirty seconds. Do not write anything. Then speak for about forty five seconds. If you are stuck, press See an example.";
+    }
+  }, 90);
+}
+
+function showExample(){
+  var box = el("ex2");
+  if (!spun){
+    box.className = "msg";
+    box.innerHTML = "Press Spin first.";
+    return;
+  }
+  if (box.className.indexOf("hidden") === -1){
+    box.className = "msg hidden";
+    el("exb").textContent = "See an example";
+    return;
+  }
+  box.className = "msg";
+  box.innerHTML =
+    "<strong>You are " + WHEEL1[cur[0]] + ", and " + WHEEL2[cur[1]] + ".</strong>" +
+    "<br><br><strong>Start like this:</strong><br>" + EX[cur[0]][cur[1]] +
+    "<br><br><strong>And keep going, " + WHEEL3[cur[2]] + ":</strong><br>" + CH[cur[1]][cur[2]] +
+    "<br><br>This is only one example. Say it your way, and say more than this.";
+  el("exb").textContent = "Hide the example";
+}
+
+function startTimer(){
+  if (tick) clearInterval(tick);
+  var left = 30;
+  el("timer").textContent = left;
+  tick = setInterval(function(){
+    left--;
+    el("timer").textContent = left;
+    if (left <= 0){
+      clearInterval(tick); tick = null;
+      el("timer").textContent = "GO";
+      el("m2").className = "msg good";
+      el("m2").textContent = "Time is up. Start talking.";
+    }
+  }, 1000);
+}
+
+/* ---------- ROUND 3 ---------- */
+function paint3(){
+  var t = R3[i3];
+  el("c3").textContent = "Sentence " + (i3 + 1) + " of " + R3.length;
+  el("p3").textContent = '"' + t.s + '"';
+  el("s3").textContent = "Correct: " + ok3 + " of " + R3.length;
+  el("okb").disabled = false;
+  el("mkb").disabled = false;
+  el("m3").className = "msg";
+  el("m3").textContent = "Read it out loud, then choose.";
+}
+
+function judge(saidOk){
+  var t = R3[i3];
+  el("okb").disabled = true;
+  el("mkb").disabled = true;
+  var right = (saidOk === t.ok);
+  if (right) ok3++;
+  var head = right ? "Yes. " : "Not this time. ";
+  var body = t.ok ? t.why : ("The correct sentence is: <strong>" + t.fix + "</strong><br>" + t.why);
+  el("m3").className = "msg " + (right ? "good" : "bad");
+  el("m3").innerHTML = head + body;
+  el("s3").textContent = "Correct: " + ok3 + " of " + R3.length;
+  if (i3 < R3.length - 1){
+    setTimeout(function(){ i3++; paint3(); }, 4200);
+  } else {
+    setTimeout(function(){
+      el("m3").className = "msg good";
+      el("m3").innerHTML = "End of Round 3. You got " + ok3 + " of " + R3.length + ". Six of these ten sentences are mistakes that travellers make every day.";
+    }, 4200);
+  }
+}
+
+/* ---------- ROUNDS ---------- */
+function setRound(n){
+  round = n;
+  el("t1").className = "tab" + (n === 1 ? " on" : "");
+  el("t2").className = "tab" + (n === 2 ? " on" : "");
+  el("t3").className = "tab" + (n === 3 ? " on" : "");
+  el("r1").className = n === 1 ? "" : "hidden";
+  el("r2").className = n === 2 ? "" : "hidden";
+  el("r3").className = n === 3 ? "" : "hidden";
+  if (tick){ clearInterval(tick); tick = null; }
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  if (n === 2){ el("ex2").className = "msg hidden"; el("exb").textContent = "See an example"; }
+  if (n === 1){ i1 = 0; ok1 = 0; paint1(); }
+  if (n === 3){ i3 = 0; ok3 = 0; paint3(); }
+}
+
+paint1();
+paint3();
+</script>
+</body>
+</html>
